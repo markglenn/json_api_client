@@ -26,11 +26,10 @@ defmodule ApiClient.Notes do
   parms:
     id: The UUID as a string to updated
     note: The elixir map with the data attributes to update.
-    
+
   Returns `%{:ok, response}`
   """
   def update(id, note) do
-    IO.inspect("#{url}/#{id}")
     case HTTPoison.patch("#{url}/#{id}", encode_data(note), content_type) do
       {:ok, res} -> {:ok, decoded_body_data(res)}
       {:error, err} -> {:error, err}
@@ -47,8 +46,6 @@ defmodule ApiClient.Notes do
     |> Poison.encode!
   end
 
-  # curl -H "Content-Type: application/json" -X POST -d '{ "Address": "http://garage.silo.decisiv.us", "Name": "garage", "Port": 80 }' http://consul.internal.silo.decisiv.us:8500/v1/agent/service/register
-
   defp decoded_body_data(resp) do
     Poison.decode!(resp.body)["data"]
   end
@@ -60,5 +57,3 @@ defmodule ApiClient.Notes do
   defp version,  do: @api_details[:version]
   defp endpoint, do: @endpoint_name
 end
-
-%{ "data" => %{ "attributes" => %{ "subject" => "updated subject"}}}
