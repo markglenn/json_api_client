@@ -4,34 +4,61 @@ defmodule ApiClient.Notes do
 
   def all do
     case HTTPoison.get(url) do
-     {:ok, res} -> {:ok, Poison.decode!(res.body)["data"]}
+     {:ok, res} -> {:ok, decoded_body_data(res)}
      {:error, err} -> {:error, :service_unavailable}
     end
   end
 
   @doc """
-  Create a Note based on data map
+  Create a Note based on note map
 
   Returns `%{:ok, response}`
   """
-  def create(data) do
-    case HTTPoison.post(url, Poison.encode!(data), content_type) do
-      {:ok, res} -> {:ok, Poison.decode!(res.body)["data"]}
+  def create(note) do
+    case HTTPoison.post(url, encode_data(note), content_type) do
+      {:ok, res} -> {:ok, decoded_body_data(res)}
       {:error, err} -> {:error, err}
     end
   end
 
-  defp url do
+  @doc """
+  Update a Note based on the updated note map
+  parms:
+    id: The UUID as a string to updated
+    note: The elixir map with the data attributes to update.
+    
+  Returns `%{:ok, response}`
+  """
+  def update(id, note) do
+    IO.inspect("#{url}/#{id}")
+    case HTTPoison.patch("#{url}/#{id}", encode_data(note), content_type) do
+      {:ok, res} -> {:ok, decoded_body_data(res)}
+      {:error, err} -> {:error, err}
+    end
+  end
+
+  def url do
     "#{scheme}://#{host}:#{port}/#{version}/#{endpoint}"
   end
 
-  defp content_type do
-    %{"Content-type" => "application/json"}
+
+  defp encode_data(data) do
+    data
+    |> Poison.encode!
   end
 
+  # curl -H "Content-Type: application/json" -X POST -d '{ "Address": "http://garage.silo.decisiv.us", "Name": "garage", "Port": 80 }' http://consul.internal.silo.decisiv.us:8500/v1/agent/service/register
+
+  defp decoded_body_data(resp) do
+    Poison.decode!(resp.body)["data"]
+  end
+
+  defp content_type, do: %{"Content-type" => "application/vnd.api+json"}
   defp scheme,   do: @api_details[:scheme]
   defp host,     do: @api_details[:host]
   defp port,     do: @api_details[:port]
   defp version,  do: @api_details[:version]
   defp endpoint, do: @endpoint_name
 end
+
+%{ "data" => %{ "attributes" => %{ "subject" => "updated subject"}}}
