@@ -8,9 +8,8 @@ defmodule ApiClient.Notes do
 
   params:
     options: Set of options that are available, with no specific order
-      page_size: int
-      page_num: int
-      filter:
+      page: %{size: string, number: string , offset: string}
+      sort: string
       fields: %{}
 
   ## Example

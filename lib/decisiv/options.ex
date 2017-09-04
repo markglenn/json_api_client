@@ -1,5 +1,28 @@
 defmodule Decisiv.Options do
+  @moduledoc """
+    Documentation for Decisiv.Options
+  """
 
+  @doc """
+  Takes a KeyWord list and converts to URI Encoded parameters for query String
+
+  ## Examples
+
+    iex> Decisiv.Options.to_query_string([fields: %{notes: "topic,id"}, page: %{number: "25"}])
+    "fields[notes]=topic,id&page[number]=25"
+
+    iex> Decisiv.Options.to_query_string([fields: %{notes: "topic,id"}, page: %{number: "25", size: "1"}])
+    "fields[notes]=topic,id&page[number]=25&page[size]=1"
+
+    iex> Decisiv.Options.to_query_string([fields: %{notes: "topic,id"}])
+    "fields[notes]=topic,id"
+
+    iex> Decisiv.Options.to_query_string([page_size: 25, page_num: 1])
+    "page_size=25&page_num=1"
+
+    iex> Decisiv.Options.to_query_string([])
+    ""
+  """
   def to_query_string(options) do
     Enum.map(options, fn(option) -> parse(option) end)
       |> Enum.join("&")
