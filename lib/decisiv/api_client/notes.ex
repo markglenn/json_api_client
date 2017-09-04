@@ -1,6 +1,6 @@
 defmodule ApiClient.Notes do
   @api_details %{scheme: "http", host: "localhost", port: 3112, version: "v1"}
-  @defaults [page_size: nil, page_num: nil, filter: nil, sort: nil, fields: nil]
+  @defaults [page: nil, sort: nil, fields: nil]
   @endpoint_name "notes"
 
   @doc """
@@ -14,8 +14,8 @@ defmodule ApiClient.Notes do
 
   ## Example
     ApiClient.Notes.all()
-    ApiClient.Notes.all(page_size: 10)
-    ApiClient.Notes.all(page_size: 10, fields: %{notes: "id,topic,recipients"})
+    ApiClient.Notes.all(page: %{size: "10"})
+    ApiClient.Notes.all(page: %{size: "10"}, fields: %{notes: "id,topic,recipients"})
   """
   def all(options \\ []) do
     options = generate_keyword_list(options)
