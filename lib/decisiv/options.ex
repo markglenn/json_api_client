@@ -17,8 +17,8 @@ defmodule Decisiv.Options do
     iex> Decisiv.Options.to_query_string([fields: %{notes: "topic,id"}])
     "fields[notes]=topic,id"
 
-    iex> Decisiv.Options.to_query_string([page_size: 25, page_num: 1])
-    "page_size=25&page_num=1"
+    iex> Decisiv.Options.to_query_string([page: %{size: "25", number: "1"}])
+    "page[number]=1&page[size]=25"
 
     iex> Decisiv.Options.to_query_string([])
     ""

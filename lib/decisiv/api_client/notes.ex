@@ -64,8 +64,8 @@ defmodule ApiClient.Notes do
 
   defp generate_keyword_list(options) do
     Keyword.merge(@defaults, options)
-      |> Enum.into(%{})
-      |> Enum.reject(fn {_,v} -> is_nil(v) end) # remove all nil values
+    |> Enum.reject(&(&1
+      |> elem(1) |> is_nil)) # remove all nil values
   end
 
   defp encode_data(data) do
