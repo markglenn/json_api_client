@@ -1,7 +1,7 @@
 defmodule Decisiv.ApiClient do
   @client_name Application.get_env(:ex_decisiv_api_client, :client_name)
   @timeout Application.get_env(:ex_decisiv_api_client, :timeout, 500)
-  @version "0.1.0"
+  @version Mix.Project.config[:version]
 
   @moduledoc """
   Documentation for Decisiv.ApiClient.
