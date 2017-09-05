@@ -10,11 +10,11 @@ use Mix.Config
 
 # You can configure your application as:
 #
-#     config :decisiv_elixir_api_client, key: :value
+config :ex_decisiv_api_client, client_name: "client_name"
 #
 # and access this configuration in your application as:
 #
-#     Application.get_env(:decisiv_elixir_api_client, :key)
+#     Application.get_env(:ex_decisiv_api_client, :key)
 #
 # You can also configure a 3rd-party app:
 #
