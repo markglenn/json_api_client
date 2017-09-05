@@ -1,8 +1,4 @@
-defmodule ExDecisivApiClientTest do
+defmodule Decisiv.ApiClientTest do
   use ExUnit.Case
-  doctest ExDecisivApiClient
-
-  test "greets the world" do
-    assert ExDecisivApiClient.hello() == :world
-  end
+  doctest Decisiv.ApiClient
 end

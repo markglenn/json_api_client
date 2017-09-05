@@ -1,18 +1,21 @@
-defmodule ExDecisivApiClient do
+defmodule Decisiv.ApiClient do
+  @version "0.1.0"
+  @client_name Application.get_env(:ex_decisiv_api_client, :client_name)
+
   @moduledoc """
-  Documentation for ExDecisivApiClient.
+  Documentation for Decisiv.ApiClient.
   """
 
   @doc """
-  Hello world.
+  Generates a value used in the User-Agent header, used to identify callers.
 
   ## Examples
 
-      iex> ExDecisivApiClient.hello
-      :world
+      iex> Decisiv.ApiClient.user_agent
+      "ExApiClient/0.1.0/client_name"
 
   """
-  def hello do
-    :world
+  def user_agent do
+    "ExApiClient/" <> @version <> "/" <> @client_name
   end
 end

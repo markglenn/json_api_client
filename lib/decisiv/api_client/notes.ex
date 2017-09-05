@@ -3,7 +3,7 @@ defmodule ApiClient.Notes do
   @endpoint_name "notes"
 
   def all do
-    case HTTPoison.get(url) do
+    case HTTPoison.get(url, headers()) do
      {:ok, res} -> {:ok, decoded_body_data(res)}
      {:error, err} -> {:error, :service_unavailable}
     end
@@ -15,7 +15,7 @@ defmodule ApiClient.Notes do
   Returns `%{:ok, response}`
   """
   def create(note) do
-    case HTTPoison.post(url, encode_data(note), content_type) do
+    case HTTPoison.post(url, encode_data(note), headers()) do
       {:ok, res} -> {:ok, decoded_body_data(res)}
       {:error, err} -> {:error, err}
     end
@@ -30,7 +30,7 @@ defmodule ApiClient.Notes do
   Returns `%{:ok, response}`
   """
   def update(id, note) do
-    case HTTPoison.patch("#{url}/#{id}", encode_data(note), content_type) do
+    case HTTPoison.patch("#{url}/#{id}", encode_data(note), headers()) do
       {:ok, res} -> {:ok, decoded_body_data(res)}
       {:error, err} -> {:error, err}
     end
@@ -50,7 +50,12 @@ defmodule ApiClient.Notes do
     Poison.decode!(resp.body)["data"]
   end
 
-  defp content_type, do: %{"Content-type" => "application/vnd.api+json"}
+  defp headers do
+    Map.new
+    |> Map.put("Accept", "application/vnd.api+json")
+    |> Map.put("User-Agent", Decisiv.ApiClient.user_agent())
+  end
+
   defp scheme,   do: @api_details[:scheme]
   defp host,     do: @api_details[:host]
   defp port,     do: @api_details[:port]
