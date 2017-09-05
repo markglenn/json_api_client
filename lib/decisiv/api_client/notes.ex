@@ -3,9 +3,9 @@ defmodule ApiClient.Notes do
   @endpoint_name "notes"
 
   def all do
-    case HTTPoison.get(url, headers()) do
+    case HTTPoison.get(url, headers(), options()) do
      {:ok, res} -> {:ok, decoded_body_data(res)}
-     {:error, err} -> {:error, :service_unavailable}
+     {:error, _err} -> {:error, :service_unavailable}
     end
   end
 
@@ -15,7 +15,7 @@ defmodule ApiClient.Notes do
   Returns `%{:ok, response}`
   """
   def create(note) do
-    case HTTPoison.post(url, encode_data(note), headers()) do
+    case HTTPoison.post(url, encode_data(note), headers(), options()) do
       {:ok, res} -> {:ok, decoded_body_data(res)}
       {:error, err} -> {:error, err}
     end
@@ -30,7 +30,7 @@ defmodule ApiClient.Notes do
   Returns `%{:ok, response}`
   """
   def update(id, note) do
-    case HTTPoison.patch("#{url}/#{id}", encode_data(note), headers()) do
+    case HTTPoison.patch("#{url}/#{id}", encode_data(note), headers(), options()) do
       {:ok, res} -> {:ok, decoded_body_data(res)}
       {:error, err} -> {:error, err}
     end
@@ -40,6 +40,9 @@ defmodule ApiClient.Notes do
     "#{scheme}://#{host}:#{port}/#{version}/#{endpoint}"
   end
 
+  defp options do
+    [timeout: Decisiv.ApiClient.timeout(), recv_timeout: Decisiv.ApiClient.timeout()]
+  end
 
   defp encode_data(data) do
     data

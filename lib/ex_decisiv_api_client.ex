@@ -1,6 +1,7 @@
 defmodule Decisiv.ApiClient do
-  @version "0.1.0"
   @client_name Application.get_env(:ex_decisiv_api_client, :client_name)
+  @timeout Application.get_env(:ex_decisiv_api_client, :timeout, 500)
+  @version "0.1.0"
 
   @moduledoc """
   Documentation for Decisiv.ApiClient.
@@ -11,11 +12,24 @@ defmodule Decisiv.ApiClient do
 
   ## Examples
 
-      iex> Decisiv.ApiClient.user_agent
+      iex> Decisiv.ApiClient.user_agent()
       "ExApiClient/0.1.0/client_name"
 
   """
   def user_agent do
     "ExApiClient/" <> @version <> "/" <> @client_name
+  end
+
+  @doc """
+  Returns the default timeout value, in msecs.
+
+  ## Examples
+
+      iex> Decisiv.ApiClient.timeout()
+      500
+
+  """
+  def timeout do
+    @timeout
   end
 end
