@@ -28,3 +28,11 @@ Every request made to a service carries a special `User-Agent` header that looks
 ```
 config :ex_decisiv_api_client, client_name: "valentine"
 ```
+
+### timeout
+
+This library allows its users to specify a timeout for all its service calls by using a `timeout` setting. By default, the timeout is set to 500msecs.
+
+```
+config :ex_decisiv_api_client, timeout: 200
+```
