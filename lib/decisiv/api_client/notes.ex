@@ -1,6 +1,6 @@
 defmodule ApiClient.Notes do
   @api_details %{scheme: "http", host: "localhost", port: 3112, version: "v1"}
-  @defaults [page: nil, sort: nil, fields: nil]
+  @defaults [page: nil, sort: nil, fields: nil, filter: nil]
   @endpoint_name "notes"
 
   @doc """
