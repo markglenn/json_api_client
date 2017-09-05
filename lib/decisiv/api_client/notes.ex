@@ -3,7 +3,7 @@ defmodule ApiClient.Notes do
   @endpoint_name "notes"
 
   def all do
-    case HTTPoison.get(url, headers(), options()) do
+    case HTTPoison.get(url(), headers(), options()) do
      {:ok, res} -> {:ok, decoded_body_data(res)}
      {:error, _err} -> {:error, :service_unavailable}
     end
@@ -15,7 +15,7 @@ defmodule ApiClient.Notes do
   Returns `%{:ok, response}`
   """
   def create(note) do
-    case HTTPoison.post(url, encode_data(note), headers(), options()) do
+    case HTTPoison.post(url(), encode_data(note), headers(), options()) do
       {:ok, res} -> {:ok, decoded_body_data(res)}
       {:error, err} -> {:error, err}
     end
@@ -30,14 +30,14 @@ defmodule ApiClient.Notes do
   Returns `%{:ok, response}`
   """
   def update(id, note) do
-    case HTTPoison.patch("#{url}/#{id}", encode_data(note), headers(), options()) do
+    case HTTPoison.patch("#{url()}/#{id}", encode_data(note), headers(), options()) do
       {:ok, res} -> {:ok, decoded_body_data(res)}
       {:error, err} -> {:error, err}
     end
   end
 
   def url do
-    "#{scheme}://#{host}:#{port}/#{version}/#{endpoint}"
+    "#{scheme()}://#{host()}:#{port()}/#{version()}/#{endpoint()}"
   end
 
   defp options do
