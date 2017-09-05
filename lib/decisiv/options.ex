@@ -39,7 +39,6 @@ defmodule Decisiv.Options do
     elem(option, 1)
       |> Enum.map(fn({key, value}) -> "#{Atom.to_string(param_name)}[#{key}]#{parse(value)}" end)
       |> Enum.join("&")
-
   end
 
   defp parse(option) when is_map(option) do

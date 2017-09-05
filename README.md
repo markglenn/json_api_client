@@ -52,7 +52,7 @@ config :ex_decisiv_api_client, timeout: 200
 #### Update
 The Update function has an Update/2, which takes the UUID and the note data in which you want to update.
 - Example:
-  - `ApiClient.Notes.create(%{ "data" => %{ "attributes" => %{ "subject" => "updated subject"}}})`
+  - `ApiClient.Notes.update(%{ "subject" => "updated subject"})`
 
 
 #### Create
@@ -60,14 +60,12 @@ The create function accepts a map, that will be encoded to JSON.
 - Example:
 ```
 ApiClient.Notes.create(
-    %{"data" => %{"attributes" => %{
-      "topic" => "decisiv:notes:c9a37d6f-578f-42c2-bea7-dd3d456a7c13",
-      "subject" => "test subject",
-      "author" => "test author",
-      "recipients" => ["decisiv:jskinner:6f698a0f-2e74-4273-987c-c781f2b44841"],
-      "body" => "blah"
-      }
-    }
+  %{
+    "topic" => "decisiv:notes:c9a37d6f-578f-42c2-bea7-dd3d456a7c13",
+    "subject" => "test subject",
+    "author" => "test author",
+    "recipients" => ["decisiv:jskinner:6f698a0f-2e74-4273-987c-c781f2b44841"],
+    "body" => "blah"
   })
 >>>>>>> Update Readme.md with examples for the Notes APIClient.
 ```

@@ -1,6 +1,7 @@
 defmodule ApiClient.Notes do
   @api_details %{scheme: "http", host: "localhost", port: 3112, version: "v1"}
   @defaults [page: nil, sort: nil, fields: nil, filter: nil]
+  @json_data_body %{data: %{attributes: %{}}}
   @endpoint_name "notes"
 
   @doc """
@@ -69,7 +70,8 @@ defmodule ApiClient.Notes do
   end
 
   defp encode_data(data) do
-    data
+    @json_data_body
+    |> put_in([:data, :attributes], data)
     |> Poison.encode!
   end
 
