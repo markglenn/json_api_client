@@ -29,14 +29,14 @@ Every request made to a service carries a special `User-Agent` header that looks
 config :ex_decisiv_api_client, client_name: "valentine"
 ```
 
-<<<<<<< HEAD
 ### timeout
 
 This library allows its users to specify a timeout for all its service calls by using a `timeout` setting. By default, the timeout is set to 500msecs.
 
 ```
 config :ex_decisiv_api_client, timeout: 200
-=======
+```
+
 ## How to use
 
 ### Notes
@@ -67,5 +67,4 @@ ApiClient.Notes.create(
     "recipients" => ["decisiv:jskinner:6f698a0f-2e74-4273-987c-c781f2b44841"],
     "body" => "blah"
   })
->>>>>>> Update Readme.md with examples for the Notes APIClient.
 ```
