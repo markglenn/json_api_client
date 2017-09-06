@@ -1,8 +1,27 @@
 defmodule ApiClient.Notes do
   @api_details %{scheme: "http", host: "localhost", port: 3112, version: "v1"}
+  @defaults [page: nil, sort: nil, fields: nil, filter: nil]
+  @json_data_body %{data: %{attributes: %{}}}
   @endpoint_name "notes"
 
-  def all do
+  @doc """
+  List all the NotesTest
+
+  params:
+    options: Set of options that are available, with no specific order
+      page: %{size: string, number: string , offset: string}
+      sort: string
+      fields: %{}
+
+  ## Example
+    ApiClient.Notes.all()
+    ApiClient.Notes.all(page: %{size: "10"})
+    ApiClient.Notes.all(page: %{size: "10"}, fields: %{notes: "id,topic,recipients"})
+  """
+  def all(options \\ []) do
+    options = generate_keyword_list(options)
+    query_params = Decisiv.Options.to_query_string(options)
+
     case HTTPoison.get(url(), headers(), options()) do
      {:ok, res} -> {:ok, decoded_body_data(res)}
      {:error, _err} -> {:error, :service_unavailable}
@@ -44,8 +63,15 @@ defmodule ApiClient.Notes do
     [timeout: Decisiv.ApiClient.timeout(), recv_timeout: Decisiv.ApiClient.timeout()]
   end
 
+  defp generate_keyword_list(options) do
+    Keyword.merge(@defaults, options)
+    |> Enum.reject(&(&1
+      |> elem(1) |> is_nil)) # remove all nil values
+  end
+
   defp encode_data(data) do
-    data
+    @json_data_body
+    |> put_in([:data, :attributes], data)
     |> Poison.encode!
   end
 
