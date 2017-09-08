@@ -1,8 +1,8 @@
 defmodule ApiClient.Notes do
-  @api_details %{scheme: "http", host: "localhost", port: 3112, version: "v1"}
   @defaults [page: nil, sort: nil, fields: nil, filter: nil]
   @json_data_body %{data: %{attributes: %{}}}
-  @endpoint_name "notes"
+  @endpoint "notes"
+  @api_version "v1"
 
   @doc """
   List all the NotesTest
@@ -56,7 +56,7 @@ defmodule ApiClient.Notes do
   end
 
   def url do
-    "#{scheme()}://#{host()}:#{port()}/#{version()}/#{endpoint()}"
+    "#{service_url()}/#{@endpoint}"
   end
 
   defp options do
@@ -85,9 +85,7 @@ defmodule ApiClient.Notes do
     |> Map.put("User-Agent", Decisiv.ApiClient.user_agent())
   end
 
-  defp scheme,   do: @api_details[:scheme]
-  defp host,     do: @api_details[:host]
-  defp port,     do: @api_details[:port]
-  defp version,  do: @api_details[:version]
-  defp endpoint, do: @endpoint_name
+  defp service_url do
+    "#{Decisiv.ApiClient.url_for(:notes)}/#{@api_version}"
+  end
 end

@@ -28,10 +28,12 @@ defmodule ExDecisivApiClient.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:excoveralls, "~> 0.7.2", only: :test},
       {:httpoison, "~> 0.13.0"},
       {:poison, "~> 3.1"},
+      {:ex_aws, "~> 1.1.4"},
       {:ex_doc, "~>0.16.3", only: :dev},
+      {:excoveralls, "~> 0.7.2", only: :test},
+      {:mock, "~> 0.2.0", only: :test, runtime: false},
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]
