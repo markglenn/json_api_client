@@ -10,7 +10,9 @@ use Mix.Config
 
 # You can configure your application as:
 #
-config :ex_decisiv_api_client, client_name: "client_name"
+config :ex_decisiv_api_client,
+  client_name: "client_name",
+  decisiv_environment: System.get_env("DECISIV_ENVIRONMENT") || "development"
 #
 # and access this configuration in your application as:
 #
@@ -21,10 +23,14 @@ config :ex_decisiv_api_client, client_name: "client_name"
 #     config :logger, level: :info
 #
 
+config :ex_aws,
+  access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, :instance_role],
+  secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, :instance_role]
+
 # It is also possible to import configuration files, relative to this
 # directory. For example, you can emulate configuration per environment
 # by uncommenting the line below and defining dev.exs, test.exs and such.
 # Configuration from the imported file will override the ones defined
 # here (which is why it is important to import them last).
 #
-#     import_config "#{Mix.env}.exs"
+import_config "#{Mix.env}.exs"

@@ -42,7 +42,9 @@ config :ex_decisiv_api_client, timeout: 200
 ### Notes
 
 #### All
- To get a list of All Notes `ApiClient.Notes.all()`. You can pass different options to the all function to select specific fields, perform pagination, or sort by fields. See `api_client/notes.ex` for examples.
+
+To get a list of All Notes `ApiClient.Notes.all()`. You can pass different options to the all function to select specific fields, perform pagination, or sort by fields. See `api_client/notes.ex` for examples.
+
 - Examples:
   - `ApiClient.Notes.all()`
   - `ApiClient.Notes.all(page: %{size: "5"})`
@@ -50,13 +52,17 @@ config :ex_decisiv_api_client, timeout: 200
   - `ApiClient.Notes.all(page: %{size: "5", number: "2" }, sort="subject")`
 
 #### Update
+
 The Update function has an Update/2, which takes the UUID and the note data in which you want to update.
+
 - Example:
   - `ApiClient.Notes.update(%{ "subject" => "updated subject"})`
 
 
 #### Create
+
 The create function accepts a map, that will be encoded to JSON.
+
 - Example:
 ```
 ApiClient.Notes.create(
@@ -67,4 +73,23 @@ ApiClient.Notes.create(
     "recipients" => ["decisiv:jskinner:6f698a0f-2e74-4273-987c-c781f2b44841"],
     "body" => "blah"
   })
+```
+
+## Development
+
+### Amazon DynamoDB setup
+
+1. Run DynamoDB locally with Docker:
+```
+docker run -d -p 8000:8000 -v /tmp/data:/data dwmkerr/dynamodb -sharedDb
+```
+
+1. Using AWS CLI, create the DynamoDB table:
+```
+aws dynamodb create-table --endpoint-url http://localhost:8000 --table-name service_discovery_development --attribute-definitions AttributeName=service,AttributeType=S --key-schema AttributeName=service,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+```
+
+1. And now, add the `notes` endpoint:
+```
+aws dynamodb put-item --endpoint-url http://localhost:8000 --table-name service_discovery_development --item '{"service": {"S": "notes"}, "endpoint": {"S": "http://localhost:3112"} }'
 ```

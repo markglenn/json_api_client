@@ -32,4 +32,18 @@ defmodule Decisiv.ApiClient do
   def timeout do
     @timeout
   end
+
+  @doc """
+  Returns the endpoint of a specific service.
+
+  ## Examples
+
+      iex> Decisiv.ApiClient.url_for(:notes)
+      "http://localhost:3112"
+
+  """
+  def url_for(service_name) do
+    response = Decisiv.DynamoDB.get_item(service_name)
+    response["Item"]["endpoint"]
+  end
 end
