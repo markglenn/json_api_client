@@ -21,8 +21,9 @@ defmodule ApiClient.Notes do
   def all(options \\ []) do
     options = generate_keyword_list(options)
     query_params = Decisiv.Options.to_query_string(options)
+    request_url = if query_params, do: "#{url}?#{query_params}", else: url
 
-    case HTTPoison.get(url(), headers(), options()) do
+    case HTTPoison.get(request_url, headers(), options()) do
      {:ok, res} -> {:ok, decoded_body_data(res)}
      {:error, _err} -> {:error, :service_unavailable}
     end
