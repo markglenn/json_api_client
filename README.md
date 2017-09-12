@@ -49,7 +49,7 @@ To get a list of All Notes `ApiClient.Notes.all()`. You can pass different optio
   - `ApiClient.Notes.all()`
   - `ApiClient.Notes.all(page: %{size: "5"})`
   - `ApiClient.Notes.all(fields: %{notes: "topic,recipients"})`
-  - `ApiClient.Notes.all(page: %{size: "5", number: "2" }, sort="subject")`
+  - `ApiClient.Notes.all(page: %{size: "5", number: "2" }, sort: "posted_at")`  *Currently we only allow sorting on "posted_at", any other field in the sort key, will fail*
 
 #### Update
 
