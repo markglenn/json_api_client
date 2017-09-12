@@ -36,6 +36,8 @@ defmodule ExDecisivApiClient.Mixfile do
       {:httpoison, "~> 0.13.0"},
       {:poison, "~> 3.1"},
       {:mock, "~> 0.2.0", only: :test, runtime: false},
+      {:uuid, "~> 1.1", only: :test},
+      {:faker, "~> 0.9"}
     ]
   end
 

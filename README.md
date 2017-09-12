@@ -84,12 +84,12 @@ ApiClient.Notes.create(
 docker run -d -p 8000:8000 -v /tmp/data:/data dwmkerr/dynamodb -sharedDb
 ```
 
-1. Using AWS CLI, create the DynamoDB table:
+2. Using AWS CLI, create the DynamoDB table:
 ```
 aws dynamodb create-table --endpoint-url http://localhost:8000 --table-name service_discovery_development --attribute-definitions AttributeName=service,AttributeType=S --key-schema AttributeName=service,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 ```
 
-1. And now, add the `notes` endpoint:
+3. And now, add the `notes` endpoint:
 ```
 aws dynamodb put-item --endpoint-url http://localhost:8000 --table-name service_discovery_development --item '{"service": {"S": "notes"}, "endpoint": {"S": "http://localhost:3112"} }'
 ```
