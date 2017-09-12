@@ -47,7 +47,7 @@ config :ex_decisiv_api_client, timeout: 200
   - `ApiClient.Notes.all()`
   - `ApiClient.Notes.all(page: %{size: "5"})`
   - `ApiClient.Notes.all(fields: %{notes: "topic,recipients"})`
-  - `ApiClient.Notes.all(page: %{size: "5", number: "2" }, sort="subject")`
+  - `ApiClient.Notes.all(page: %{size: "5", number: "2" }, sort: "posted_at")`  *Currently we only allow sorting on "posted_at", any other field in the sort key, will fail*
 
 #### Update
 The Update function has an Update/2, which takes the UUID and the note data in which you want to update.
