@@ -22,7 +22,7 @@ defmodule ApiClient.Notes.HTTPClient do
     end
   end
 
-  def upate(id, note) do
+  def update(id, note) do
     case HTTPoison.patch("#{url()}/#{id}", encode_data(note), headers(), options()) do
       {:ok, res} -> {:ok, decoded_body_data(res)}
       {:error, err} -> {:error, err}
@@ -50,6 +50,7 @@ defmodule ApiClient.Notes.HTTPClient do
   defp headers do
     Map.new
     |> Map.put("Accept", "application/vnd.api+json")
+    |> Map.put("Content-Type", "application/vnd.api+json")
     |> Map.put("User-Agent", Decisiv.ApiClient.user_agent())
   end
 

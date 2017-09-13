@@ -93,3 +93,9 @@ aws dynamodb create-table --endpoint-url http://localhost:8000 --table-name serv
 ```
 aws dynamodb put-item --endpoint-url http://localhost:8000 --table-name service_discovery_development --item '{"service": {"S": "notes"}, "endpoint": {"S": "http://localhost:3112"} }'
 ```
+
+## Test
+
+### Run Test against Development instance
+1. Ensure you have the development server you wish to test.
+2. In the terminal, run `mix test --include notes_api`. This will run the all test including the `notes_api `@moduletag for the Notes Api HTTPClient.
