@@ -11,6 +11,7 @@ defmodule ExDecisivApiClient.Mixfile do
       name: "Decisiv Elixir ApiClient",
       description: description(),
       package: package(),
+      aliases: aliases(),
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: ["coveralls": :test, "coveralls.html": :test, "coveralls.post": :test],
       deps: deps(),
@@ -28,14 +29,13 @@ defmodule ExDecisivApiClient.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:httpoison, "~> 0.13.0"},
-      {:poison, "~> 3.1"},
+      {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.7.2", only: :test},
       {:ex_aws, "~> 1.1.4"},
       {:ex_doc, "~>0.16.3", only: :dev},
-      {:excoveralls, "~> 0.7.2", only: :test},
+      {:httpoison, "~> 0.13.0"},
+      {:poison, "~> 3.1"},
       {:mock, "~> 0.2.0", only: :test, runtime: false},
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]
   end
 
@@ -54,5 +54,11 @@ defmodule ExDecisivApiClient.Mixfile do
     """
       Client package for accessing Elixir JSONApi services built at Decisiv
     """
+  end
+
+  defp aliases do
+    [
+      "ci": ["compile", "credo --strict", "coveralls"]
+    ]
   end
 end
