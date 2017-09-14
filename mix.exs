@@ -30,7 +30,7 @@ defmodule ExDecisivApiClient.Mixfile do
   defp deps do
     [
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
-      {:excoveralls, "~> 0.7.2", only: :test},
+      {:excoveralls, "~> 0.7.2", only: [:dev, :test]},
       {:ex_aws, "~> 1.1.4"},
       {:ex_doc, "~>0.16.3", only: :dev},
       {:httpoison, "~> 0.13.0"},
@@ -58,7 +58,7 @@ defmodule ExDecisivApiClient.Mixfile do
 
   defp aliases do
     [
-      "ci": ["deps.get", "compile", "credo --strict", "coveralls"]
+      "ci": ["compile", "credo --strict", "coveralls.html"]
     ]
   end
 end
