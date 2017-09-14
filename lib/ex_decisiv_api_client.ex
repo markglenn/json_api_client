@@ -3,6 +3,7 @@ defmodule Decisiv.ApiClient do
   @timeout Application.get_env(:ex_decisiv_api_client, :timeout, 500)
   @version Mix.Project.config[:version]
 
+  alias Decisiv.DynamoDB
   @moduledoc """
   Documentation for Decisiv.ApiClient.
   """
@@ -43,7 +44,7 @@ defmodule Decisiv.ApiClient do
 
   """
   def url_for(service_name) do
-    response = Decisiv.DynamoDB.get_item(service_name)
+    response = DynamoDB.get_item(service_name)
     response["Item"]["endpoint"]
   end
 end

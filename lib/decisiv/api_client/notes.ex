@@ -4,6 +4,13 @@ defmodule ApiClient.Notes do
   @endpoint "notes"
   @api_version "v1"
 
+  alias Decisiv.Options
+  alias Decisiv.ApiClient
+
+  @moduledoc """
+  Documentation for ApiClient.Notes
+  """
+
   @doc """
   List all the NotesTest
 
@@ -20,7 +27,7 @@ defmodule ApiClient.Notes do
   """
   def all(options \\ []) do
     options = generate_keyword_list(options)
-    query_params = Decisiv.Options.to_query_string(options)
+    query_params = Options.to_query_string(options)
     request_url = if query_params, do: "#{url}?#{query_params}", else: url
 
     case HTTPoison.get(request_url, headers(), options()) do
@@ -61,13 +68,13 @@ defmodule ApiClient.Notes do
   end
 
   defp options do
-    [timeout: Decisiv.ApiClient.timeout(), recv_timeout: Decisiv.ApiClient.timeout()]
+    [timeout: ApiClient.timeout(), recv_timeout: ApiClient.timeout()]
   end
 
   defp generate_keyword_list(options) do
-    Keyword.merge(@defaults, options)
-    |> Enum.reject(&(&1
-      |> elem(1) |> is_nil)) # remove all nil values
+    merged_list = Keyword.merge(@defaults, options)
+    merged_list
+    |> Enum.reject(&(&1 |> elem(1) |> is_nil)) # remove all nil values
   end
 
   defp encode_data(data) do
@@ -83,10 +90,10 @@ defmodule ApiClient.Notes do
   defp headers do
     Map.new
     |> Map.put("Accept", "application/vnd.api+json")
-    |> Map.put("User-Agent", Decisiv.ApiClient.user_agent())
+    |> Map.put("User-Agent", ApiClient.user_agent())
   end
 
   defp service_url do
-    "#{Decisiv.ApiClient.url_for(:notes)}/#{@api_version}"
+    "#{ApiClient.url_for(:notes)}/#{@api_version}"
   end
 end

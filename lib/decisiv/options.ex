@@ -30,27 +30,32 @@ defmodule Decisiv.Options do
     ""
   """
   def to_query_string(options) do
-    Enum.map(options, fn(option) -> parse(option) end)
+    orig_map = Enum.map(options, fn(option) -> parse(option) end)
+    orig_map
       |> Enum.join("&")
   end
 
   defp parse(option) when is_tuple(option) and is_map(elem(option, 1)) do
-    param_name = elem(option,0)
-    elem(option, 1)
-      |> Enum.map(fn({key, value}) -> "#{Atom.to_string(param_name)}[#{key}]#{parse(value)}" end)
+    param_name = Atom.to_string(elem(option, 0))
+    field_map = elem(option, 1)
+    field_map
+      |> Enum.map(fn({key, value}) -> "#{param_name}[#{key}]#{parse(value)}" end)
       |> Enum.join("&")
   end
 
   defp parse(option) when is_map(option) do
     option
-    |> Enum.map( fn({key, value}) -> "[#{key}]#{parse(value)}" end)
+    |> Enum.map(fn({key, value}) -> "[#{key}]#{parse(value)}" end)
     |> Enum.join("&")
   end
 
   defp parse(option) when is_tuple(option) do
-    Tuple.to_list(option)
+  option_tuple = Tuple.to_list(option)
+
+  option_tuple
       |> Enum.chunk(2)
-      |> Enum.reduce(%{}, fn([key, value], accumulator) -> Map.put(accumulator, key, value) end)
+      |> Enum.reduce(%{}, fn([key, value], accumulator) ->
+          Map.put(accumulator, key, value) end)
       |> URI.encode_query
   end
 
