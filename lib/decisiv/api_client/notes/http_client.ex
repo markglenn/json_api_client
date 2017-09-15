@@ -1,12 +1,19 @@
 defmodule ApiClient.Notes.HTTPClient do
+  @moduledoc """
+  HTTPClient which handles all request to the Notes API Endpoints
+  """
+
   @behaviour ApiClient.Notes.Behaviour
 
   @json_data_body %{data: %{attributes: %{}}}
   @endpoint "notes"
   @api_version "v1"
 
+  alias Decisiv.Options
+  alias Decisiv.ApiClient
+
   def all(options \\ []) do
-    query_params = Decisiv.Options.to_query_string(options)
+    query_params = Options.to_query_string(options)
     request_url = if query_params, do: "#{url()}?#{query_params}", else: url()
 
     case HTTPoison.get(request_url, headers(), options()) do
@@ -34,7 +41,7 @@ defmodule ApiClient.Notes.HTTPClient do
   end
 
   defp options do
-    [timeout: Decisiv.ApiClient.timeout(), recv_timeout: Decisiv.ApiClient.timeout()]
+    [timeout: ApiClient.timeout(), recv_timeout: ApiClient.timeout()]
   end
 
   defp encode_data(data) do
@@ -51,10 +58,10 @@ defmodule ApiClient.Notes.HTTPClient do
     Map.new
     |> Map.put("Accept", "application/vnd.api+json")
     |> Map.put("Content-Type", "application/vnd.api+json")
-    |> Map.put("User-Agent", Decisiv.ApiClient.user_agent())
+    |> Map.put("User-Agent", ApiClient.user_agent())
   end
 
   defp service_url do
-    "#{Decisiv.ApiClient.url_for(:notes)}/#{@api_version}"
+    "#{ApiClient.url_for(:notes)}/#{@api_version}"
   end
 end

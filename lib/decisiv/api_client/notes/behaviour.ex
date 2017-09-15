@@ -1,4 +1,8 @@
 defmodule ApiClient.Notes.Behaviour do
+  @moduledoc """
+  Defined contract for all things related to service API calls.
+  """
+
   @doc """
   List all the records for a given set of data
 
@@ -9,11 +13,6 @@ defmodule ApiClient.Notes.Behaviour do
       fields: %{}
 
   Returns `{:ok, %{}}` | `{:error, Atom.t}`
-
-  ## Example
-    ApiClient.Notes.all()
-    ApiClient.Notes.all(page: %{size: "10"})
-    ApiClient.Notes.all(page: %{size: "10"}, fields: %{notes: "id,topic,recipients"})
   """
   @callback all(options :: Keyword.t) :: {:ok, %{}} | {:error, Atom.t}
 
@@ -32,5 +31,6 @@ defmodule ApiClient.Notes.Behaviour do
 
   Returns `%{:ok, %{}}` | {:error, String.t}
   """
-  @callback update(id :: String.t, note :: Map.t) :: {:ok, %{}} | {:error, String.t}
+  @callback update(id :: String.t, note :: Map.t)
+    :: {:ok, %{}} | {:error, String.t}
 end

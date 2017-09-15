@@ -1,14 +1,20 @@
 defmodule ApiClient.Notes.InMemory do
+  @moduledoc """
+  This is the Mocked Client for Testing.
+  """
   @behaviour ApiClient.Notes.Behaviour
 
-  def all(options \\ []) do
+  alias ApiClient.Notes.InMemory
+  alias Faker.{Name, Lorem}
+
+  def all(_ \\ []) do
     resp = [%{
       "attributes" => %{
-        "author" => Faker.Name.name,
-        "body" => Faker.Lorem.word,
+        "author" => Name.name,
+        "body" => Lorem.word,
         "posted_at" => DateTime.to_string(DateTime.utc_now),
         "recipients" => ["decisiv:jskinner:6f698a0f-2e74-4273-987c-c781f2b44841"],
-        "subject" => Faker.Lorem.word,
+        "subject" => Lorem.word,
         "topic" => "decisiv:notes:c9a37d6f-578f-42c2-bea7-dd3d456a7c13",
         "inserted_at" => DateTime.to_string(DateTime.utc_now),
         "updated_at" => DateTime.to_string(DateTime.utc_now)
@@ -19,11 +25,11 @@ defmodule ApiClient.Notes.InMemory do
     },
     %{
       "attributes" => %{
-        "author" => Faker.Name.name,
-        "body" => Faker.Lorem.word,
+        "author" => Name.name,
+        "body" => Lorem.word,
         "posted_at" => nil,
         "recipients" => ["decisiv:jskinner:6f698a0f-2e74-4273-987c-c781f2b44841"],
-        "subject" => Faker.Lorem.word,
+        "subject" => Lorem.word,
         "topic" => "decisiv:notes:c9a37d6f-578f-42c2-bea7-dd3d456a7c13",
         "inserted_at" => DateTime.to_string(DateTime.utc_now),
         "updated_at" => DateTime.to_string(DateTime.utc_now)
@@ -33,11 +39,11 @@ defmodule ApiClient.Notes.InMemory do
       "type" => "notes"},
     %{
       "attributes" => %{
-        "author" => Faker.Name.name,
-        "body" => Faker.Lorem.word,
+        "author" => Name.name,
+        "body" => Lorem.word,
         "posted_at" => nil,
         "recipients" => ["decisiv:jskinner:6f698a0f-2e74-4273-987c-c781f2b44841"],
-        "subject" => Faker.Lorem.word,
+        "subject" => Lorem.word,
         "topic" => "decisiv:notes:c9a37d6f-578f-42c2-bea7-dd3d456a7c13",
         "inserted_at" => DateTime.to_string(DateTime.utc_now),
         "updated_at" => DateTime.to_string(DateTime.utc_now)
@@ -67,8 +73,14 @@ defmodule ApiClient.Notes.InMemory do
   end
 
   def update(id, note) do
-    {:ok, all_notes_list} = ApiClient.Notes.InMemory.all
-    existing_note = Enum.at(all_notes_list, Enum.find_index(get_in(all_notes_list, [Access.all, "id"]), fn x -> x == id end))
+    {:ok, all_notes_list} = InMemory.all
+    existing_note = Enum.at(all_notes_list,
+      Enum.find_index(get_in(all_notes_list, [Access.all, "id"]),
+        fn x ->
+          x == id
+        end
+      )
+    )
 
     updated_note = Map.merge(existing_note["attributes"], stringify_keys(note))
 
@@ -79,6 +91,8 @@ defmodule ApiClient.Notes.InMemory do
 
   defp stringify_keys(note) do
     note
-      |> Enum.reduce(%{}, fn ({key, val}, acc) -> Map.put(acc, Atom.to_string(key), val) end)
+      |> Enum.reduce(%{}, fn ({key, val}, acc) ->
+        Map.put(acc, Atom.to_string(key), val)
+      end)
   end
 end
