@@ -98,4 +98,4 @@ aws dynamodb put-item --endpoint-url http://localhost:8000 --table-name service_
 
 ### Run Test against Development instance
 1. Ensure you have the development server you wish to test running.
-2. In the terminal, run `mix test --include notes_api`. This will run the all test including the `notes_api` @moduletag for the Notes Api HTTPClient.
+2. In the terminal, run `mix test --include live_integration_test`. This will run the all test including the `live_integration_test` @moduletag for the Notes Api HTTPClient.

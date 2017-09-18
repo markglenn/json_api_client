@@ -3,7 +3,7 @@ defmodule ApiClient.Notes.HTTPClient.HTTPClientTest do
 
   import Mock
 
-  @moduletag :notes_api
+  @moduletag :live_integration_test
 
   setup_all do
     sample_id= create_note()

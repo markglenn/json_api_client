@@ -1,2 +1,2 @@
-ExUnit.configure exclude: [:notes_api]
+ExUnit.configure exclude: [:live_integration_test]
 ExUnit.start()
