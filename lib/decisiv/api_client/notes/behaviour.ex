@@ -33,4 +33,14 @@ defmodule ApiClient.Notes.Behaviour do
   """
   @callback update(id :: String.t, note :: Map.t)
     :: {:ok, %{}} | {:error, String.t}
+
+  @doc """
+  get a Note based on the id
+  parms:
+    id: The UUID as a string to updated
+
+  Returns `%{:ok, %{}}` | {:error, String.t}
+  """
+  @callback get(id :: String.t)
+    :: {:ok, %{}} | {:error, String.t}
 end

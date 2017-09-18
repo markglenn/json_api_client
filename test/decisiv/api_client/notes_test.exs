@@ -45,4 +45,13 @@ defmodule ApiClient.NotesTest do
       assert resp["attributes"]["topic"] == context.note[:topic]
     end
   end
+
+  describe ".get" do
+    test "get an existing note", context do
+      {:ok, note} = ApiClient.Notes.create(context.note)
+      {:ok, resp} = ApiClient.Notes.get("7ded61ea-717a-456f-a23b-1ea95492abab")
+
+      assert resp["attributes"]["topic"] == note[:topic]
+    end
+  end
 end

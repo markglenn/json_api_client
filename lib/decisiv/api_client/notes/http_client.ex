@@ -36,6 +36,17 @@ defmodule ApiClient.Notes.HTTPClient do
     end
   end
 
+  def get(id) do
+    case HTTPoison.get("#{url()}/#{id}", headers(), options()) do
+      # Decisiv.ApiClient.Notes.get("invalid_uuid") was returning {:ok, nil}
+      # It was establishing a connection which gave an ok and returned nil.
+      # ensure we check the status code 404 and return a not_found error
+      {:ok, %HTTPoison.Response{status_code: 404}} -> {:error, :not_found}
+      {:ok, res} -> {:ok, decoded_body_data(res)["attributes"]}
+      {:error, err} -> {:error, err}
+    end
+  end
+
   def url do
    "#{service_url()}/#{@endpoint}"
   end

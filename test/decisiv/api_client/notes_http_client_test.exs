@@ -77,6 +77,18 @@ defmodule ApiClient.Notes.HTTPClient.HTTPClientTest do
     end
   end
 
+  describe ".get" do
+    test "a note with its id", context do
+      with_mock ExAws, [request!: fn(_params) -> %{
+        "Item" => %{"endpoint" => %{"S" => "http://localhost:3112"}, "service" => %{"S" => "notes"}}
+      } end] do
+        {:ok, note} = ApiClient.Notes.HTTPClient.create(context.note)
+        {:ok, resp} = ApiClient.Notes.HTTPClient.get(note["id"])
+        assert resp["topic"] == note["attributes"]["topic"]
+      end
+    end
+  end
+
   defp delete_note(id) do
     HTTPoison.delete("http://localhost:3112/v1/notes/#{id}")
   end

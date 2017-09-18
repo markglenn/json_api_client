@@ -1,10 +1,6 @@
 defmodule ApiClient.Notes do
   @defaults [page: nil, sort: nil, fields: nil, filter: nil]
   @notes_api Application.get_env(:ex_decisiv_api_client, :notes_api)
-
-  alias Decisiv.Options
-  alias Decisiv.ApiClient
-
   @moduledoc """
   Documentation for ApiClient.Notes
   """
@@ -48,6 +44,17 @@ defmodule ApiClient.Notes do
   """
   def update(id, note) do
     @notes_api.update(id, note)
+  end
+
+  @doc """
+  Get a Note based on the ID
+  parms:
+    id: The UUID as a string to updated
+
+  Returns `%{:ok, response}`
+  """
+  def get(id) do
+    @notes_api.get(id)
   end
 
   defp generate_keyword_list(options) do

@@ -89,6 +89,18 @@ defmodule ApiClient.Notes.InMemory do
     {:ok, note}
   end
 
+  def get(id) do
+    {:ok, %{
+        "author" => Name.name,
+        "body" => Lorem.word,
+        "posted_at" => nil,
+        "recipients" => ["decisiv:jskinner:6f698a0f-2e74-4273-987c-c781f2b44841"],
+        "subject" => Lorem.word,
+        "topic" => "decisiv:notes:c9a37d6f-578f-42c2-bea7-dd3d456a7c13",
+      }
+    }
+  end
+
   defp stringify_keys(note) do
     note
       |> Enum.reduce(%{}, fn ({key, val}, acc) ->
