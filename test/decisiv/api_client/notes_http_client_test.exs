@@ -35,7 +35,7 @@ defmodule ApiClient.Notes.HTTPClient.HTTPClientTest do
         {:ok, resp} = ApiClient.Notes.HTTPClient.create(context.note)
 
         assert resp["attributes"]["subject"] == context.note[:subject]
-        assert resp["attributes"]["inserted_at"]
+        assert resp["id"]
 
         delete_note(resp["id"])
       end
@@ -59,7 +59,7 @@ defmodule ApiClient.Notes.HTTPClient.HTTPClientTest do
         "Item" => %{"endpoint" => %{"S" => "http://localhost:3112"}, "service" => %{"S" => "notes"}}
       } end] do
         {:ok, resp} = ApiClient.Notes.HTTPClient.all()
-        assert length(resp) == 1
+        assert length(resp) >= 1
       end
     end
 
