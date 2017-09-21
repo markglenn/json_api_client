@@ -11,27 +11,28 @@ defmodule ApiClient.Notes.HTTPClient do
 
   alias Decisiv.Options
   alias Decisiv.ApiClient
+  alias Decisiv.JsonApi.Parser
 
   def all(options \\ []) do
     query_params = Options.to_query_string(options)
     request_url = if query_params, do: "#{url()}?#{query_params}", else: url()
 
     case HTTPoison.get(request_url, headers(), options()) do
-      {:ok, res} -> {:ok, decoded_body_data(res)}
+      {:ok, res} -> {:ok, Parser.parse(decoded_body_data(res))}
       {:error, _err} -> {:error, :service_unavailable}
     end
   end
 
   def create(note) do
     case HTTPoison.post(url(), encode_data(note), headers(), options()) do
-      {:ok, res} -> {:ok, decoded_body_data(res)}
+      {:ok, res} -> {:ok, Parser.parse(decoded_body_data(res))}
       {:error, err} -> {:error, err}
     end
   end
 
   def update(id, note) do
     case HTTPoison.patch("#{url()}/#{id}", encode_data(note), headers(), options()) do
-      {:ok, res} -> {:ok, decoded_body_data(res)}
+      {:ok, res} -> {:ok, Parser.parse(decoded_body_data(res))}
       {:error, err} -> {:error, err}
     end
   end
@@ -42,7 +43,7 @@ defmodule ApiClient.Notes.HTTPClient do
       # It was establishing a connection which gave an ok and returned nil.
       # ensure we check the status code 404 and return a not_found error
       {:ok, %HTTPoison.Response{status_code: 404}} -> {:error, :not_found}
-      {:ok, res} -> {:ok, decoded_body_data(res)["attributes"]}
+      {:ok, res} -> {:ok, Parser.parse(decoded_body_data(res))}
       {:error, err} -> {:error, err}
     end
   end
