@@ -13,7 +13,7 @@ use Mix.Config
 config :ex_decisiv_api_client,
   client_name: "client_name",
   decisiv_environment: System.get_env("DECISIV_ENVIRONMENT") || "development",
-  notes_api: ApiClient.Notes.HTTPClient
+  notes_transport_protocol: ApiClient.Transport.Http
 #
 # and access this configuration in your application as:
 #
