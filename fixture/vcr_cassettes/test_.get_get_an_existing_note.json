@@ -1,0 +1,62 @@
+[
+  {
+    "request": {
+      "body": "{\"data\":{\"attributes\":{\"topic\":\"decisiv:notes:0a4984c9-945a-4f4a-8caa-8f4ed0c094f4\",\"subject\":\"Great Job!\",\"recipients\":[\"decisiv:jskinner:05C8E078-217B-4469-B3A6-3021834C1917\"],\"body\":\"Fantastic job on this case =)\",\"author\":\"decisiv:user:01157108-E9DE-4785-BC7D-FFA42B62D874\"}}}",
+      "headers": {
+        "Accept": "application/vnd.api+json",
+        "Content-Type": "application/vnd.api+json",
+        "User-Agent": "ExApiClient/0.1.0/client_name"
+      },
+      "method": "post",
+      "options": {
+        "recv_timeout": 500,
+        "connect_timeout": 500
+      },
+      "request_body": "",
+      "url": "http://0.0.0.0:3112/v1/notes"
+    },
+    "response": {
+      "body": "{\"jsonapi\":{\"version\":\"1.0\"},\"data\":{\"type\":\"notes\",\"relationships\":{\"replies\":{\"links\":{\"self\":\"/v1/notes/id/relationships/replies\",\"related\":\"/v1/notes/5163c26e-7750-493b-a5d8-d9eadc541a50/replies\"}}},\"links\":{\"self\":\"/v1/notes/5163c26e-7750-493b-a5d8-d9eadc541a50\"},\"id\":\"5163c26e-7750-493b-a5d8-d9eadc541a50\",\"attributes\":{\"topic\":\"decisiv:notes:0a4984c9-945a-4f4a-8caa-8f4ed0c094f4\",\"subject\":\"Great Job!\",\"recipients\":[\"decisiv:jskinner:05C8E078-217B-4469-B3A6-3021834C1917\"],\"posted_at\":null,\"body\":\"Fantastic job on this case =)\",\"author\":\"decisiv:user:01157108-E9DE-4785-BC7D-FFA42B62D874\"}}}",
+      "headers": {
+        "server": "Cowboy",
+        "date": "Mon, 25 Sep 2017 21:34:40 GMT",
+        "content-length": "601",
+        "content-type": "application/vnd.api+json; charset=utf-8",
+        "cache-control": "max-age=0, private, must-revalidate",
+        "x-request-id": "kijsmmq05aip9dp4m9r9h6rs4htu73r9"
+      },
+      "status_code": 201,
+      "type": "ok"
+    }
+  },
+  {
+    "request": {
+      "body": "",
+      "headers": {
+        "Accept": "application/vnd.api+json",
+        "Content-Type": "application/vnd.api+json",
+        "User-Agent": "ExApiClient/0.1.0/client_name"
+      },
+      "method": "get",
+      "options": {
+        "recv_timeout": 500,
+        "connect_timeout": 500
+      },
+      "request_body": "",
+      "url": "http://0.0.0.0:3112/v1/notes/5163c26e-7750-493b-a5d8-d9eadc541a50"
+    },
+    "response": {
+      "body": "{\"jsonapi\":{\"version\":\"1.0\"},\"data\":{\"type\":\"notes\",\"relationships\":{\"replies\":{\"links\":{\"self\":\"/v1/notes/id/relationships/replies\",\"related\":\"/v1/notes/5163c26e-7750-493b-a5d8-d9eadc541a50/replies\"}}},\"links\":{\"self\":\"/v1/notes/5163c26e-7750-493b-a5d8-d9eadc541a50\"},\"id\":\"5163c26e-7750-493b-a5d8-d9eadc541a50\",\"attributes\":{\"topic\":\"decisiv:notes:0a4984c9-945a-4f4a-8caa-8f4ed0c094f4\",\"subject\":\"Great Job!\",\"recipients\":[\"decisiv:jskinner:05C8E078-217B-4469-B3A6-3021834C1917\"],\"posted_at\":null,\"body\":\"Fantastic job on this case =)\",\"author\":\"decisiv:user:01157108-E9DE-4785-BC7D-FFA42B62D874\"}}}",
+      "headers": {
+        "server": "Cowboy",
+        "date": "Mon, 25 Sep 2017 21:34:40 GMT",
+        "content-length": "601",
+        "content-type": "application/vnd.api+json; charset=utf-8",
+        "cache-control": "max-age=0, private, must-revalidate",
+        "x-request-id": "gbf6fm5e949dhrdqgumtom7h8dq1fe54"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]
