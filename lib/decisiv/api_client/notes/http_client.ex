@@ -9,15 +9,13 @@ defmodule ApiClient.Notes.HTTPClient do
   @endpoint "notes"
   @api_version "v1"
 
-  alias Decisiv.Options
   alias Decisiv.ApiClient
   alias Decisiv.JsonApi.Parser
 
   def all(options \\ []) do
-    query_params = Options.to_query_string(options)
-    request_url = if query_params, do: "#{url()}?#{query_params}", else: url()
+    query_params = UriQuery.params(options)
 
-    case HTTPoison.get(request_url, headers(), options()) do
+    case HTTPoison.get(url(), headers(), [{:params, query_params}] ++ options()) do
       {:ok, res} -> {:ok, Parser.parse(decoded_body_data(res))}
       {:error, _err} -> {:error, :service_unavailable}
     end

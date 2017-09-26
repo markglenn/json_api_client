@@ -47,6 +47,7 @@ defmodule ExDecisivApiClient.Mixfile do
       {:uuid, "~> 1.1", only: :test},
       {:faker, "~> 0.9"},
       {:exvcr, "~> 0.8", only: :test},
+      {:uri_query, "~> 0.1.1"},
     ]
   end
 

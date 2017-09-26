@@ -16,14 +16,14 @@
       "url": "http://0.0.0.0:3112/v1/notes"
     },
     "response": {
-      "body": "{\"jsonapi\":{\"version\":\"1.0\"},\"data\":{\"type\":\"notes\",\"relationships\":{\"replies\":{\"links\":{\"self\":\"/v1/notes/id/relationships/replies\",\"related\":\"/v1/notes/486a4563-a3fc-4ed0-a6d3-1ad8cd45844d/replies\"}}},\"links\":{\"self\":\"/v1/notes/486a4563-a3fc-4ed0-a6d3-1ad8cd45844d\"},\"id\":\"486a4563-a3fc-4ed0-a6d3-1ad8cd45844d\",\"attributes\":{\"topic\":\"decisiv:notes:0a4984c9-945a-4f4a-8caa-8f4ed0c094f4\",\"subject\":\"Great Job!\",\"recipients\":[\"decisiv:jskinner:05C8E078-217B-4469-B3A6-3021834C1917\"],\"posted_at\":null,\"body\":\"Fantastic job on this case =)\",\"author\":\"decisiv:user:01157108-E9DE-4785-BC7D-FFA42B62D874\"}}}",
+      "body": "{\"jsonapi\":{\"version\":\"1.0\"},\"data\":{\"type\":\"notes\",\"relationships\":{\"replies\":{\"links\":{\"self\":\"/v1/notes/id/relationships/replies\",\"related\":\"/v1/notes/f3482920-ea58-4663-b8d6-a73b4d76d598/replies\"}}},\"links\":{\"self\":\"/v1/notes/f3482920-ea58-4663-b8d6-a73b4d76d598\"},\"id\":\"f3482920-ea58-4663-b8d6-a73b4d76d598\",\"attributes\":{\"topic\":\"decisiv:notes:0a4984c9-945a-4f4a-8caa-8f4ed0c094f4\",\"subject\":\"Great Job!\",\"recipients\":[\"decisiv:jskinner:05C8E078-217B-4469-B3A6-3021834C1917\"],\"posted_at\":null,\"body\":\"Fantastic job on this case =)\",\"author\":\"decisiv:user:01157108-E9DE-4785-BC7D-FFA42B62D874\"}}}",
       "headers": {
         "server": "Cowboy",
-        "date": "Mon, 25 Sep 2017 21:34:40 GMT",
+        "date": "Tue, 26 Sep 2017 02:20:08 GMT",
         "content-length": "601",
         "content-type": "application/vnd.api+json; charset=utf-8",
         "cache-control": "max-age=0, private, must-revalidate",
-        "x-request-id": "sivq4825svrbu7aisk844uhfsk90osii"
+        "x-request-id": "si9fpbule7b8glmhinp3gk9pbib41vaf"
       },
       "status_code": 201,
       "type": "ok"
