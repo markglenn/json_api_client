@@ -3,7 +3,6 @@ defmodule Decisiv.ApiClient do
   @timeout Application.get_env(:ex_decisiv_api_client, :timeout, 500)
   @version Mix.Project.config[:version]
 
-  alias Decisiv.DynamoDB
   @moduledoc """
   Documentation for Decisiv.ApiClient.
   """
@@ -39,54 +38,23 @@ defmodule Decisiv.ApiClient do
     end
   end
 
-  @doc """
-  Generates a value used in the User-Agent header, used to identify callers.
-
-  ## Examples
-
-      iex> Decisiv.ApiClient.user_agent()
-      "ExApiClient/0.1.0/client_name"
-
-  """
-  def user_agent do
-    "ExApiClient/" <> @version <> "/" <> @client_name
-  end
-
-  @doc """
-  Returns the default timeout value, in msecs.
-
-  ## Examples
-
-      iex> Decisiv.ApiClient.timeout()
-      500
-
-  """
-  def timeout do
-    @timeout
-  end
-
-  @doc """
-  Returns the endpoint of a specific service.
-
-  ## Examples
-
-      iex> Decisiv.ApiClient.url_for(:notes)
-      "http://localhost:3112"
-
-  """
-  def url_for(service_name) do
-    response = DynamoDB.get_item(service_name)
-    response["Item"]["endpoint"]
-  end
-
   defp default_options do
     [timeout: timeout(), recv_timeout: timeout()]
   end
 
   defp default_headers do
-    Map.new
-    |> Map.put("Accept", "application/vnd.api+json")
-    |> Map.put("Content-Type", "application/vnd.api+json")
-    |> Map.put("User-Agent", user_agent())
+    %{
+      "Accept"       => "application/vnd.api+json",
+      "Content-Type" => "application/vnd.api+json", 
+      "User-Agent"   => user_agent()              ,
+    }
+  end
+
+  defp user_agent do
+    "ExApiClient/" <> @version <> "/" <> @client_name
+  end
+
+  defp timeout do
+    @timeout
   end
 end

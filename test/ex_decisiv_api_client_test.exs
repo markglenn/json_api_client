@@ -1,26 +1,12 @@
 defmodule Decisiv.ApiClientTest do
   use ExUnit.Case
-  doctest Decisiv.ApiClient, except: [url_for: 1]
-
-  import Mock
+  doctest Decisiv.ApiClient
 
   alias Decisiv.ApiClient
 
-  setup_with_mocks([{ExAws, [], [request!: fn (_) ->
-      %{
-        "Item" => %{
-          "endpoint" => %{"S" => "http://localhost:3112"}, 
-          "service" => %{"S" => "notes"}
-        }
-      }
-    end]}])
-  do
+  setup do
     bypass = Bypass.open
     {:ok, bypass: bypass, url: "http://localhost:#{bypass.port}"}
-  end
-
-  test ".url_for" do
-    assert ApiClient.url_for(:notes) == "http://localhost:3112"
   end
 
   describe ".request" do
