@@ -9,6 +9,37 @@ defmodule Decisiv.ApiClient do
   """
 
   @doc """
+  Issues a request to a JSON API endpoint.
+
+  Valid options are:
+  * :params
+  * :data
+  * :headers
+  * :options
+  """
+  def request(method, url, options \\ []) do
+    params       = Keyword.get(options, :params)
+    data         = Keyword.get(options, :data)
+    headers      = Keyword.get(options, :headers, default_headers())
+    http_options = Keyword.get_lazy(options, :options, fn ->
+      if params, 
+      do: [{:params, UriQuery.params(params)}] ++ default_options(), 
+      else: default_options()
+    end)
+
+    body = if data, do: Poison.encode!(%{data: data}), else: ""
+
+    case HTTPoison.request(method, url, body, headers, http_options) do
+      # Decisiv.ApiClient.Notes.get("invalid_uuid") was returning {:ok, nil}
+      # It was establishing a connection which gave an ok and returned nil.
+      # ensure we check the status code 404 and return a not_found error
+      {:ok, %HTTPoison.Response{status_code: 404}} -> {:error, :not_found}
+      {:ok, resp} -> {:ok, Poison.decode!(resp.body)}
+      {:error, err} -> {:error, err}
+    end
+  end
+
+  @doc """
   Generates a value used in the User-Agent header, used to identify callers.
 
   ## Examples
@@ -46,28 +77,6 @@ defmodule Decisiv.ApiClient do
   def url_for(service_name) do
     response = DynamoDB.get_item(service_name)
     response["Item"]["endpoint"]
-  end
-
-  def request(method, url, options \\ []) do
-    params       = Keyword.get(options, :params)
-    data         = Keyword.get(options, :data)
-    headers      = Keyword.get(options, :headers, default_headers())
-    http_options = Keyword.get_lazy(options, :options, fn ->
-      if params, 
-      do: [{:params, params}] ++ default_options(), 
-      else: default_options()
-    end)
-
-    body = if data, do: Poison.encode!(%{data: data}), else: ""
-
-    case HTTPoison.request(method, url, body, headers, http_options) do
-      # Decisiv.ApiClient.Notes.get("invalid_uuid") was returning {:ok, nil}
-      # It was establishing a connection which gave an ok and returned nil.
-      # ensure we check the status code 404 and return a not_found error
-      {:ok, %HTTPoison.Response{status_code: 404}} -> {:error, :not_found}
-      {:ok, resp} -> {:ok, Poison.decode!(resp.body)}
-      {:error, err} -> {:error, err}
-    end
   end
 
   defp default_options do

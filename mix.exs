@@ -17,10 +17,6 @@ defmodule ExDecisivApiClient.Mixfile do
         "coveralls": :test,
         "coveralls.html": :test,
         "coveralls.post": :test,
-        "vcr": :test,
-        "vcr.delete": :test,
-        "vcr.check": :test,
-        "vcr.show": :test,
       ],
       deps: deps(),
       source_url: "https://github.decisiv.net/PlatformServices/ex_decisiv_api_client",
@@ -44,9 +40,10 @@ defmodule ExDecisivApiClient.Mixfile do
       {:httpoison, "~> 0.13.0"},
       {:poison, "~> 3.1"},
       {:mock, "~> 0.3.0", only: :test, runtime: false},
+      {:bypass, "~> 0.8", only: :test},
       {:uuid, "~> 1.1", only: :test},
       {:faker, "~> 0.9"},
-      {:exvcr, "~> 0.8", only: :test},
+      {:exjsx, "~> 4.0.0"},
       {:uri_query, "~> 0.1.1"},
     ]
   end
