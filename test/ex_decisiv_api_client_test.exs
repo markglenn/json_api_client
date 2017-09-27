@@ -2,7 +2,8 @@ defmodule Decisiv.ApiClientTest do
   use ExUnit.Case
   doctest Decisiv.ApiClient
 
-  alias Decisiv.ApiClient
+  import Decisiv.ApiClient
+  alias Decisiv.ApiClient.{Links, Relationship, Resource, Response}
 
   setup do
     bypass = Bypass.open
@@ -10,36 +11,45 @@ defmodule Decisiv.ApiClientTest do
   end
 
   describe ".request" do
-    @single_resource_json """
-    {
-      "links": {
-        "self": "http://example.com/articles/1"
-      },
-      "data": {
-        "type": "articles",
-        "id": "1",
-        "attributes": {
-          "title": "JSON API paints my bikeshed!"
+    test "get a resource", context do
+      single_resource_doc = %{
+        links: %{
+          self: "http://example.com/articles/1"
         },
-        "relationships": {
-          "author": {
-            "links": {
-              "related": "http://example.com/articles/1/author"
+        data: %{
+          type: "articles",
+          id: "1",
+          attributes: %{
+            title: "JSON API paints my bikeshed!"
+          },
+          relationships: %{
+            author: %{
+              links: %{
+                related: "http://example.com/articles/1/author"
+              }
             }
           }
         }
       }
-    }
-    """
-
-    test "get a resource", context do
-      path = "/articles/123"
-      Bypass.expect_once context.bypass, "GET", path, fn conn ->
+      Bypass.expect context.bypass, "GET", "/articles/123", fn conn ->
         assert_has_json_api_headers(conn)
-        Plug.Conn.resp(conn, 200, @single_resource_json)
+        Plug.Conn.resp(conn, 200, Poison.encode! single_resource_doc)
       end
-      {:ok, resp} = ApiClient.request(:get, context.url <> path)
-      assert Poison.decode!(@single_resource_json) == resp
+
+      assert {:ok, single_resource_doc} == request(context.url <> "/articles")
+      |> id("123")
+      |> method(:get)
+      |> execute
+
+      assert {:ok, single_resource_doc} == request(context.url <> "/articles")
+      |> execute(method: :get, id: "123") # exec takes a keyword list that maps to helpers
+
+      assert {:ok, single_resource_doc} == request(context.url <> "/articles")
+      |> fetch(id: "123") # fetch(list) is the same as exec([method: :get] ++ list)
+
+      assert {:ok, single_resource_doc} == request(context.url <> "/articles")
+      |> id("123")
+      |> fetch
     end
 
     @resource_list_json """ 
@@ -62,26 +72,6 @@ defmodule Decisiv.ApiClientTest do
       }]
     }
     """
-
-    test "get a resource list with params", context do
-      path = "/articles"
-      Bypass.expect_once context.bypass, fn conn ->
-        assert_has_json_api_headers(conn)
-        conn = Plug.Conn.fetch_query_params(conn)
-        assert %{
-          request_path: ^path,
-          method: "GET",
-          query_params: %{"sort" => "age", "filter" => %{"foo" => "bar"}},
-        } = conn
-          
-        Plug.Conn.resp(conn, 200, @resource_list_json)
-      end
-
-      {:ok, resp} = ApiClient.request(:get, context.url <> path, [
-        params: %{sort: "age", filter: %{foo: "bar"}}
-      ])
-      assert Poison.decode!(@resource_list_json) == resp
-    end
 
     @create_resource_paylod """
     {
@@ -109,20 +99,6 @@ defmodule Decisiv.ApiClientTest do
       }
     }
     """
-
-    test "creates a JSON API resource", context do
-      path = "/articles"
-      Bypass.expect_once context.bypass, "POST", path, fn conn ->
-        assert_has_json_api_headers(conn)
-        {:ok, body, conn} = Plug.Conn.read_body(conn)
-        assert JSX.minify(body) == JSX.minify(@create_resource_paylod)
-
-        Plug.Conn.resp(conn, 200, @create_resource_response)
-      end
-      resource = Poison.decode!(@create_resource_paylod)["data"]
-      {:ok, resp} = ApiClient.request(:post, context.url <> path, data: resource) 
-      assert Poison.decode!(@create_resource_response) == resp
-    end
 
     def assert_has_json_api_headers(conn) do
       headers = for {name, value} <- conn.req_headers, do: {String.to_atom(name), value}
