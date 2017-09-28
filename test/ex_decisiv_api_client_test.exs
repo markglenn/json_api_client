@@ -23,12 +23,6 @@ defmodule Decisiv.ApiClientTest do
     |> execute
 
     assert {:ok, doc} == request(context.url <> "/articles")
-    |> execute(method: :get, id: "123")
-
-    assert {:ok, doc} == request(context.url <> "/articles")
-    |> fetch(id: "123")
-
-    assert {:ok, doc} == request(context.url <> "/articles")
     |> id("123")
     |> fetch
   end

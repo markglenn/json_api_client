@@ -7,32 +7,28 @@ defmodule Decisiv.ApiClient do
   Documentation for Decisiv.ApiClient.
   """
 
-  def request(base_url), do: %{base_url: base_url, params: %{}}
-  
-
-  def fetch(req, options \\ []), do: req |> method(:get) |> execute(options)
+  def request(base_url) do
+    %{base_url: base_url, params: %{}}
+  end
 
   def id(req, id)          , do: Map.put(req, :resource_id, id    )
   def method(req, method)  , do: Map.put(req, :method     , method)
+
   def fields(req, fields)  , do: params(req, fields:  fields )
   def sort(req, sort)      , do: params(req, sort:    sort   )
   def page(req, page)      , do: params(req, page:    page   )
   def filter(req, filter)  , do: params(req, filter:  filter )
   def include(req, include), do: params(req, include: include)
+
   def params(req, list) do
     Enum.reduce(list, req, fn ({param, val}, acc) ->
       put_in(acc, [:params, param], val)
     end)
   end
 
-  def execute(req, options \\ []) do
-    req = Enum.reduce(options, req, fn ({option, value}, acc) -> 
-      apply(__MODULE__, option, [acc, value])
-    end)
-    exec_request(req)
-  end
+  def fetch(req), do: req |> method(:get) |> execute
 
-  def exec_request(req) do
+  def execute(req) do
     method       = Map.get(req, :method)
     base_url     = Map.get(req, :base_url)
     resource_id  = Map.get(req, :resource_id)
@@ -42,14 +38,15 @@ defmodule Decisiv.ApiClient do
     params       = Map.get(req, :params)
     data         = Map.get(req, :data)
     headers      = Map.get(req, :headers, default_headers())
-    # TODO: this is broken, if there ARE both http_options and params the params will get ignored
-    http_options = Map.get_lazy(req, :options, fn ->
-      if params,
-      do: [{:params, UriQuery.params(params)} | default_options()],
-      else: default_options()
-    end)
+    http_options = Map.get(req, :options, default_options())
 
-    body = if data, do: Poison.encode!(%{data: data}), else: ""
+    url = if params,
+      do: "#{url}?#{UriQuery.params(params) |> URI.encode_query}",
+      else: url
+
+    body = if data,
+      do: Poison.encode!(%{data: data}),
+      else: ""
 
     case HTTPoison.request(method, url, body, headers, http_options) do
       # Decisiv.ApiClient.Notes.get("invalid_uuid") was returning {:ok, nil}
