@@ -7,13 +7,23 @@ defmodule Decisiv.ApiClient do
   Documentation for Decisiv.ApiClient.
   """
 
-  def request(base_url), do: %{base_url: base_url}
+  def request(base_url), do: %{base_url: base_url, params: %{}}
   
-  def id(req, id), do: Map.put(req, :resource_id, id)
-  
-  def method(req, method), do: Map.put(req, :method, method)
 
   def fetch(req, options \\ []), do: req |> method(:get) |> execute(options)
+
+  def id(req, id)          , do: Map.put(req, :resource_id, id    )
+  def method(req, method)  , do: Map.put(req, :method     , method)
+  def fields(req, fields)  , do: params(req, fields:  fields )
+  def sort(req, sort)      , do: params(req, sort:    sort   )
+  def page(req, page)      , do: params(req, page:    page   )
+  def filter(req, filter)  , do: params(req, filter:  filter )
+  def include(req, include), do: params(req, include: include)
+  def params(req, list) do
+    Enum.reduce(list, req, fn ({param, val}, acc) ->
+      put_in(acc, [:params, param], val)
+    end)
+  end
 
   def execute(req, options \\ []) do
     req = Enum.reduce(options, req, fn ({option, value}, acc) -> 
@@ -32,9 +42,10 @@ defmodule Decisiv.ApiClient do
     params       = Map.get(req, :params)
     data         = Map.get(req, :data)
     headers      = Map.get(req, :headers, default_headers())
+    # TODO: this is broken, if there ARE both http_options and params the params will get ignored
     http_options = Map.get_lazy(req, :options, fn ->
       if params,
-      do: [{:params, UriQuery.params(params)} | default_options],
+      do: [{:params, UriQuery.params(params)} | default_options()],
       else: default_options()
     end)
 
@@ -57,8 +68,6 @@ defmodule Decisiv.ApiClient do
   end
   def atomize_keys(list) when is_list(list), do: Enum.map(list, &atomize_keys/1)
   def atomize_keys(val), do: val
-
-  def exec(x), do: x
 
   defp default_options do
     [timeout: timeout(), recv_timeout: timeout()]
