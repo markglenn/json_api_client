@@ -1,5 +1,0 @@
-{
-  "skip_files": [
-    "lib/decisiv/api_client/notes/http_client.ex"
-  ]
-}

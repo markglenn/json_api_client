@@ -12,8 +12,7 @@ use Mix.Config
 #
 config :ex_decisiv_api_client,
   client_name: "client_name",
-  decisiv_environment: System.get_env("DECISIV_ENVIRONMENT") || "development",
-  notes_api: ApiClient.Notes.HTTPClient
+  decisiv_environment: System.get_env("DECISIV_ENVIRONMENT") || "development"
 #
 # and access this configuration in your application as:
 #
@@ -23,10 +22,6 @@ config :ex_decisiv_api_client,
 #
 #     config :logger, level: :info
 #
-
-config :ex_aws,
-  access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, :instance_role],
-  secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, :instance_role]
 
 # It is also possible to import configuration files, relative to this
 # directory. For example, you can emulate configuration per environment
