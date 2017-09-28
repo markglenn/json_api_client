@@ -34,7 +34,7 @@ defmodule Decisiv.ApiClient do
     headers      = Map.get(req, :headers, default_headers())
     http_options = Map.get_lazy(req, :options, fn ->
       if params,
-      do: [{:params, UriQuery.params(params)} | default_options],
+      do: [{:params, Decisiv.Options.to_query_string(params)} | default_options],
       else: default_options()
     end)
 
