@@ -10,13 +10,12 @@ use Mix.Config
 
 # You can configure your application as:
 #
-config :ex_decisiv_api_client,
-  client_name: "client_name",
-  decisiv_environment: System.get_env("DECISIV_ENVIRONMENT") || "development"
+config :json_api_client,
+  client_name: "client_name"
 #
 # and access this configuration in your application as:
 #
-#     Application.get_env(:ex_decisiv_api_client, :key)
+#     Application.get_env(:json_api_client, :key)
 #
 # You can also configure a 3rd-party app:
 #

@@ -1,8 +1,8 @@
-defmodule Decisiv.ApiClientTest do
+defmodule JsonApiClientTest do
   use ExUnit.Case
-  doctest Decisiv.ApiClient, import: true
+  doctest JsonApiClient, import: true
 
-  import Decisiv.ApiClient
+  import JsonApiClient
 
   setup do
     bypass = Bypass.open

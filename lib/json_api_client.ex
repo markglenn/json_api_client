@@ -1,10 +1,10 @@
-defmodule Decisiv.ApiClient do
-  @client_name Application.get_env(:ex_decisiv_api_client, :client_name)
-  @timeout Application.get_env(:ex_decisiv_api_client, :timeout, 500)
+defmodule JsonApiClient do
+  @client_name Application.get_env(:json_api_client, :client_name)
+  @timeout Application.get_env(:json_api_client, :timeout, 500)
   @version Mix.Project.config[:version]
 
   @moduledoc """
-  Documentation for Decisiv.ApiClient.
+  Documentation for JsonApiClient.
   """
 
   def request(base_url) do
@@ -45,9 +45,7 @@ defmodule Decisiv.ApiClient do
       else: url
 
     case HTTPoison.request(method, url, "", headers, http_options) do
-      # Decisiv.ApiClient.Notes.get("invalid_uuid") was returning {:ok, nil}
-      # It was establishing a connection which gave an ok and returned nil.
-      # ensure we check the status code 404 and return a not_found error
+      # TODO: don't always assume 404 will have an invalid body (but allow for it)
       {:ok, %HTTPoison.Response{status_code: 404}} -> {:error, :not_found}
       {:ok, resp} -> {:ok, atomize_keys(Poison.decode!(resp.body))}
       {:error, err} -> {:error, err}
@@ -83,7 +81,7 @@ defmodule Decisiv.ApiClient do
   end
 end
 
-defmodule Decisiv.ApiClient.Request do
+defmodule JsonApiClient.Request do
   @moduledoc """
   Describes a JSON API HTTP Request
   """
@@ -99,7 +97,7 @@ defmodule Decisiv.ApiClient.Request do
   )
 end
 
-defmodule Decisiv.ApiClient.Resource do
+defmodule JsonApiClient.Resource do
   @moduledoc """
   JSON API Resource Object
   http://jsonapi.org/format/#document-resource-objects
@@ -114,7 +112,7 @@ defmodule Decisiv.ApiClient.Resource do
   )
 end
 
-defmodule Decisiv.ApiClient.Links do
+defmodule JsonApiClient.Links do
   @moduledoc """
   JSON API Links Object
   http://jsonapi.org/format/#document-links
