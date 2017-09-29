@@ -1,6 +1,6 @@
 #! /bin/bash -ex
 cleanup () {
-  docker image rm ex_decisiv_api_client:latest
+  docker images -q ex_decisiv_api_client:latest | xargs docker rmi
 }
 trap cleanup EXIT
 

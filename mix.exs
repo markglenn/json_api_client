@@ -13,7 +13,11 @@ defmodule ExDecisivApiClient.Mixfile do
       package: package(),
       aliases: aliases(),
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: ["coveralls": :test, "coveralls.html": :test, "coveralls.post": :test],
+      preferred_cli_env: [
+        "coveralls": :test,
+        "coveralls.html": :test,
+        "coveralls.post": :test,
+      ],
       deps: deps(),
       source_url: "https://github.decisiv.net/PlatformServices/ex_decisiv_api_client",
     ]
@@ -35,7 +39,12 @@ defmodule ExDecisivApiClient.Mixfile do
       {:ex_doc, "~>0.16.3", only: :dev},
       {:httpoison, "~> 0.13.0"},
       {:poison, "~> 3.1"},
-      {:mock, "~> 0.2.0", only: :test, runtime: false},
+      {:mock, "~> 0.3.0", only: :test, runtime: false},
+      {:bypass, "~> 0.8", only: :test},
+      {:uuid, "~> 1.1", only: :test},
+      {:faker, "~> 0.9"},
+      {:exjsx, "~> 4.0.0"},
+      {:uri_query, "~> 0.1.1"},
     ]
   end
 
@@ -58,7 +67,7 @@ defmodule ExDecisivApiClient.Mixfile do
 
   defp aliases do
     [
-      "ci": ["compile", "credo --strict", "coveralls.html"]
+      "ci": ["compile", "credo --strict", "coveralls.html --raise"]
     ]
   end
 end

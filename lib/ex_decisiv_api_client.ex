@@ -3,48 +3,122 @@ defmodule Decisiv.ApiClient do
   @timeout Application.get_env(:ex_decisiv_api_client, :timeout, 500)
   @version Mix.Project.config[:version]
 
-  alias Decisiv.DynamoDB
   @moduledoc """
   Documentation for Decisiv.ApiClient.
   """
 
-  @doc """
-  Generates a value used in the User-Agent header, used to identify callers.
+  def request(base_url) do
+    %{base_url: base_url, params: %{}}
+  end
 
-  ## Examples
+  def id(req, id)        , do: Map.put(req, :resource_id, id)
+  def method(req, method), do: Map.put(req, :method, method)
 
-      iex> Decisiv.ApiClient.user_agent()
-      "ExApiClient/0.1.0/client_name"
+  def fields(req, fields)  , do: params(req, fields:  fields)
+  def sort(req, sort)      , do: params(req, sort:    sort)
+  def page(req, page)      , do: params(req, page:    page)
+  def filter(req, filter)  , do: params(req, filter:  filter)
+  def include(req, include), do: params(req, include: include)
 
-  """
-  def user_agent do
+  def params(req, list) do
+    Enum.reduce(list, req, fn ({param, val}, acc) ->
+      put_in(acc, [:params, param], val)
+    end)
+  end
+
+  def fetch(req), do: req |> method(:get) |> execute
+
+  def execute(req) do
+    method       = Map.get(req, :method)
+    base_url     = Map.get(req, :base_url)
+    resource_id  = Map.get(req, :resource_id)
+    url = [base_url, resource_id]
+          |> Enum.reject(&is_nil/1)
+          |> Enum.join("/")
+    params       = Map.get(req, :params)
+    data         = Map.get(req, :data)
+    headers      = Map.get(req, :headers, default_headers())
+    http_options = Map.get(req, :options, default_options())
+
+    url = if params != %{},
+      do: "#{url}?#{URI.encode_query UriQuery.params(params)}",
+      else: url
+
+    case HTTPoison.request(method, url, "", headers, http_options) do
+      # Decisiv.ApiClient.Notes.get("invalid_uuid") was returning {:ok, nil}
+      # It was establishing a connection which gave an ok and returned nil.
+      # ensure we check the status code 404 and return a not_found error
+      {:ok, %HTTPoison.Response{status_code: 404}} -> {:error, :not_found}
+      {:ok, resp} -> {:ok, atomize_keys(Poison.decode!(resp.body))}
+      {:error, err} -> {:error, err}
+    end
+  end
+
+  def atomize_keys(map) when is_map(map) do
+    for {key, val} <- map, into: %{} do
+      {String.to_atom(key), atomize_keys(val)}
+    end
+  end
+  def atomize_keys(list) when is_list(list), do: Enum.map(list, &atomize_keys/1)
+  def atomize_keys(val), do: val
+
+  defp default_options do
+    [timeout: timeout(), recv_timeout: timeout()]
+  end
+
+  defp default_headers do
+    %{
+      "Accept"       => "application/vnd.api+json",
+      "Content-Type" => "application/vnd.api+json",
+      "User-Agent"   => user_agent()              ,
+    }
+  end
+
+  defp user_agent do
     "ExApiClient/" <> @version <> "/" <> @client_name
   end
 
-  @doc """
-  Returns the default timeout value, in msecs.
-
-  ## Examples
-
-      iex> Decisiv.ApiClient.timeout()
-      500
-
-  """
-  def timeout do
+  defp timeout do
     @timeout
   end
+end
 
-  @doc """
-  Returns the endpoint of a specific service.
-
-  ## Examples
-
-      iex> Decisiv.ApiClient.url_for(:notes)
-      "http://localhost:3112"
-
+defmodule Decisiv.ApiClient.Request do
+  @moduledoc """
+  Describes a JSON API HTTP Request
   """
-  def url_for(service_name) do
-    response = DynamoDB.get_item(service_name)
-    response["Item"]["endpoint"]
-  end
+
+  defstruct(
+    data:     nil,
+    errors:   nil,
+    meta:     nil,
+    jsonapi:  nil,
+    links:    nil,
+    included: nil,
+    _query: %{},
+  )
+end
+
+defmodule Decisiv.ApiClient.Resource do
+  @moduledoc """
+  JSON API Resource Object
+  http://jsonapi.org/format/#document-resource-objects
+  """
+
+  defstruct(
+    id:            nil,
+    type:          nil,
+    attributes:    nil,
+    relationships: nil,
+    meta:          nil,
+  )
+end
+
+defmodule Decisiv.ApiClient.Links do
+  @moduledoc """
+  JSON API Links Object
+  http://jsonapi.org/format/#document-links
+  """
+
+  defstruct self: nil, related: nil
 end
