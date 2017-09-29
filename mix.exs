@@ -1,14 +1,14 @@
-defmodule ExDecisivApiClient.Mixfile do
+defmodule JsonApiClient.Mixfile do
   use Mix.Project
 
   def project do
     [
-      app: :ex_decisiv_api_client,
+      app: :json_api_client,
       version: "0.1.0",
       elixir: "~> 1.5",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
-      name: "Decisiv Elixir ApiClient",
+      name: "JsonApiClient",
       description: description(),
       package: package(),
       aliases: aliases(),
@@ -61,7 +61,7 @@ defmodule ExDecisivApiClient.Mixfile do
 
   defp description do
     """
-      Client package for accessing Elixir JSONApi services built at Decisiv
+      Client package for accessing JSONApi services
     """
   end
 
