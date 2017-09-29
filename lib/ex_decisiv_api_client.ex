@@ -11,8 +11,8 @@ defmodule Decisiv.ApiClient do
     %{base_url: base_url, params: %{}}
   end
 
-  def id(req, id)          , do: Map.put(req, :resource_id, id)
-  def method(req, method)  , do: Map.put(req, :method     , method)
+  def id(req, id)        , do: Map.put(req, :resource_id, id)
+  def method(req, method), do: Map.put(req, :method, method)
 
   def fields(req, fields)  , do: params(req, fields:  fields)
   def sort(req, sort)      , do: params(req, sort:    sort)
