@@ -67,7 +67,7 @@ defmodule ExDecisivApiClient.Mixfile do
 
   defp aliases do
     [
-      "ci": ["compile", "credo --strict", "coveralls.html"]
+      "ci": ["compile", "credo --strict", "coveralls.html --raise"]
     ]
   end
 end

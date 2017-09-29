@@ -11,13 +11,13 @@ defmodule Decisiv.ApiClient do
     %{base_url: base_url, params: %{}}
   end
 
-  def id(req, id)          , do: Map.put(req, :resource_id, id    )
+  def id(req, id)          , do: Map.put(req, :resource_id, id)
   def method(req, method)  , do: Map.put(req, :method     , method)
 
-  def fields(req, fields)  , do: params(req, fields:  fields )
-  def sort(req, sort)      , do: params(req, sort:    sort   )
-  def page(req, page)      , do: params(req, page:    page   )
-  def filter(req, filter)  , do: params(req, filter:  filter )
+  def fields(req, fields)  , do: params(req, fields:  fields)
+  def sort(req, sort)      , do: params(req, sort:    sort)
+  def page(req, page)      , do: params(req, page:    page)
+  def filter(req, filter)  , do: params(req, filter:  filter)
   def include(req, include), do: params(req, include: include)
 
   def params(req, list) do
@@ -40,15 +40,11 @@ defmodule Decisiv.ApiClient do
     headers      = Map.get(req, :headers, default_headers())
     http_options = Map.get(req, :options, default_options())
 
-    url = if params,
-      do: "#{url}?#{UriQuery.params(params) |> URI.encode_query}",
+    url = if params != %{},
+      do: "#{url}?#{URI.encode_query UriQuery.params(params)}",
       else: url
 
-    body = if data,
-      do: Poison.encode!(%{data: data}),
-      else: ""
-
-    case HTTPoison.request(method, url, body, headers, http_options) do
+    case HTTPoison.request(method, url, "", headers, http_options) do
       # Decisiv.ApiClient.Notes.get("invalid_uuid") was returning {:ok, nil}
       # It was establishing a connection which gave an ok and returned nil.
       # ensure we check the status code 404 and return a not_found error
@@ -88,18 +84,10 @@ defmodule Decisiv.ApiClient do
 end
 
 defmodule Decisiv.ApiClient.Request do
-  defstruct(
-    data:     nil,
-    errors:   nil,
-    meta:     nil,
-    jsonapi:  nil,
-    links:    nil,
-    included: nil,
-    _query: %{}, 
-  )
-end
+  @moduledoc """
+  Describes a JSON API HTTP Request
+  """
 
-defmodule Decisiv.ApiClient.Response do
   defstruct(
     data:     nil,
     errors:   nil,
@@ -107,10 +95,16 @@ defmodule Decisiv.ApiClient.Response do
     jsonapi:  nil,
     links:    nil,
     included: nil,
+    _query: %{},
   )
 end
 
 defmodule Decisiv.ApiClient.Resource do
+  @moduledoc """
+  JSON API Resource Object
+  http://jsonapi.org/format/#document-resource-objects
+  """
+
   defstruct(
     id:            nil,
     type:          nil,
@@ -121,5 +115,10 @@ defmodule Decisiv.ApiClient.Resource do
 end
 
 defmodule Decisiv.ApiClient.Links do
+  @moduledoc """
+  JSON API Links Object
+  http://jsonapi.org/format/#document-links
+  """
+
   defstruct self: nil, related: nil
 end
