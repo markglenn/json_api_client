@@ -1,66 +1,57 @@
 defmodule JsonApiClient do
+  @moduledoc """
+  A client library for interacting with REST APIs that comply with
+  the JSON API spec described at http://jsonapi.org
+  """
+
   @client_name Application.get_env(:json_api_client, :client_name)
   @timeout Application.get_env(:json_api_client, :timeout, 500)
   @version Mix.Project.config[:version]
 
-  @moduledoc """
-  Documentation for JsonApiClient.
+  alias __MODULE__.Request
+
+  @doc "Execute a JSON API Request using HTTP GET"
+  def fetch(req), do: req |> Request.method(:get) |> execute
+
+  @doc """
+  Execute a JSON API Request
+
+  Takes a JsonApiClient.Request and preforms the described request.
   """
-
-  def request(base_url) do
-    %{base_url: base_url, params: %{}}
-  end
-
-  def id(req, id)        , do: Map.put(req, :resource_id, id)
-  def method(req, method), do: Map.put(req, :method, method)
-
-  def fields(req, fields)  , do: params(req, fields:  fields)
-  def sort(req, sort)      , do: params(req, sort:    sort)
-  def page(req, page)      , do: params(req, page:    page)
-  def filter(req, filter)  , do: params(req, filter:  filter)
-  def include(req, include), do: params(req, include: include)
-
-  def params(req, list) do
-    Enum.reduce(list, req, fn ({param, val}, acc) ->
-      put_in(acc, [:params, param], val)
-    end)
-  end
-
-  def fetch(req), do: req |> method(:get) |> execute
-
   def execute(req) do
-    method       = Map.get(req, :method)
-    base_url     = Map.get(req, :base_url)
-    resource_id  = Map.get(req, :resource_id)
-    url = [base_url, resource_id]
-          |> Enum.reject(&is_nil/1)
-          |> Enum.join("/")
-    params       = Map.get(req, :params)
-    data         = Map.get(req, :data)
-    headers      = Map.get(req, :headers, default_headers())
-    http_options = Map.get(req, :options, default_options())
+    url          = Request.get_url(req)
+    query_params = Request.get_query_params(req)
+    headers      = default_headers()
+                   |> Map.merge(req.headers)
+                   |> Enum.into([])
+    http_options = default_options()
+                   |> Map.merge(req.options)
+                   |> Map.put(:params, query_params)
+                   |> Enum.into([])
+    body = ""
 
-    url = if params != %{},
-      do: "#{url}?#{URI.encode_query UriQuery.params(params)}",
-      else: url
-
-    case HTTPoison.request(method, url, "", headers, http_options) do
+    case HTTPoison.request(
+      req.method, url, body, headers, http_options
+    ) do
       {:ok, %HTTPoison.Response{status_code: 404}} -> {:error, :not_found}
       {:ok, resp} -> {:ok, atomize_keys(Poison.decode!(resp.body))}
       {:error, err} -> {:error, err}
     end
   end
 
-  def atomize_keys(map) when is_map(map) do
+  defp atomize_keys(map) when is_map(map) do
     for {key, val} <- map, into: %{} do
       {String.to_atom(key), atomize_keys(val)}
     end
   end
-  def atomize_keys(list) when is_list(list), do: Enum.map(list, &atomize_keys/1)
-  def atomize_keys(val), do: val
+  defp atomize_keys(list) when is_list(list), do: Enum.map(list, &atomize_keys/1)
+  defp atomize_keys(val), do: val
 
   defp default_options do
-    [timeout: timeout(), recv_timeout: timeout()]
+    %{
+      timeout: timeout(),
+      recv_timeout: timeout(),
+    }
   end
 
   defp default_headers do
@@ -78,22 +69,6 @@ defmodule JsonApiClient do
   defp timeout do
     @timeout
   end
-end
-
-defmodule JsonApiClient.Request do
-  @moduledoc """
-  Describes a JSON API HTTP Request
-  """
-
-  defstruct(
-    data:     nil,
-    errors:   nil,
-    meta:     nil,
-    jsonapi:  nil,
-    links:    nil,
-    included: nil,
-    _query: %{},
-  )
 end
 
 defmodule JsonApiClient.Resource do
