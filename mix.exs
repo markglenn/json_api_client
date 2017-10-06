@@ -19,7 +19,7 @@ defmodule JsonApiClient.Mixfile do
         "coveralls.post": :test,
       ],
       deps: deps(),
-      source_url: "https://github.decisiv.net/PlatformServices/ex_decisiv_api_client",
+      source_url: "https://github.com/Decisiv/json_api_client",
     ]
   end
 
@@ -49,20 +49,27 @@ defmodule JsonApiClient.Mixfile do
     ]
   end
 
+  def docs do
+    [
+      main: "README",
+      source_url: "https://github.com/Decisiv/json_api_client",
+      extras: ["README.md"],
+    ]
+  end
+
   defp package do
     [
       organization: "decisiv",
       licenses: ["MIT"],
       maintainers: [
-        "Julian Skinner",
-        "Eduardo Carneiro",
-        "Cloves Carneiro",
-        "Trevor Little",
-        "George Murphy",
         "Chan Park",
+        "Cloves Carneiro",
+        "George Murphy",
+        "Michael Lagutko",
+        "Trevor Little",
       ],
       links: %{
-        "Github" => "https://github.decisiv.net/PlatformServices/ex_decisiv_api_client"
+        "Github" => "https://github.com/Decisiv/json_api_client"
       }
     ]
   end
