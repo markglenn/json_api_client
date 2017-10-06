@@ -19,12 +19,12 @@ defmodule JsonApiClientTest do
       Plug.Conn.resp(conn, 200, Poison.encode! doc)
     end
 
-    assert {:ok, doc} == Request.new(context.url <> "/articles")
+    assert {:ok, %{status: 200, doc: doc}} == Request.new(context.url <> "/articles")
     |> id("123")
     |> method(:get)
     |> execute
 
-    assert {:ok, doc} == Request.new(context.url <> "/articles")
+    assert {:ok, %{status: 200, doc: doc}} == Request.new(context.url <> "/articles")
     |> id("123")
     |> fetch
   end
@@ -49,7 +49,7 @@ defmodule JsonApiClientTest do
       Plug.Conn.resp(conn, 200, Poison.encode! doc)
     end
 
-    assert {:ok, doc} == Request.new(context.url <> "/articles")
+    assert {:ok, %{status: 200, doc: doc}} == Request.new(context.url <> "/articles")
     |> fields(articles: "title,topic", authors: "first-name,last-name,twitter")
     |> include(:author)
     |> sort(:id)
@@ -65,11 +65,11 @@ defmodule JsonApiClientTest do
       Plug.Conn.resp(conn, 204, "")
     end
 
-    assert {:ok, ""} == Request.new(context.url)
+    assert {:ok, %{status: 204, doc: nil}} == Request.new(context.url)
     |> resource(%Resource{type: "articles", id: "123"})
     |> delete
 
-    assert {:ok, ""} == Request.new(context.url <> "/articles")
+    assert {:ok, %{status: 204, doc: nil}} == Request.new(context.url <> "/articles")
     |> id("123")
     |> delete
   end
@@ -99,7 +99,7 @@ defmodule JsonApiClientTest do
       }
     }
 
-    assert {:ok, doc} == Request.new(context.url)
+    assert {:ok, %{status: 201, doc: doc}} == Request.new(context.url)
     |> resource(new_article)
     |> create
   end
@@ -130,7 +130,7 @@ defmodule JsonApiClientTest do
       }
     }
 
-    assert {:ok, doc} == Request.new(context.url)
+    assert {:ok, %{status: 200, doc: doc}} == Request.new(context.url)
     |> resource(new_article)
     |> update
   end

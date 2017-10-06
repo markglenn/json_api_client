@@ -43,12 +43,15 @@ defmodule JsonApiClient do
       req.method, url, body, headers, http_options
     ) do
       {:ok, %HTTPoison.Response{status_code: 404}} -> {:error, :not_found}
-      {:ok, resp} -> {:ok, parse_body(resp.body)}
+      {:ok, resp} -> {:ok, %{
+        status: resp.status_code, 
+        doc: parse_body(resp.body),
+      }}
       {:error, err} -> {:error, err}
     end
   end
 
-  defp parse_body(""), do: ""
+  defp parse_body(""), do: nil
   defp parse_body(body) do
     body
     |> Poison.decode!
