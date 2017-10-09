@@ -27,13 +27,21 @@ defmodule JsonApiClient do
 
   Takes a JsonApiClient.Request and preforms the described request.
   
-  Returns a tuple with `{:ok, %JsonApiClient.esponse{}}` if the http request
-  completed and the server response (if any) was valid. Returns 
-  `{:error, %JsonApiClient.RequestError{}}` if the http connection failed for 
-  some reson.  Invalid server responses will be ignored when the server returns 
-  an error status code between 400-599, but if the server returns an invalid 
-  response with a 200 level status code this function will return 
-  `{:error, %JsonApiClient.RequestError{}}`.
+  Returns either a tuple with `:ok` and a `JsonApiClient.Response` struct (or
+  nil) or `:error` and a `JsonApiClient.RequestError` struct depending on the
+  http response code and whether the server response was valid according to the
+  JSON API spec.
+
+  | Scenario     | Server Response Valid | Return Value                                                                         |
+  |--------------|-----------------------|--------------------------------------------------------------------------------------|
+  | 2**          | yes                   | `{:ok, %Response{status: 2**, doc: %Document{}}`                                     |
+  | 4**          | yes                   | `{:ok, %Response{status: 4**, doc: %Document{} or nil}`                              |
+  | 5**          | yes                   | `{:ok, %Response{status: 5**, doc: %Document{} or nil}`                              |
+  | 2**          | no                    | `{:error, %RequestError{status: 2**, reason: "Invalid response body"}}`              |
+  | 4**          | no                    | `{:ok, %Response{status: 4**, doc: nil}}`                                            |
+  | 5**          | no                    | `{:ok, %Response{status: 3**, doc: nil}}`                                            |
+  | socket error | n/a                   | `{:error, %RequestError{status: nil, reason: :econnrefused, original_error: error}}` |
+
   """
   def execute(req) do
     with {:ok, response} <- do_request(req),
