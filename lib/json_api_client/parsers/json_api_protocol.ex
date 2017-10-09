@@ -33,7 +33,7 @@ defmodule JsonApiClient.Parsers.JsonApiProtocol do
         data: resource_object(),
         meta: meta_object(),
         included: Map.put(resource_object(), :array, true),
-        error: Map.put(error_object(), :array, true)
+        errors: Map.put(error_object(), :array, true)
       }
     }
   end

@@ -2,10 +2,10 @@ defmodule ParserTest do
   use ExUnit.Case
   doctest JsonApiClient.Parsers.Parser, import: true
 
-  alias JsonApiClient.{Document, JsonApi, Resource, PaginationLinks}
+  alias JsonApiClient.{Document, JsonApi, Resource, PaginationLinks, Error, ErrorLink, ErrorSource}
   alias JsonApiClient.Parsers.{Parser, JsonApiProtocol}
 
-  @protocol JsonApiProtocol.index_document_fields()
+  @protocol JsonApiProtocol.index_document_object()
 
   describe "parse()" do
     test "returns an error when mandatories fileds are missing" do
@@ -115,6 +115,47 @@ defmodule ParserTest do
       assert {:ok, %Document{included: [%Resource{
         id: "91c4ca5a-beda-484e-bcd9-77b378aa48f3",
         type: "people"}]
+      }} = Parser.parse(document_json, @protocol)
+    end
+
+    test "Errors Object: error is reported when errors is not an object" do
+      document_json = %{
+        "errors" => "foo"
+      }
+      assert {:error, "The filed 'errors' must be an array."} = Parser.parse(document_json, @protocol)
+    end
+
+    test "Errors Object: supports id, links, status, code, title, detail, meta and source" do
+      document_json = %{
+        "errors" => [%{
+          "id" => "91c4ca5a-beda-484e-bcd9-77b378aa48f3",
+          "links" => %{
+            "about" => "any error"
+          },
+          "status" => "403",
+          "code" => "200",
+          "title" => "Error",
+          "detail" => "Editing secret powers is not authorized on Sundays.",
+          "meta" => %{
+            "copyright" => "Copyright 2015 Example Corp."
+          },
+          "source" => %{
+            "pointer" => "/data/attributes/title",
+            "parameter" => "secret"
+          }
+        }]
+      }
+      assert {:ok, %Document{errors: [
+        %Error{
+          id: "91c4ca5a-beda-484e-bcd9-77b378aa48f3",
+          links: %ErrorLink{about: "any error"},
+          status: "403",
+          code: "200",
+          title: "Error",
+          detail: "Editing secret powers is not authorized on Sundays.",
+          meta: %{ copyright: "Copyright 2015 Example Corp."},
+          source: %ErrorSource{ pointer: "/data/attributes/title", parameter: "secret"}
+        }]
       }} = Parser.parse(document_json, @protocol)
     end
   end

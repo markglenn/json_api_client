@@ -25,13 +25,31 @@ defmodule JsonApiClient.ErrorLink do
   defstruct about: nil
 end
 
+defmodule JsonApiClient.ErrorSource do
+  @moduledoc """
+  JSON API JSON Error Object
+  http://jsonapi.org/format/#errors
+  """
+
+  defstruct pointer: nil, parameter: nil
+end
+
 defmodule JsonApiClient.Error do
   @moduledoc """
   JSON API JSON Error Object
   http://jsonapi.org/format/#errors
   """
 
-  defstruct meta: nil
+  defstruct(
+    id: nil,
+    links: nil,
+    status: nil,
+    code: nil,
+    title: nil,
+    detail: nil,
+    meta: nil,
+    source: nil,
+  )
 end
 
 defmodule JsonApiClient.Relationships do
