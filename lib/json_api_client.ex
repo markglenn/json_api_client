@@ -1,3 +1,19 @@
+defmodule JsonApiClient.RequestError do
+  @moduledoc """
+  A Fatal Error during an API request
+  """
+
+  defstruct [:reason, :msg, :original_error, :status]
+end
+
+defmodule JsonApiClient.Response do
+  @moduledoc """
+  A response from JSON API request
+  """
+
+  defstruct [:status, :headers, :doc]
+end
+
 defmodule JsonApiClient do
   @moduledoc """
   A client library for interacting with REST APIs that comply with
@@ -8,7 +24,7 @@ defmodule JsonApiClient do
   @timeout Application.get_env(:json_api_client, :timeout, 500)
   @version Mix.Project.config[:version]
 
-  alias __MODULE__.Request
+  alias __MODULE__.{Request, RequestError, Response}
 
   @doc "Execute a JSON API Request using HTTP GET"
   def fetch(req), do: req |> Request.method(:get) |> execute
@@ -28,6 +44,16 @@ defmodule JsonApiClient do
   Takes a JsonApiClient.Request and preforms the described request.
   """
   def execute(req) do
+    with {:ok, response} <- do_request(req),
+      {:ok, parsed} <- parse_response(response)
+    do
+      {:ok, parsed}
+    else
+      {:error, error} -> {:error, %RequestError{error | status: error.status}}
+    end
+  end
+
+  defp do_request(req) do
     url          = Request.get_url(req)
     query_params = Request.get_query_params(req)
     headers      = default_headers()
@@ -39,23 +65,24 @@ defmodule JsonApiClient do
                    |> Enum.into([])
     body = Request.get_body(req)
 
-    case HTTPoison.request(
-      req.method, url, body, headers, http_options
-    ) do
-      {:ok, %HTTPoison.Response{status_code: 404}} -> {:error, :not_found}
-      {:ok, resp} -> {:ok, %{
-        status: resp.status_code, 
-        doc: parse_body(resp.body),
-      }}
-      {:error, err} -> {:error, err}
+    HTTPoison.request(req.method, url, body, headers, http_options)
+  end
+
+  defp parse_response(response) do
+    with {:ok, doc} <- parse_body(response.body) do
+      {:ok, %Response{status: response.status_code, doc: doc}}
+    else
+      {:error, error} -> {:error, %RequestError{reason: "Parse Error", original_error: error, status: response.status_code}}
     end
   end
 
-  defp parse_body(""), do: nil
+  defp parse_body(""), do: {:ok, nil}
   defp parse_body(body) do
-    body
-    |> Poison.decode!
-    |> atomize_keys
+    with {:ok, map} <- Poison.decode(body),
+         atomizied <- atomize_keys(map)
+    do
+      {:ok, atomizied}
+    end
   end
 
   defp atomize_keys(map) when is_map(map) do
@@ -89,6 +116,7 @@ defmodule JsonApiClient do
     @timeout
   end
 end
+
 
 defmodule JsonApiClient.Resource do
   @moduledoc """
