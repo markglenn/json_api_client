@@ -4,7 +4,7 @@ defmodule JsonApiClientTest do
 
   import JsonApiClient
   import JsonApiClient.Request
-  alias JsonApiClient.{Request, Resource, Response}
+  alias JsonApiClient.{Request, Resource, Response, RequestError}
 
   setup do
     bypass = Bypass.open
@@ -135,32 +135,40 @@ defmodule JsonApiClientTest do
     |> update
   end
 
-  describe "HTTP success codes with invalid Documents" do
-    test "2**", context do
+  describe "Error Contidions" do
+    test "HTTP success codes with invalid Documents", context do
       Bypass.expect context.bypass, fn conn ->
         Plug.Conn.resp(conn, 200, "this is not json")
       end
 
       assert {:error, %JsonApiClient.RequestError{status: 200}} = fetch(Request.new(context.url <> "/"))
     end
-  end
-  describe "HTTP error codes with no content" do
-    test "4**", context do
+
+    test "HTTP error codes with no content", context do
       Bypass.expect context.bypass, fn conn ->
         Plug.Conn.resp(conn, 422, "")
       end
 
       assert {:ok, %Response{status: 422, doc: nil}} == fetch(Request.new(context.url <> "/"))
     end
-  end
-  describe "HTTP error codes with valid Documents" do
-    test "4**", context do
+
+    test "HTTP error codes with valid Documents", context do
       doc = error_doc()
       Bypass.expect context.bypass, fn conn ->
         Plug.Conn.resp(conn, 422, Poison.encode! doc)
       end
 
       assert {:ok, %Response{status: 422, doc: doc}} == fetch(Request.new(context.url <> "/"))
+    end
+
+    test "Failed TCP/HTTP connection", context do
+      Bypass.down(context.bypass)
+
+      assert {:error, %RequestError{
+        original_error: %{reason: reason},
+        status: nil,
+        reason: reason,
+      }} = fetch(Request.new(context.url <> "/"))
     end
   end
 

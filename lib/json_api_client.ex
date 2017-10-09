@@ -41,7 +41,8 @@ defmodule JsonApiClient do
     do
       {:ok, parsed}
     else
-      {:error, error} -> {:error, %RequestError{error | status: error.status}}
+      {:error, %RequestError{} = error} -> {:error, error}
+      {:error, error} -> {:error, %RequestError{original_error: error, reason: error.reason}}
     end
   end
 
