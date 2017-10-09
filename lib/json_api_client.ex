@@ -1,19 +1,3 @@
-defmodule JsonApiClient.RequestError do
-  @moduledoc """
-  A Fatal Error during an API request
-  """
-
-  defstruct [:reason, :msg, :original_error, :status]
-end
-
-defmodule JsonApiClient.Response do
-  @moduledoc """
-  A response from JSON API request
-  """
-
-  defstruct [:status, :headers, :doc]
-end
-
 defmodule JsonApiClient do
   @moduledoc """
   A client library for interacting with REST APIs that comply with
@@ -42,10 +26,18 @@ defmodule JsonApiClient do
   Execute a JSON API Request
 
   Takes a JsonApiClient.Request and preforms the described request.
+  
+  Returns a tuple with `{:ok, %JsonApiClient.esponse{}}` if the http request
+  completed and the server response (if any) was valid. Returns 
+  `{:error, %JsonApiClient.RequestError{}}` if the http connection failed for 
+  some reson.  Invalid server responses will be ignored when the server returns 
+  an error status code between 400-599, but if the server returns an invalid 
+  response with a 200 level status code this function will return 
+  `{:error, %JsonApiClient.RequestError{}}`.
   """
   def execute(req) do
     with {:ok, response} <- do_request(req),
-      {:ok, parsed} <- parse_response(response)
+         {:ok, parsed}   <- parse_response(response)
     do
       {:ok, parsed}
     else

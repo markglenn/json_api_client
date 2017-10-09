@@ -138,7 +138,6 @@ defmodule JsonApiClientTest do
   describe "HTTP success codes with invalid Documents" do
     test "2**", context do
       Bypass.expect context.bypass, fn conn ->
-        assert_has_json_api_headers(conn)
         Plug.Conn.resp(conn, 200, "this is not json")
       end
 
@@ -148,7 +147,6 @@ defmodule JsonApiClientTest do
   describe "HTTP error codes with no content" do
     test "4**", context do
       Bypass.expect context.bypass, fn conn ->
-        assert_has_json_api_headers(conn)
         Plug.Conn.resp(conn, 422, "")
       end
 
@@ -159,7 +157,6 @@ defmodule JsonApiClientTest do
     test "4**", context do
       doc = error_doc()
       Bypass.expect context.bypass, fn conn ->
-        assert_has_json_api_headers(conn)
         Plug.Conn.resp(conn, 422, Poison.encode! doc)
       end
 
