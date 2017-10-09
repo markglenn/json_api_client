@@ -1,10 +1,9 @@
-defmodule JsonApiClient.Parsers.Parser do
+defmodule JsonApiClient.Parser do
   @moduledoc """
   Parses a JSON API HTTP Response
   """
 
-  alias JsonApiClient.{Document}
-  alias JsonApiClient.Parsers.{FieldValidation, JsonApiProtocol}
+  alias JsonApiClient.{Document, FieldValidation, JsonApiProtocol}
 
   def parse(map, protocol) do
     field_value(:Document, protocol, ensure_jsonapi_field_exist(map))
@@ -22,19 +21,19 @@ defmodule JsonApiClient.Parsers.Parser do
   end
 
   defp field_value(name, %{array: true}, value) do
-    {:error, "The filed '#{name}' must be an array."}
+    {:error, "The field '#{name}' must be an array."}
   end
 
   defp field_value(name, _, value) when is_list(value) do
-    {:error, "The filed '#{name}' cannot be an array."}
+    {:error, "The field '#{name}' cannot be an array."}
   end
 
   defp field_value(_, %{representation: :object}, %{} = value) do
-    {:ok, Map.new(value, fn {k, v} -> {String.to_atom(k), v} end)}
+    {:ok, value}
   end
 
   defp field_value(name, %{representation: :object}, _) do
-    {:error, "The filed '#{name}' must be an object."}
+    {:error, "The field '#{name}' must be an object."}
   end
 
   defp field_value(name, %{representation: representation, fields: fields} = field_definition, data) do

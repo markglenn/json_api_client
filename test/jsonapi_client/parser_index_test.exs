@@ -1,19 +1,18 @@
 defmodule ParserIndexTest do
   use ExUnit.Case
-  doctest JsonApiClient.Parsers.Parser, import: true
+  doctest JsonApiClient.Parser, import: true
 
-  alias JsonApiClient.{Document, JsonApi, Resource, PaginationLinks}
-  alias JsonApiClient.Parsers.{Parser, JsonApiProtocol}
+  alias JsonApiClient.{Document, JsonApi, Resource, PaginationLinks, Parser, JsonApiProtocol}
 
   @protocol JsonApiProtocol.index_document_object()
 
   describe "parse()" do
-    test "returns an error when mandatories fileds are missing" do
+    test "returns an error when mandatory fileds are missing" do
       assert {:error, _} = Parser.parse(%{}, @protocol)
     end
 
     test "Resource Object: when data is not an array" do
-      assert {:error, "The filed 'data' must be an array."} = Parser.parse(%{"data" => %{}}, @protocol)
+      assert {:error, "The field 'data' must be an array."} = Parser.parse(%{"data" => %{}}, @protocol)
     end
 
     test "Resource Object: when data does not contain required fields" do
@@ -77,8 +76,8 @@ defmodule ParserIndexTest do
         id: "91c4ca5a-beda-484e-bcd9-77b378aa48f3",
         type: "people",
         attributes: %{
-          first_name: "John",
-          last_name: "Doe"
+          "first_name" => "John",
+          "last_name" => "Doe"
         }
       }]}} = Parser.parse(document_json, @protocol)
     end

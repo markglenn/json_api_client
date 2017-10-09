@@ -1,4 +1,4 @@
-defmodule JsonApiClient.Parsers.JsonApiProtocol do
+defmodule JsonApiClient.JsonApiProtocol do
   @moduledoc """
   Describes a JSON API Protocol
   """
@@ -126,11 +126,9 @@ defmodule JsonApiClient.Parsers.JsonApiProtocol do
       representation: JsonApiClient.Relationships,
       either_fields: ~w(links data meta),
       fields: %{
-        meta: %{
-          representation: :object,
-        },
-        links: nil,
-        version: nil,
+        links: links_object(),
+        meta: meta_object(),
+        data: meta_object(),
       }
     }
   end

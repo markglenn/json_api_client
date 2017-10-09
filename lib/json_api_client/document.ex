@@ -71,8 +71,6 @@ defmodule JsonApiClient.Resource do
   http://jsonapi.org/format/#document-resource-objects
   """
 
-  alias JsonApiClient.{Links}
-
   defstruct(
     id:            nil,
     type:          nil,
@@ -97,8 +95,6 @@ defmodule JsonApiClient.Document do
   JSON API Document Object
   http://jsonapi.org/format/#document-structure
   """
-
-  alias JsonApiClient.{Resource, JsonApi}
 
   defstruct(
     jsonapi: nil,

@@ -1,4 +1,4 @@
-defmodule JsonApiClient.Parsers.FieldValidation do
+defmodule JsonApiClient.FieldValidation do
   @moduledoc """
   Describes a JSON API Document field validation
   """
@@ -17,12 +17,12 @@ defmodule JsonApiClient.Parsers.FieldValidation do
     required_fields = field_definition[:required_fields] || []
     to_validate = [
       %{
-        fields: field_definition[:either_fields] || [],
+        fields: either_fields,
         method: :validate_either_fields,
         error: "A '#{name}' MUST contain at least one of the following members: #{Enum.join(either_fields, ", ")}"
       },
       %{
-        fields: field_definition[:required_fields] || [],
+        fields: required_fields,
         method: :validate_required_fields,
         error: "A '#{name}' MUST contain following members: #{Enum.join(required_fields, ", ")}"
       }
@@ -30,9 +30,10 @@ defmodule JsonApiClient.Parsers.FieldValidation do
   end
 
   defp validate_fields(fields, method, data, error) do
-    case !Enum.any?(fields) || apply(JsonApiClient.Parsers.FieldValidation, method, [fields, data]) do
-      true -> {:ok}
-      false -> {:error, error}
+    if !Enum.any?(fields) || apply(__MODULE__, method, [fields, data]) do
+      {:ok}
+    else
+      {:error, error}
     end
   end
 

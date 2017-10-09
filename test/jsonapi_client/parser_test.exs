@@ -1,14 +1,13 @@
 defmodule ParserTest do
   use ExUnit.Case
-  doctest JsonApiClient.Parsers.Parser, import: true
+  doctest JsonApiClient.Parser, import: true
 
-  alias JsonApiClient.{Document, JsonApi, Resource, PaginationLinks, Error, ErrorLink, ErrorSource}
-  alias JsonApiClient.Parsers.{Parser, JsonApiProtocol}
+  alias JsonApiClient.{Document, JsonApi, Resource, PaginationLinks, Error, ErrorLink, ErrorSource, Parser, JsonApiProtocol}
 
   @protocol JsonApiProtocol.index_document_object()
 
   describe "parse()" do
-    test "returns an error when mandatories fileds are missing" do
+    test "returns an error when mandatory fileds are missing" do
       assert {:error, _} = Parser.parse(%{}, @protocol)
     end
 
@@ -42,7 +41,7 @@ defmodule ParserTest do
       assert {:ok, %Document{jsonapi: %JsonApi{version: "2.0", meta: %{}}}} = Parser.parse(document_json, @protocol)
     end
 
-    test "JSON API Object: is added with meta atoms keys to jsonapi field" do
+    test "JSON API Object: supports meta" do
       document_json = %{
         "meta" => %{},
         "jsonapi" => %{
@@ -54,7 +53,7 @@ defmodule ParserTest do
       }
       assert {:ok,
               %Document{
-                jsonapi: %JsonApi{version: "2.0", meta: %{ copyright: "Copyright 2015 Example Corp."}}
+                jsonapi: %JsonApi{version: "2.0", meta: %{ "copyright" => "Copyright 2015 Example Corp."}}
               }} = Parser.parse(document_json, @protocol)
     end
 
@@ -66,24 +65,24 @@ defmodule ParserTest do
           "meta" => "foo"
         }
       }
-      assert {:error, "The filed 'meta' must be an object."} = Parser.parse(document_json, @protocol)
+      assert {:error, "The field 'meta' must be an object."} = Parser.parse(document_json, @protocol)
     end
 
-    test "Meta Object: is added with meta atoms keys to jsonapi field" do
+    test "Meta Object: supports meta" do
       document_json = %{
         "meta" => %{
           "copyright" => "Copyright 2015 Example Corp."
         }
       }
       assert {:ok,
-              %Document{ meta: %{ copyright: "Copyright 2015 Example Corp."}}} = Parser.parse(document_json, @protocol)
+              %Document{ meta: %{ "copyright" => "Copyright 2015 Example Corp."}}} = Parser.parse(document_json, @protocol)
     end
 
     test "Meta Object: error is reported when meta is not an object" do
       document_json = %{
         "meta" => "foo"
       }
-      assert {:error, "The filed 'meta' must be an object."} = Parser.parse(document_json, @protocol)
+      assert {:error, "The field 'meta' must be an object."} = Parser.parse(document_json, @protocol)
     end
 
     test "Included Object: error is reported when included is not an array" do
@@ -91,7 +90,7 @@ defmodule ParserTest do
         "meta" => %{},
         "included" => %{}
       }
-      assert {:error, "The filed 'included' must be an array."} = Parser.parse(document_json, @protocol)
+      assert {:error, "The field 'included' must be an array."} = Parser.parse(document_json, @protocol)
     end
 
     test "Included Object: when data does not contain required fields" do
@@ -122,7 +121,7 @@ defmodule ParserTest do
       document_json = %{
         "errors" => "foo"
       }
-      assert {:error, "The filed 'errors' must be an array."} = Parser.parse(document_json, @protocol)
+      assert {:error, "The field 'errors' must be an array."} = Parser.parse(document_json, @protocol)
     end
 
     test "Errors Object: supports id, links, status, code, title, detail, meta and source" do
@@ -153,7 +152,7 @@ defmodule ParserTest do
           code: "200",
           title: "Error",
           detail: "Editing secret powers is not authorized on Sundays.",
-          meta: %{ copyright: "Copyright 2015 Example Corp."},
+          meta: %{ "copyright" => "Copyright 2015 Example Corp."},
           source: %ErrorSource{ pointer: "/data/attributes/title", parameter: "secret"}
         }]
       }} = Parser.parse(document_json, @protocol)
