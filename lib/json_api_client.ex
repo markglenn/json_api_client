@@ -42,7 +42,11 @@ defmodule JsonApiClient do
       {:ok, parsed}
     else
       {:error, %RequestError{} = error} -> {:error, error}
-      {:error, error} -> {:error, %RequestError{original_error: error, reason: error.reason}}
+      {:error, error} ->
+        {:error, %RequestError{
+          original_error: error,
+          reason: error.reason
+        }}
     end
   end
 
@@ -65,7 +69,12 @@ defmodule JsonApiClient do
     with {:ok, doc} <- parse_body(response.body) do
       {:ok, %Response{status: response.status_code, doc: doc}}
     else
-      {:error, error} -> {:error, %RequestError{reason: "Parse Error", original_error: error, status: response.status_code}}
+      {:error, error} ->
+        {:error, %RequestError{
+          reason: "Parse Error",
+          original_error: error,
+          status: response.status_code,
+        }}
     end
   end
 
@@ -109,7 +118,6 @@ defmodule JsonApiClient do
     @timeout
   end
 end
-
 
 defmodule JsonApiClient.Resource do
   @moduledoc """
