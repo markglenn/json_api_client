@@ -14,13 +14,22 @@ defmodule JsonApiClient.FieldValidationTest do
       assert {:error, "A 'doc' MUST contain at least one of the following members: bar"} = validation
     end
 
-    test "required fields are issing" do
+    test "required fields are missing" do
       validation = FieldValidation.valid?("doc", %{required_fields: [:foo]}, %{})
       assert {:error, "A 'doc' MUST contain the following members: foo"} = validation
     end
 
     test "required fields and either fields exist" do
-      assert {:ok} = FieldValidation.valid?("doc", %{required_fields: [:foo]}, %{bar: "value1", foo: "value2"})
+      data = %{bar: "value1", foo: "value2"}
+      assert {:ok} = FieldValidation.valid?("doc", %{required_fields: [:foo], either_fields: [:bar]}, data)
+    end
+
+    test "reither fields exist" do
+      assert {:ok} = FieldValidation.valid?("doc", %{either_fields: [:bar]}, %{bar: "value1"})
+    end
+
+    test "required fields exist" do
+      assert {:ok} = FieldValidation.valid?("doc", %{required_fields: [:foo]}, %{foo: "value2"})
     end
   end
 end

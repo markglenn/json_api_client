@@ -1,9 +1,9 @@
 defmodule JsonApiClient.Parser do
   @moduledoc """
-  Parses a JSON API HTTP Response
+  Parses a JSON API Document
   """
 
-  alias JsonApiClient.{Document, FieldValidation, JsonApiProtocol}
+  alias JsonApiClient.{Document, FieldValidation, Schema}
 
   def parse(map, protocol) do
     field_value(:Document, protocol, ensure_jsonapi_field_exist(map))

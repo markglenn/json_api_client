@@ -1,4 +1,4 @@
-defmodule JsonApiClient.JsonApiProtocol do
+defmodule JsonApiClient.Schema do
   @moduledoc """
   Describes a JSON API Protocol
   """
@@ -9,10 +9,10 @@ defmodule JsonApiClient.JsonApiProtocol do
       either_fields: ~w(data errors meta),
       fields: %{
         jsonapi: json_api_object(),
-        data: Map.put(resource_object(), :array, :allow),
+        data: allow_array(resource_object()),
         meta: meta_object(),
-        included: Map.put(resource_object(), :array, true),
-        errors: Map.put(error_object(), :array, true),
+        included: array(resource_object()),
+        errors: array(error_object()),
         links: links_object()
       }
     }
@@ -99,7 +99,7 @@ defmodule JsonApiClient.JsonApiProtocol do
       fields: %{
         links: links_object(),
         meta: meta_object(),
-        data: Map.put(resource_identifier_object(), :array, :allow),
+        data: allow_array(resource_identifier_object())
       }
     }
   end
@@ -123,4 +123,8 @@ defmodule JsonApiClient.JsonApiProtocol do
   end
 
   def meta_object, do: object_object()
+
+  defp allow_array(object), do: Map.put(object, :array, :allow)
+
+  defp array(object), do: Map.put(object, :array, true)
 end
