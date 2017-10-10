@@ -74,8 +74,7 @@ defmodule JsonApiClient do
   end
 
   defp parse_response(response) do
-    with {:ok, map} <- decode_json(response.body),
-         {:ok, doc} <- parse_document(map)
+    with {:ok, doc} <- parse_document(response.body)
     do
       {:ok, %Response{status: response.status_code, doc: doc}}
     else
@@ -88,15 +87,8 @@ defmodule JsonApiClient do
     end
   end
 
-  defp parse_document(nil), do: {:ok, nil}
-  defp parse_document(map), do: Parser.parse(map)
-
-  defp decode_json(""), do: {:ok, nil}
-  defp decode_json(string) do
-    {:ok, Poison.decode!(string)}
-  rescue
-    error in Poison.SyntaxError -> {:error, error}
-  end
+  defp parse_document(""), do: {:ok, nil}
+  defp parse_document(json), do: Parser.parse(json)
 
   defp default_options do
     %{
