@@ -8,7 +8,7 @@ defmodule JsonApiClient do
   @timeout Application.get_env(:json_api_client, :timeout, 500)
   @version Mix.Project.config[:version]
 
-  alias __MODULE__.{Request, RequestError, Response}
+  alias __MODULE__.{Request, RequestError, Response, Parser}
 
   @doc "Execute a JSON API Request using HTTP GET"
   def fetch(req), do: req |> Request.method(:get) |> execute
@@ -74,7 +74,9 @@ defmodule JsonApiClient do
   end
 
   defp parse_response(response) do
-    with {:ok, doc} <- parse_body(response.body) do
+    with {:ok, map} <- decode_json(response.body),
+         {:ok, doc} <- parse_document(map)
+    do
       {:ok, %Response{status: response.status_code, doc: doc}}
     else
       {:error, error} ->
@@ -86,22 +88,15 @@ defmodule JsonApiClient do
     end
   end
 
-  defp parse_body(""), do: {:ok, nil}
-  defp parse_body(body) do
-    with {:ok, map} <- Poison.decode(body),
-         atomizied <- atomize_keys(map)
-    do
-      {:ok, atomizied}
-    end
-  end
+  defp parse_document(nil), do: {:ok, nil}
+  defp parse_document(map), do: Parser.parse(map)
 
-  defp atomize_keys(map) when is_map(map) do
-    for {key, val} <- map, into: %{} do
-      {String.to_atom(key), atomize_keys(val)}
-    end
+  defp decode_json(""), do: {:ok, nil}
+  defp decode_json(string) do
+    {:ok, Poison.decode!(string)}
+  rescue
+    error in Poison.SyntaxError -> {:error, error}
   end
-  defp atomize_keys(list) when is_list(list), do: Enum.map(list, &atomize_keys/1)
-  defp atomize_keys(val), do: val
 
   defp default_options do
     %{

@@ -173,19 +173,19 @@ defmodule JsonApiClientTest do
   end
 
   def single_resource_doc do
-    %{
-      links: %{
+    %JsonApiClient.Document{
+      links: %JsonApiClient.Links{
         self: "http://example.com/articles/1"
       },
-      data: %{
+      data: %JsonApiClient.Resource{
         type: "articles",
         id: "1",
         attributes: %{
-          title: "JSON API paints my bikeshed!"
+          "title" => "JSON API paints my bikeshed!"
         },
         relationships: %{
-          author: %{
-            links: %{
+          "author" => %JsonApiClient.Relationship{
+            links: %JsonApiClient.Links{
               related: "http://example.com/articles/1/author"
             }
           }
@@ -195,52 +195,52 @@ defmodule JsonApiClientTest do
   end
 
   def multiple_resource_doc do
-    %{
-      links: %{
+    %JsonApiClient.Document{
+      links: %JsonApiClient.Links{
         self: "http://example.com/articles"
       },
-      data: [%{
+      data: [%JsonApiClient.Resource{
         type: "articles",
         id: "1",
         attributes: %{
-          title: "JSON API paints my bikeshed!",
-          category: "json-api",
+          "title" => "JSON API paints my bikeshed!",
+          "category" => "json-api",
         },
         relationships: %{
-          author: %{
-            links: %{
+          "author" => %JsonApiClient.Relationship{
+            links: %JsonApiClient.Links{
               self: "http://example.com/articles/1/relationships/author",
               related: "http://example.com/articles/1/author"
             },
-            data: %{ type: "people", id: "9" }
+            data: %JsonApiClient.ResourceIdentifier{ type: "people", id: "9" }
           },
         }	
-      }, %{
+      }, %JsonApiClient.Resource{
         type: "articles",
         id: "2",
         attributes: %{
-          title: "Rails is Omakase",
-          category: "rails",
+          "title" => "Rails is Omakase",
+          "category" => "rails",
         },
         relationships: %{
-          author: %{
-            links: %{
+          "author" => %JsonApiClient.Relationship{
+            links: %JsonApiClient.Links{
               self: "http://example.com/articles/1/relationships/author",
               related: "http://example.com/articles/1/author"
             },
-            data: %{ type: "people", id: "9" }
+            data: %JsonApiClient.ResourceIdentifier{ type: "people", id: "9" }
           },
         }	
       }],
-      included: [%{
+      included: [%JsonApiClient.Resource{
         type: "people",
         id: "9",
         attributes: %{
-          "first-name": "Dan",
-          "last-name": "Gebhardt",
-          twitter: "dgeb"
+          "first-name" => "Dan",
+          "last-name" => "Gebhardt",
+          "twitter" => "dgeb",
         },
-        links: %{
+        links: %JsonApiClient.Links{
           self: "http://example.com/people/9"
         }
       }]
@@ -248,11 +248,13 @@ defmodule JsonApiClientTest do
   end
 
   def error_doc do
-    %{
+    %JsonApiClient.Document{
       errors: [
-	%{
+	%JsonApiClient.Error{
 	  status: "422",
-	  source: %{ pointer: "/data/attributes/first-name" },
+	  source: %JsonApiClient.ErrorSource{
+            pointer: "/data/attributes/first-name" 
+          },
 	  title:  "Invalid Attribute",
 	  detail: "First name must contain at least three characters."
 	}

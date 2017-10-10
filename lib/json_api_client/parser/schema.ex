@@ -19,20 +19,22 @@ defmodule JsonApiClient.Parser.Schema do
   end
 
   def resource_object do
-   %{
-     representation: JsonApiClient.Resource,
-     required_fields: ~w(type id),
-     fields: %{
-       type: nil,
-       id: nil,
-       attributes: object_object(),
-       relationships: Map.put(object_object(), :value_representation, relationships_object())
-     }
-   }
+    %{
+      representation: JsonApiClient.Resource,
+      required_fields: ~w(type id),
+      fields: %{
+        type: nil,
+        id: nil,
+        attributes: object_object(),
+        relationships: Map.put(object_object(), :value_representation, relationships_object()),
+        meta: meta_object(),
+        links: links_object(),
+      }
+    }
   end
 
   def error_object do
-   %{
+    %{
       representation: JsonApiClient.Error,
       fields: %{
         id: nil,
@@ -44,7 +46,7 @@ defmodule JsonApiClient.Parser.Schema do
         meta: meta_object(),
         source: error_source_object(),
       }
-   }
+    }
   end
 
   def error_link_object  do

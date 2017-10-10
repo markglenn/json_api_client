@@ -6,7 +6,7 @@ defmodule JsonApiClient.Parser do
   alias JsonApiClient.{Document}
   alias JsonApiClient.Parser.{FieldValidation, Schema}
 
-  def parse(map, protocol) do
+  def parse(map, protocol \\ Schema.document_object()) do
     field_value(:Document, protocol, ensure_jsonapi_field_exist(map))
   end
 
