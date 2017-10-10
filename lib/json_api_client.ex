@@ -8,7 +8,7 @@ defmodule JsonApiClient do
   @timeout Application.get_env(:json_api_client, :timeout, 500)
   @version Mix.Project.config[:version]
 
-  alias __MODULE__.{Request, RequestError, Response}
+  alias __MODULE__.{Request, RequestError, Response, Parser}
 
   @doc "Execute a JSON API Request using HTTP GET"
   def fetch(req), do: req |> Request.method(:get) |> execute
@@ -74,7 +74,8 @@ defmodule JsonApiClient do
   end
 
   defp parse_response(response) do
-    with {:ok, doc} <- parse_body(response.body) do
+    with {:ok, doc} <- parse_document(response.body)
+    do
       {:ok, %Response{status: response.status_code, doc: doc}}
     else
       {:error, error} ->
@@ -86,22 +87,8 @@ defmodule JsonApiClient do
     end
   end
 
-  defp parse_body(""), do: {:ok, nil}
-  defp parse_body(body) do
-    with {:ok, map} <- Poison.decode(body),
-         atomizied <- atomize_keys(map)
-    do
-      {:ok, atomizied}
-    end
-  end
-
-  defp atomize_keys(map) when is_map(map) do
-    for {key, val} <- map, into: %{} do
-      {String.to_atom(key), atomize_keys(val)}
-    end
-  end
-  defp atomize_keys(list) when is_list(list), do: Enum.map(list, &atomize_keys/1)
-  defp atomize_keys(val), do: val
+  defp parse_document(""), do: {:ok, nil}
+  defp parse_document(json), do: Parser.parse(json)
 
   defp default_options do
     %{

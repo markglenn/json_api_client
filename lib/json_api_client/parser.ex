@@ -3,11 +3,16 @@ defmodule JsonApiClient.Parser do
   Parses a JSON API Document
   """
 
-  alias JsonApiClient.{Document}
   alias JsonApiClient.Parser.{FieldValidation, Schema}
 
-  def parse(map, protocol) do
-    field_value(:Document, protocol, ensure_jsonapi_field_exist(map))
+  def parse(json) when is_binary(json) do
+    parse(Poison.decode!(json))
+  rescue
+    error in Poison.SyntaxError -> {:error, error}
+  end
+
+  def parse(%{} = map) do
+    field_value(:Document, Schema.document_object(), ensure_jsonapi_field_exist(map))
   end
 
   defp field_value(_, _, nil), do: {:ok, nil}
@@ -24,16 +29,7 @@ defmodule JsonApiClient.Parser do
     field_value(name, Map.put(field_definition, :array, false), value)
   end
 
-  defp array_field_value(name, field_definition, value) do
-    Enum.reduce_while(Enum.reverse(value), {:ok, []}, fn(entry, {result, acc}) ->
-      case field_value(name, Map.put(field_definition, :array, false), entry) do
-        {:error, error} -> {:halt, {:error, error}}
-        {:ok, value} -> {:cont, {:ok, [value | acc]}}
-      end
-    end)
-  end
-
-  defp field_value(name, %{array: true}, value) do
+  defp field_value(name, %{array: true}, _value) do
     {:error, "The field '#{name}' must be an array."}
   end
 
@@ -41,8 +37,8 @@ defmodule JsonApiClient.Parser do
     {:error, "The field '#{name}' cannot be an array."}
   end
 
-  defp field_value(name, %{representation: :object, value_representation: value_representation}, %{} = value) do
-    representations = Map.new(value, fn {k, v} -> {k, value_representation} end)
+  defp field_value(_name, %{representation: :object, value_representation: value_representation}, %{} = value) do
+    representations = Map.new(value, fn {k, _} -> {k, value_representation} end)
     compute_values(representations, value)
   end
 
@@ -65,12 +61,21 @@ defmodule JsonApiClient.Parser do
     end
   end
 
-  defp field_value(name, _, value) do
+  defp field_value(_, _, value) do
     {:ok, value}
   end
 
+  defp array_field_value(name, field_definition, value) do
+    Enum.reduce_while(Enum.reverse(value), {:ok, []}, fn(entry, {_, acc}) ->
+      case field_value(name, Map.put(field_definition, :array, false), entry) do
+        {:error, error} -> {:halt, {:error, error}}
+        {:ok, value} -> {:cont, {:ok, [value | acc]}}
+      end
+    end)
+  end
+
   def compute_values(fields, data) do
-    Enum.reduce_while(fields, {:ok, %{}}, fn({k, definition}, {code, acc}) ->
+    Enum.reduce_while(fields, {:ok, %{}}, fn({k, definition}, {_, acc}) ->
       case field_value(k, definition, data[to_string(k)]) do
         {:error, error} -> {:halt, {:error, error}}
         {:ok, value} -> {:cont, {:ok, Map.put(acc, k, value)}}
