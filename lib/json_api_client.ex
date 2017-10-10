@@ -126,27 +126,3 @@ defmodule JsonApiClient do
     @timeout
   end
 end
-
-defmodule JsonApiClient.Resource do
-  @moduledoc """
-  JSON API Resource Object
-  http://jsonapi.org/format/#document-resource-objects
-  """
-
-  defstruct(
-    id:            nil,
-    type:          nil,
-    attributes:    nil,
-    relationships: nil,
-    meta:          nil,
-  )
-end
-
-defmodule JsonApiClient.Links do
-  @moduledoc """
-  JSON API Links Object
-  http://jsonapi.org/format/#document-links
-  """
-
-  defstruct self: nil, related: nil
-end
