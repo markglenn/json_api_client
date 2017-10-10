@@ -1,8 +1,8 @@
-defmodule JsonApiClient.FieldValidationTest do
+defmodule JsonApiClient.Parser.FieldValidationTest do
   use ExUnit.Case
-  doctest JsonApiClient.FieldValidation, import: true
+  doctest JsonApiClient.Parser.FieldValidation, import: true
 
-  alias JsonApiClient.FieldValidation
+  alias JsonApiClient.Parser.FieldValidation
 
   describe "valid?" do
     test "either fields and requred fields don't exist" do

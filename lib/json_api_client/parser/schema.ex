@@ -1,4 +1,4 @@
-defmodule JsonApiClient.Schema do
+defmodule JsonApiClient.Parser.Schema do
   @moduledoc """
   Describes a JSON API Protocol
   """

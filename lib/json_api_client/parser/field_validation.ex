@@ -1,4 +1,4 @@
-defmodule JsonApiClient.FieldValidation do
+defmodule JsonApiClient.Parser.FieldValidation do
   @moduledoc """
   Describes a JSON API Document field validation
   """

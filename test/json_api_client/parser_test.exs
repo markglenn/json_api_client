@@ -3,6 +3,7 @@ defmodule JsonApiClient.ParserTest do
   doctest JsonApiClient.Parser, import: true
 
   alias JsonApiClient.{Document, Links, JsonApi, Resource, Error, ErrorLink, ErrorSource, ResourceIdentifier, Relationship, Parser, Schema}
+  alias JsonApiClient.Parser.{Schema}
 
   @protocol Schema.document_object()
 
