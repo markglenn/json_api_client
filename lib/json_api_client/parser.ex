@@ -12,6 +12,18 @@ defmodule JsonApiClient.Parser do
   defp field_value(_, _, nil), do: {:ok, nil}
 
   defp field_value(name, %{array: true} = field_definition, value) when is_list(value) do
+    array_field_value(name, field_definition, value)
+  end
+
+  defp field_value(name, %{array: :allow} = field_definition, value) when is_list(value) do
+    array_field_value(name, field_definition, value)
+  end
+
+  defp field_value(name, %{array: :allow} = field_definition, value) do
+    field_value(name, Map.put(field_definition, :array, false), value)
+  end
+
+  defp array_field_value(name, field_definition, value) do
     Enum.reduce_while(Enum.reverse(value), {:ok, []}, fn(entry, {result, acc}) ->
       case field_value(name, Map.put(field_definition, :array, false), entry) do
         {:error, error} -> {:halt, {:error, error}}
@@ -28,6 +40,11 @@ defmodule JsonApiClient.Parser do
     {:error, "The field '#{name}' cannot be an array."}
   end
 
+  defp field_value(name, %{representation: :object, value_representation: value_representation}, %{} = value) do
+    representations = Map.new(value, fn {k, v} -> {k, value_representation} end)
+    compute_values(representations, value)
+  end
+
   defp field_value(_, %{representation: :object}, %{} = value) do
     {:ok, value}
   end
@@ -41,7 +58,7 @@ defmodule JsonApiClient.Parser do
       {:ok} ->
         case compute_values(fields, data) do
           {:error, error} -> {:error, error}
-          values  -> {:ok, struct(representation, values)}
+          {:ok, values} -> {:ok, struct(representation, values)}
         end
       error -> error
     end
@@ -52,10 +69,10 @@ defmodule JsonApiClient.Parser do
   end
 
   def compute_values(fields, data) do
-    Enum.reduce_while(fields, %{}, fn({k, definition}, acc) ->
+    Enum.reduce_while(fields, {:ok, %{}}, fn({k, definition}, {code, acc}) ->
       case field_value(k, definition, data[to_string(k)]) do
         {:error, error} -> {:halt, {:error, error}}
-        {:ok, value} -> {:cont, Map.put(acc, k, value)}
+        {:ok, value} -> {:cont, {:ok, Map.put(acc, k, value)}}
       end
     end)
   end
@@ -64,4 +81,3 @@ defmodule JsonApiClient.Parser do
     Map.put_new(map, "jsonapi", %{"version" => "1.0", "meta" => %{}})
   end
 end
-

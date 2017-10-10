@@ -2,9 +2,9 @@ defmodule ParserTest do
   use ExUnit.Case
   doctest JsonApiClient.Parser, import: true
 
-  alias JsonApiClient.{Document, JsonApi, Resource, PaginationLinks, Error, ErrorLink, ErrorSource, Parser, JsonApiProtocol}
+  alias JsonApiClient.{Document, JsonApi, Resource, Error, ErrorLink, ErrorSource, Parser, JsonApiProtocol}
 
-  @protocol JsonApiProtocol.index_document_object()
+  @protocol JsonApiProtocol.document_object()
 
   describe "parse()" do
     test "returns an error when mandatory fileds are missing" do
@@ -100,7 +100,7 @@ defmodule ParserTest do
           "type" => "people"
         }]
       }
-      assert {:error, "A 'included' MUST contain following members: type, id"} = Parser.parse(document_json, @protocol)
+      assert {:error, "A 'included' MUST contain the following members: type, id"} = Parser.parse(document_json, @protocol)
     end
 
     test "Included Object: when data contains required fields" do

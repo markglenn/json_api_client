@@ -4,7 +4,7 @@ defmodule JsonApiClient.FieldValidation do
   """
 
   def valid?(name, field_definition, data) do
-    Enum.reduce_while(to_validate(name, field_definition, data), :ok, fn validation, _ ->
+    Enum.reduce_while(to_validate(name, field_definition), :ok, fn validation, _ ->
       case validate_fields(validation[:fields], validation[:method], data, validation[:error]) do
         {:ok} -> {:cont, {:ok}}
         error -> {:halt, error}
@@ -12,10 +12,10 @@ defmodule JsonApiClient.FieldValidation do
     end)
   end
 
-  defp to_validate(name, field_definition, data) do
+  defp to_validate(name, field_definition) do
     either_fields   = field_definition[:either_fields] || []
     required_fields = field_definition[:required_fields] || []
-    to_validate = [
+    [
       %{
         fields: either_fields,
         method: :validate_either_fields,
@@ -24,7 +24,7 @@ defmodule JsonApiClient.FieldValidation do
       %{
         fields: required_fields,
         method: :validate_required_fields,
-        error: "A '#{name}' MUST contain following members: #{Enum.join(required_fields, ", ")}"
+        error: "A '#{name}' MUST contain the following members: #{Enum.join(required_fields, ", ")}"
       }
     ]
   end

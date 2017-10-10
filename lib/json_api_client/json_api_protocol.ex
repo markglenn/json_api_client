@@ -3,37 +3,17 @@ defmodule JsonApiClient.JsonApiProtocol do
   Describes a JSON API Protocol
   """
 
-  def index_document_object do
-    index_document_fields = %{
-      fields: %{
-        data: %{
-          array: true,
-        },
-        links: pagination_links_object()
-      }
-    }
-    DeepMerge.deep_merge(document_object(), index_document_fields)
-  end
-
-  def show_document_object do
-    show_document_fields = %{
-      fields: %{
-        links: links_object()
-      }
-    }
-    DeepMerge.deep_merge(document_object(), show_document_fields)
-  end
-
   def document_object do
     %{
       representation: JsonApiClient.Document,
       either_fields: ~w(data errors meta),
       fields: %{
         jsonapi: json_api_object(),
-        data: resource_object(),
+        data: Map.put(resource_object(), :array, :allow),
         meta: meta_object(),
         included: Map.put(resource_object(), :array, true),
-        errors: Map.put(error_object(), :array, true)
+        errors: Map.put(error_object(), :array, true),
+        links: links_object()
       }
     }
   end
@@ -45,9 +25,8 @@ defmodule JsonApiClient.JsonApiProtocol do
      fields: %{
        type: nil,
        id: nil,
-       attributes: %{
-         representation: :object,
-       }
+       attributes: object_object(),
+       relationships: Map.put(object_object(), :value_representation, relationships_object())
      }
    }
   end
@@ -103,15 +82,7 @@ defmodule JsonApiClient.JsonApiProtocol do
       representation: JsonApiClient.Links,
       fields: %{
         self: nil,
-        related: nil
-      }
-    }
-  end
-
-  def pagination_links_object do
-    %{
-      representation: JsonApiClient.PaginationLinks,
-      fields: %{
+        related: nil,
         self: nil,
         first: nil,
         prev: nil,
@@ -123,21 +94,33 @@ defmodule JsonApiClient.JsonApiProtocol do
 
   def relationships_object do
     %{
-      representation: JsonApiClient.Relationships,
+      representation: JsonApiClient.Relationship,
       either_fields: ~w(links data meta),
       fields: %{
         links: links_object(),
         meta: meta_object(),
-        data: meta_object(),
+        data: Map.put(resource_identifier_object(), :array, :allow),
       }
     }
   end
 
-  def meta_object do
+  def resource_identifier_object do
+     %{
+       representation: JsonApiClient.ResourceIdentifier,
+       required_fields: ~w(type id),
+       fields: %{
+         type: nil,
+         id: nil,
+         meta: meta_object()
+       }
+     }
+  end
+
+  def object_object do
     %{
       representation: :object,
     }
   end
+
+  def meta_object, do: object_object()
 end
-
-

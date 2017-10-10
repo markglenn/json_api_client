@@ -1,19 +1,18 @@
-defmodule JsonApiClient.PaginationLinks do
-  @moduledoc """
-  JSON API JSON Pagination Links
-  http://jsonapi.org/format/#fetching-pagination
-  """
-
-  defstruct self: nil, first: nil, prev: nil, next: nil, last: nil
-end
-
 defmodule JsonApiClient.Links do
   @moduledoc """
   JSON API JSON Links
   http://jsonapi.org/format/#document-links
   """
 
-  defstruct self: nil, related: nil
+  defstruct(
+    self: nil,
+    related: nil,
+    self: nil,
+    first: nil,
+    prev: nil,
+    next: nil,
+    last: nil
+  )
 end
 
 defmodule JsonApiClient.ErrorLink do
@@ -52,17 +51,22 @@ defmodule JsonApiClient.Error do
   )
 end
 
-defmodule JsonApiClient.Relationships do
+defmodule JsonApiClient.ResourceIdentifier do
+  @moduledoc """
+  JSON API Resource Identifier Object
+  http://jsonapi.org/format/#document-resource-identifier-objects
+  """
+
+  defstruct id: nil, type: nil, meta: nil
+end
+
+defmodule JsonApiClient.Relationship do
   @moduledoc """
   JSON API Relationships Object
   http://jsonapi.org/format/#document-resource-object-relationships
   """
 
-  defstruct(
-    data: nil,
-    meta: nil,
-  )
-
+  defstruct links: nil, meta: nil, data: nil
 end
 
 defmodule JsonApiClient.Resource do
