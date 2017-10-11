@@ -12,6 +12,19 @@ defmodule JsonApiClientTest do
     {:ok, bypass: bypass, url: "http://localhost:#{bypass.port}"}
   end
 
+  test "includes status and headers from the HTTP response", context do
+    Bypass.expect context.bypass, "GET", "/articles/123", fn conn ->
+      conn 
+      |> Plug.Conn.resp(200, "")
+      |> Plug.Conn.put_resp_header("X-Test-Header", "42")
+    end
+
+    {:ok, response} = fetch Request.new(context.url <> "/articles/123")
+
+    assert response.status == 200
+    assert Enum.member?(response.headers, {"X-Test-Header", "42"})
+  end
+
   test "get a resource", context do
     doc = single_resource_doc()
     Bypass.expect context.bypass, "GET", "/articles/123", fn conn ->
@@ -19,12 +32,12 @@ defmodule JsonApiClientTest do
       Plug.Conn.resp(conn, 200, Poison.encode! doc)
     end
 
-    assert {:ok, %Response{status: 200, doc: doc}} == Request.new(context.url <> "/articles")
+    assert {:ok, %Response{status: 200, doc: ^doc}} = Request.new(context.url <> "/articles")
     |> id("123")
     |> method(:get)
     |> execute
 
-    assert {:ok, %Response{status: 200, doc: doc}} == Request.new(context.url <> "/articles")
+    assert {:ok, %Response{status: 200, doc: ^doc}} = Request.new(context.url <> "/articles")
     |> id("123")
     |> fetch
   end
@@ -49,7 +62,7 @@ defmodule JsonApiClientTest do
       Plug.Conn.resp(conn, 200, Poison.encode! doc)
     end
 
-    assert {:ok, %Response{status: 200, doc: doc}} == Request.new(context.url <> "/articles")
+    assert {:ok, %Response{status: 200, doc: ^doc}} = Request.new(context.url <> "/articles")
     |> fields(articles: "title,topic", authors: "first-name,last-name,twitter")
     |> include(:author)
     |> sort(:id)
@@ -65,11 +78,11 @@ defmodule JsonApiClientTest do
       Plug.Conn.resp(conn, 204, "")
     end
 
-    assert {:ok, %Response{status: 204, doc: nil}} == Request.new(context.url)
+    assert {:ok, %Response{status: 204, doc: nil}} = Request.new(context.url)
     |> resource(%Resource{type: "articles", id: "123"})
     |> delete
 
-    assert {:ok, %Response{status: 204, doc: nil}} == Request.new(context.url <> "/articles")
+    assert {:ok, %Response{status: 204, doc: nil}} = Request.new(context.url <> "/articles")
     |> id("123")
     |> delete
   end
@@ -99,7 +112,7 @@ defmodule JsonApiClientTest do
       }
     }
 
-    assert {:ok, %Response{status: 201, doc: doc}} == Request.new(context.url)
+    assert {:ok, %Response{status: 201, doc: ^doc}} = Request.new(context.url)
     |> resource(new_article)
     |> create
   end
@@ -130,7 +143,7 @@ defmodule JsonApiClientTest do
       }
     }
 
-    assert {:ok, %Response{status: 200, doc: doc}} == Request.new(context.url)
+    assert {:ok, %Response{status: 200, doc: ^doc}} = Request.new(context.url)
     |> resource(new_article)
     |> update
   end
@@ -149,7 +162,7 @@ defmodule JsonApiClientTest do
         Plug.Conn.resp(conn, 422, "")
       end
 
-      assert {:ok, %Response{status: 422, doc: nil}} == fetch(Request.new(context.url <> "/"))
+      assert {:ok, %Response{status: 422, doc: nil}} = fetch(Request.new(context.url <> "/"))
     end
 
     test "HTTP error codes with valid Documents", context do
@@ -158,7 +171,7 @@ defmodule JsonApiClientTest do
         Plug.Conn.resp(conn, 422, Poison.encode! doc)
       end
 
-      assert {:ok, %Response{status: 422, doc: doc}} == fetch(Request.new(context.url <> "/"))
+      assert {:ok, %Response{status: 422, doc: ^doc}} = fetch(Request.new(context.url <> "/"))
     end
 
     test "Failed TCP/HTTP connection", context do
