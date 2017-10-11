@@ -76,7 +76,11 @@ defmodule JsonApiClient do
   defp parse_response(response) do
     with {:ok, doc} <- parse_document(response.body)
     do
-      {:ok, %Response{status: response.status_code, doc: doc}}
+      {:ok, %Response{
+        status: response.status_code,
+        doc: doc,
+        headers: response.headers,
+      }}
     else
       {:error, error} ->
         {:error, %RequestError{
