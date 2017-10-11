@@ -260,6 +260,34 @@ defmodule JsonApiClientTest do
     }
   end
 
+  describe "dangerous execution functions raise erorrs on error" do
+    setup context do
+      Bypass.down(context.bypass)
+      [request: Request.new(context.url <> "/articles")]
+    end
+
+    test "execute!", %{request: req}, do: assert_raise RequestError, fn -> execute! req end
+    test "fetch!"  , %{request: req}, do: assert_raise RequestError, fn -> fetch!   req end
+    test "update!" , %{request: req}, do: assert_raise RequestError, fn -> update!  req end
+    test "create!" , %{request: req}, do: assert_raise RequestError, fn -> create!  req end
+    test "delete!" , %{request: req}, do: assert_raise RequestError, fn -> delete!  req end
+  end
+
+  describe "dangerous execution functions return Response on success" do
+    setup context do
+      Bypass.expect context.bypass, fn conn ->
+        Plug.Conn.resp(conn, 200, Poison.encode! multiple_resource_doc())
+      end
+      [request: Request.new(context.url <> "/articles")]
+    end
+
+    test "execute!", %{request: req}, do: assert %Response{} = execute! req
+    test "fetch!"  , %{request: req}, do: assert %Response{} = fetch!   req
+    test "update!" , %{request: req}, do: assert %Response{} = update!  req
+    test "create!" , %{request: req}, do: assert %Response{} = create!  req
+    test "delete!" , %{request: req}, do: assert %Response{} = delete!  req
+  end
+
   def error_doc do
     %JsonApiClient.Document{
       errors: [
