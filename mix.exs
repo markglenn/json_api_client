@@ -19,6 +19,7 @@ defmodule JsonApiClient.Mixfile do
         "coveralls.post": :test,
       ],
       deps: deps(),
+      docs: docs(),
       source_url: "https://github.com/Decisiv/json_api_client",
     ]
   end
