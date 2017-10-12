@@ -81,7 +81,7 @@ defmodule JsonApiClient do
 
     case HTTPoison.request(req.method, url, body, headers, http_options) do
       {:ok, _} = result -> result
-      {:error, error} -> 
+      {:error, error} ->
         {:error, %RequestError{
           original_error: error,
           message: "Error completing HTTP request: #{error.reason}",

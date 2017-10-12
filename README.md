@@ -26,7 +26,7 @@ be found at [https://hexdocs.pm/json_api_client](https://hexdocs.pm/json_api_cli
 ```elixir
 import JsonApiClient.Request
 
-base_url = "http://example.com/article/"
+base_url = "http://example.com/"
 
 # Fetch a resource by URL
 {:ok, response} = fetch Request.new(base_url <> "/articles/123")
