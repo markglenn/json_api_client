@@ -128,7 +128,7 @@ defmodule JsonApiClient.RequestTest do
 
       assert "http://api.net/articles" = url
     end
-git
+
     test "when resource has id" do
       url = new("http://api.net")
       |> resource(%JsonApiClient.Resource{type: "articles", id: "1"})
