@@ -136,23 +136,28 @@ defmodule JsonApiClient.RequestTest do
 
       assert "http://api.net/articles/1" = url
     end
+  end
 
-    test "when resource is a nested resource without id" do
-      url = new("http://api.net")
-      |> resource(%JsonApiClient.Resource{type: "articles", id: "1"})
-      |> resource(%JsonApiClient.Resource{type: "authors"})
-      |> get_url
+  describe "path()" do
+    test "when resource does not have id" do
+      req = new("http://api.net")
+      |> path(%JsonApiClient.Resource{type: "articles"})
 
-      assert "http://api.net/articles/1/authors" = url
+      assert "http://api.net/articles" = req.base_url
     end
 
-    test "when resource is a nested resource with id" do
-      url = new("http://api.net")
-      |> resource(%JsonApiClient.Resource{type: "articles", id: "1"})
-      |> resource(%JsonApiClient.Resource{type: "authors", id: "2"})
-      |> get_url
+    test "when resource has id" do
+      req = new("http://api.net")
+      |> path(%JsonApiClient.Resource{type: "articles", id: "1"})
 
-      assert "http://api.net/articles/1/authors/2" = url
+      assert "http://api.net/articles/1" = req.base_url
+    end
+
+    test "when path is a string" do
+      req = new("http://api.net")
+      |> path("foo/bar")
+
+      assert "http://api.net/foo/bar" = req.base_url
     end
   end
 end
