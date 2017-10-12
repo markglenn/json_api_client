@@ -4,7 +4,7 @@
 [![Hex.pm](https://img.shields.io/hexpm/v/json_api_client.svg)](https://hex.pm/packages/json_api_client)
 [![Build Docs](https://img.shields.io/badge/hexdocs-release-blue.svg)](https://hexdocs.pm/json_api_client)
 
-A JSON API Client for elixir. ([documentation](https://hexdocs.pm/json_api_client))
+A JSON API Client for elixir.
 
 ## Installation
 
@@ -14,7 +14,7 @@ by adding `json_api_client` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:json_api_client, "~> 0.4.0"}
+    {:json_api_client, "~> 0.5.2"}
   ]
 end
 ```
