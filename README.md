@@ -1,10 +1,11 @@
-**  ⚠️Warning: This library is currently in an alpha state and is not yet feature complete. It is not recommended for production environments. Stay tuned for a 1.0 release soon. ⚠️**
-
 # JsonApiClient
 [![Hex.pm](https://img.shields.io/hexpm/v/json_api_client.svg)](https://hex.pm/packages/json_api_client)
 [![Build Docs](https://img.shields.io/badge/hexdocs-release-blue.svg)](https://hexdocs.pm/json_api_client)
 
 A JSON API Client for elixir.
+
+**NOTICE**: This library is new and in active development. There could be
+backwards incompatable changes as the design shakes out. YMMV, PRs welcome.
 
 ## Installation
 
@@ -123,7 +124,3 @@ This library allows its users to specify a timeout for all its service calls by 
 ```
 config :json_api_client, timeout: 200
 ```
-
-## TODO
-
-* add module doc to Request and Response
