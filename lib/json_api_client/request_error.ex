@@ -9,7 +9,4 @@ defmodule JsonApiClient.RequestError do
   """
 
   defexception [:message, :original_error, :status]
-
-  def exception(%__MODULE__{} = exception), do: exception
-  def exception(params), do: struct(__MODULE__, params)
 end
