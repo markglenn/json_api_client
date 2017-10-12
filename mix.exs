@@ -50,7 +50,7 @@ defmodule JsonApiClient.Mixfile do
 
   def docs do
     [
-      main: "README",
+      main: "readme",
       source_url: "https://github.com/Decisiv/json_api_client",
       extras: ["README.md"],
     ]
