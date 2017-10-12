@@ -128,7 +128,7 @@ defmodule JsonApiClient.RequestTest do
 
       assert "http://api.net/articles" = url
     end
-
+git
     test "when resource has id" do
       url = new("http://api.net")
       |> resource(%JsonApiClient.Resource{type: "articles", id: "1"})
@@ -156,6 +156,20 @@ defmodule JsonApiClient.RequestTest do
     test "when path is a string" do
       req = new("http://api.net")
       |> path("foo/bar")
+
+      assert "http://api.net/foo/bar" = req.base_url
+    end
+
+    test "when path has a `/` at the beginning" do
+      req = new("http://api.net")
+      |> path("/foo/bar")
+
+      assert "http://api.net/foo/bar" = req.base_url
+    end
+
+    test "when path has a `/` at the and" do
+      req = new("http://api.net")
+      |> path("/foo/bar/")
 
       assert "http://api.net/foo/bar" = req.base_url
     end
