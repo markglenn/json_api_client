@@ -119,4 +119,40 @@ defmodule JsonApiClient.RequestTest do
       end
     end
   end
+
+  describe "get_url()" do
+    test "when resource does not have id" do
+      url = new("http://api.net")
+      |> resource(%JsonApiClient.Resource{type: "articles"})
+      |> get_url
+
+      assert "http://api.net/articles" = url
+    end
+
+    test "when resource has id" do
+      url = new("http://api.net")
+      |> resource(%JsonApiClient.Resource{type: "articles", id: "1"})
+      |> get_url
+
+      assert "http://api.net/articles/1" = url
+    end
+
+    test "when resource is a nested resource without id" do
+      url = new("http://api.net")
+      |> resource(%JsonApiClient.Resource{type: "articles", id: "1"})
+      |> resource(%JsonApiClient.Resource{type: "authors"})
+      |> get_url
+
+      assert "http://api.net/articles/1/authors" = url
+    end
+
+    test "when resource is a nested resource with id" do
+      url = new("http://api.net")
+      |> resource(%JsonApiClient.Resource{type: "articles", id: "1"})
+      |> resource(%JsonApiClient.Resource{type: "authors", id: "2"})
+      |> get_url
+
+      assert "http://api.net/articles/1/authors/2" = url
+    end
+  end
 end
