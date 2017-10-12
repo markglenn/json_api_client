@@ -58,7 +58,6 @@ defmodule JsonApiClient.Mixfile do
 
   defp package do
     [
-      organization: "decisiv",
       licenses: ["MIT"],
       maintainers: [
         "Chan Park",
