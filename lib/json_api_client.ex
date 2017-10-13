@@ -4,7 +4,6 @@ defmodule JsonApiClient do
   the JSON API spec described at http://jsonapi.org
   """
 
-  @user_agent_suffix Application.get_env(:json_api_client, :user_agent_suffix)
   @timeout Application.get_env(:json_api_client, :timeout, 500)
   @version Mix.Project.config[:version]
   @package_name JsonApiClient.Mixfile.project[:app]
@@ -127,9 +126,13 @@ defmodule JsonApiClient do
   end
 
   defp user_agent do
-    [@package_name, @version, @user_agent_suffix]
+    [@package_name, @version, user_agent_suffix()]
       |> Enum.reject(&is_nil/1)
       |> Enum.join("/")
+  end
+
+  defp user_agent_suffix do
+    Application.get_env(:json_api_client, :user_agent_suffix)
   end
 
   defp timeout do

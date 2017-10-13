@@ -42,6 +42,16 @@ defmodule JsonApiClientTest do
     |> fetch
   end
 
+  test "set user agent with user suffix", context do
+    Mix.Config.persist(json_api_client: [user_agent_suffix: "my_sufix"])
+    Bypass.expect context.bypass, "GET", "/articles/123", fn conn ->
+      assert Keyword.get(get_headers(conn), :"user-agent") == "json_api_client/" <> Mix.Project.config[:version] <> "/my_sufix"
+      Plug.Conn.resp(conn, 200, Poison.encode! single_resource_doc())
+    end
+    Request.new(context.url <> "/articles") |> id("123") |> method(:get) |> execute
+    Mix.Config.persist(json_api_client: [user_agent_suffix: nil])
+  end
+
   test "get a list of resources", context do
     doc = multiple_resource_doc()
     Bypass.expect context.bypass, fn conn ->
@@ -302,8 +312,12 @@ defmodule JsonApiClientTest do
     }
   end
 
+  def get_headers(conn) do
+    for {name, value} <- conn.req_headers, do: {String.to_atom(name), value}
+  end
+
   def assert_has_json_api_headers(conn) do
-    headers = for {name, value} <- conn.req_headers, do: {String.to_atom(name), value}
+    headers = get_headers(conn)
 
     assert Keyword.get(headers, :accept) == "application/vnd.api+json"
     assert Keyword.get(headers, :"content-type") == "application/vnd.api+json"
