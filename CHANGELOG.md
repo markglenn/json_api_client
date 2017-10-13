@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Renamed client_name to user_agent_suffix (optional)
+- Use package name as prefix instead of ExApiClient.
 
 ## [1.0.0] - 2017-10-17
 ### Added
