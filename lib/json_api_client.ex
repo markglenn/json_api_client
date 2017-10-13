@@ -132,7 +132,7 @@ defmodule JsonApiClient do
   end
 
   defp user_agent_suffix do
-    Application.get_env(:json_api_client, :user_agent_suffix)
+    Application.get_env(:json_api_client, :user_agent_suffix, Mix.Project.config[:app])
   end
 
   defp timeout do

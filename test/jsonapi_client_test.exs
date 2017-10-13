@@ -321,6 +321,6 @@ defmodule JsonApiClientTest do
 
     assert Keyword.get(headers, :accept) == "application/vnd.api+json"
     assert Keyword.get(headers, :"content-type") == "application/vnd.api+json"
-    assert Keyword.get(headers, :"user-agent") == "json_api_client/" <> Mix.Project.config[:version]
+    assert Keyword.get(headers, :"user-agent") == "json_api_client/" <> Mix.Project.config[:version] <> "/#{Mix.Project.config[:app]}"
   end
 end
