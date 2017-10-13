@@ -14,7 +14,7 @@ defmodule JsonApiClientTest do
 
   test "includes status and headers from the HTTP response", context do
     Bypass.expect context.bypass, "GET", "/articles/123", fn conn ->
-      conn 
+      conn
       |> Plug.Conn.resp(200, "")
       |> Plug.Conn.put_resp_header("X-Test-Header", "42")
     end
@@ -40,6 +40,16 @@ defmodule JsonApiClientTest do
     assert {:ok, %Response{status: 200, doc: ^doc}} = Request.new(context.url <> "/articles")
     |> id("123")
     |> fetch
+  end
+
+  test "set user agent with user suffix", context do
+    Mix.Config.persist(json_api_client: [user_agent_suffix: "my_sufix"])
+    Bypass.expect context.bypass, "GET", "/articles/123", fn conn ->
+      assert Keyword.get(get_headers(conn), :"user-agent") == "json_api_client/" <> Mix.Project.config[:version] <> "/my_sufix"
+      Plug.Conn.resp(conn, 200, Poison.encode! single_resource_doc())
+    end
+    Request.new(context.url <> "/articles") |> id("123") |> method(:get) |> execute
+    Mix.Config.persist(json_api_client: [user_agent_suffix: Mix.Project.config[:app]])
   end
 
   test "get a list of resources", context do
@@ -226,7 +236,7 @@ defmodule JsonApiClientTest do
             },
             data: %JsonApiClient.ResourceIdentifier{ type: "people", id: "9" }
           },
-        }	
+        }
       }, %JsonApiClient.Resource{
         type: "articles",
         id: "2",
@@ -242,7 +252,7 @@ defmodule JsonApiClientTest do
             },
             data: %JsonApiClient.ResourceIdentifier{ type: "people", id: "9" }
           },
-        }	
+        }
       }],
       included: [%JsonApiClient.Resource{
         type: "people",
@@ -293,7 +303,7 @@ defmodule JsonApiClientTest do
 	%JsonApiClient.Error{
 	  status: "422",
 	  source: %JsonApiClient.ErrorSource{
-            pointer: "/data/attributes/first-name" 
+            pointer: "/data/attributes/first-name"
           },
 	  title:  "Invalid Attribute",
 	  detail: "First name must contain at least three characters."
@@ -302,11 +312,15 @@ defmodule JsonApiClientTest do
     }
   end
 
+  def get_headers(conn) do
+    for {name, value} <- conn.req_headers, do: {String.to_atom(name), value}
+  end
+
   def assert_has_json_api_headers(conn) do
-    headers = for {name, value} <- conn.req_headers, do: {String.to_atom(name), value}
+    headers = get_headers(conn)
 
     assert Keyword.get(headers, :accept) == "application/vnd.api+json"
     assert Keyword.get(headers, :"content-type") == "application/vnd.api+json"
-    assert Keyword.get(headers, :"user-agent") |> String.starts_with?("ExApiClient")
+    assert Keyword.get(headers, :"user-agent") == "json_api_client/" <> Mix.Project.config[:version] <> "/#{Mix.Project.config[:app]}"
   end
 end
