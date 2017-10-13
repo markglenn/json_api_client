@@ -9,6 +9,7 @@ defmodule JsonApiClient do
   @package_name JsonApiClient.Mixfile.project[:app]
 
   alias __MODULE__.{Request, RequestError, Response, Parser}
+  alias Mix.Project
 
   @doc "Execute a JSON API Request using HTTP GET"
   def fetch(req), do: req |> Request.method(:get) |> execute
@@ -132,7 +133,7 @@ defmodule JsonApiClient do
   end
 
   defp user_agent_suffix do
-    Application.get_env(:json_api_client, :user_agent_suffix, Mix.Project.config[:app])
+    Application.get_env(:json_api_client, :user_agent_suffix, Project.config[:app])
   end
 
   defp timeout do
