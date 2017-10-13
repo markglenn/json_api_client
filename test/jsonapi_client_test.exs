@@ -49,7 +49,7 @@ defmodule JsonApiClientTest do
       Plug.Conn.resp(conn, 200, Poison.encode! single_resource_doc())
     end
     Request.new(context.url <> "/articles") |> id("123") |> method(:get) |> execute
-    Mix.Config.persist(json_api_client: [user_agent_suffix: nil])
+    Mix.Config.persist(json_api_client: [user_agent_suffix: Mix.Project.config[:app]])
   end
 
   test "get a list of resources", context do
