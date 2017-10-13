@@ -14,7 +14,7 @@ defmodule JsonApiClientTest do
 
   test "includes status and headers from the HTTP response", context do
     Bypass.expect context.bypass, "GET", "/articles/123", fn conn ->
-      conn 
+      conn
       |> Plug.Conn.resp(200, "")
       |> Plug.Conn.put_resp_header("X-Test-Header", "42")
     end
@@ -226,7 +226,7 @@ defmodule JsonApiClientTest do
             },
             data: %JsonApiClient.ResourceIdentifier{ type: "people", id: "9" }
           },
-        }	
+        }
       }, %JsonApiClient.Resource{
         type: "articles",
         id: "2",
@@ -242,7 +242,7 @@ defmodule JsonApiClientTest do
             },
             data: %JsonApiClient.ResourceIdentifier{ type: "people", id: "9" }
           },
-        }	
+        }
       }],
       included: [%JsonApiClient.Resource{
         type: "people",
@@ -293,7 +293,7 @@ defmodule JsonApiClientTest do
 	%JsonApiClient.Error{
 	  status: "422",
 	  source: %JsonApiClient.ErrorSource{
-            pointer: "/data/attributes/first-name" 
+            pointer: "/data/attributes/first-name"
           },
 	  title:  "Invalid Attribute",
 	  detail: "First name must contain at least three characters."
@@ -307,6 +307,6 @@ defmodule JsonApiClientTest do
 
     assert Keyword.get(headers, :accept) == "application/vnd.api+json"
     assert Keyword.get(headers, :"content-type") == "application/vnd.api+json"
-    assert Keyword.get(headers, :"user-agent") |> String.starts_with?("ExApiClient")
+    assert Keyword.get(headers, :"user-agent") == "json_api_client/" <> Mix.Project.config[:version]
   end
 end

@@ -4,7 +4,7 @@ defmodule JsonApiClient do
   the JSON API spec described at http://jsonapi.org
   """
 
-  @client_name Application.get_env(:json_api_client, :client_name)
+  @user_agent_suffix Application.get_env(:json_api_client, :user_agent_suffix)
   @timeout Application.get_env(:json_api_client, :timeout, 500)
   @version Mix.Project.config[:version]
 
@@ -34,7 +34,7 @@ defmodule JsonApiClient do
   Execute a JSON API Request
 
   Takes a JsonApiClient.Request and preforms the described request.
-  
+
   Returns either a tuple with `:ok` and a `JsonApiClient.Response` struct (or
   nil) or `:error` and a `JsonApiClient.RequestError` struct depending on the
   http response code and whether the server response was valid according to the
@@ -126,7 +126,13 @@ defmodule JsonApiClient do
   end
 
   defp user_agent do
-    "ExApiClient/" <> @version <> "/" <> @client_name
+    [package_name(), @version, @user_agent_suffix]
+      |> Enum.reject(&is_nil/1)
+      |> Enum.join("/")
+  end
+
+  defp package_name do
+    "json_api_client"
   end
 
   defp timeout do

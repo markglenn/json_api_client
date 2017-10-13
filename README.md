@@ -121,12 +121,12 @@ If the API your making requests of follows a different URI pattern you can pass 
 
 ## Configuration
 
-### client name
+### user agent suffix
 
-Every request made carries a special `User-Agent` header that looks like: `ExApiClient/0.1.0/client_name`. Each client is expected to set its `client_name` via:
+Every request made carries a special `User-Agent` header that looks like: `json_api_client/1.0.0/user_agent_suffix`. Each client is expected to set its `user_agent_suffix` via:
 
 ```
-config :json_api_client, client_name: "yourAppName"
+config :json_api_client, user_agent_suffix: "yourSufix"
 ```
 
 ### timeout
