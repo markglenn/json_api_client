@@ -174,4 +174,21 @@ defmodule JsonApiClient.RequestTest do
       assert "http://api.net/foo/bar" = req.base_url
     end
   end
+
+  describe "header()" do
+    test "when new values is added" do
+      req = new("http://api.net")
+      |> header("X-My-Header", "My header")
+
+      assert %Request{headers: %{"X-My-Header" => "My header"}} = req
+    end
+
+    test "when a header is already added" do
+      req = new("http://api.net")
+      |> header("X-My-Header", "My header")
+      |> header("X-My-Header", "My header 2")
+
+      assert %Request{headers: %{"X-My-Header" => "My header 2"}} = req
+    end
+  end
 end
