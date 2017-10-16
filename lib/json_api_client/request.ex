@@ -48,6 +48,13 @@ defmodule JsonApiClient.Request do
     params(req, fields: new_fields)
   end
 
+  @doc """
+  Add a a header to the request.".
+
+      header(%Request{}, "X-My-Header", "My header value")
+  """
+  def header(req, header_name, header_value), do: %{req | headers: Map.put(req.headers, header_name, header_value)}
+
   defp encode_fields(%{fields: %{} = fields} = params) do
     encoded_fields = fields
       |> Enum.map(fn
