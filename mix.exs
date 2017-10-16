@@ -14,9 +14,10 @@ defmodule JsonApiClient.Mixfile do
       aliases: aliases(),
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
-        "coveralls": :test,
+        "ci": :test,
         "coveralls.html": :test,
         "coveralls.post": :test,
+        "coveralls": :test,
       ],
       deps: deps(),
       docs: docs(),
