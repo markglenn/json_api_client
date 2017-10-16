@@ -129,6 +129,15 @@ Every request made carries a special `User-Agent` header that looks like: `json_
 config :json_api_client, user_agent_suffix: "yourSufix"
 ```
 
+### http backend
+
+HTTP Backend can be configured via:
+```
+config :json_api_client, http_client_backend: JsonApiClient.HTTPClient.MyHTTBackend
+```
+
+The default HTTP Backend is `JsonApiClient.HTTPClient.HTTPoison`.
+
 ### timeout
 
 This library allows its users to specify a timeout for all its service calls by using a `timeout` setting. By default, the timeout is set to 500msecs.
