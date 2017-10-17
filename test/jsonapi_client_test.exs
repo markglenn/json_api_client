@@ -1,12 +1,13 @@
 defmodule JsonApiClientTest do
   use ExUnit.Case
+  Code.require_file("mock_http_client.exs", "./test/json_api_client")
   doctest JsonApiClient, import: true
 
   import Mock
   import JsonApiClient
   import JsonApiClient.Request
   alias JsonApiClient.{Request, Resource, Response, RequestError}
-  alias JsonApiClient.HTTPClient.HTTPoison
+  alias JsonApiClient.HTTPClient.{TestMock}
 
   setup do
     bypass = Bypass.open
@@ -14,144 +15,160 @@ defmodule JsonApiClientTest do
     {:ok, bypass: bypass, url: "http://localhost:#{bypass.port}"}
   end
 
-  test "return HTTP Backend response", context do
-    with_mock HTTPoison, [], [request: fn(_, _, _, _, _) -> {:ok, %Response{status: 201, doc: "foo"}} end] do
-      assert {:ok, %Response{status: 201, doc: "foo"}} = fetch Request.new(context.url <> "/articles/123")
+  test "includes status and headers from the HTTP response", context do
+    Bypass.expect context.bypass, "GET", "/articles/123", fn conn ->
+      conn
+      |> Plug.Conn.resp(200, "")
+      |> Plug.Conn.put_resp_header("X-Test-Header", "42")
     end
+
+    {:ok, response} = fetch Request.new(context.url <> "/articles/123")
+
+    assert response.status == 200
+    assert Enum.member?(response.headers, {"X-Test-Header", "42"})
   end
 
-  test "add json api headers", context do
-    with_mock HTTPoison, [], [
-      request: fn(_, _, _, headers, _) ->
-          assert_has_json_api_headers(headers)
-          {:ok, %Response{status: 201}}
-        end
-      ] do
-      fetch Request.new(context.url <> "/articles/123")
+  test "get a resource", context do
+    doc = single_resource_doc()
+    Bypass.expect context.bypass, "GET", "/articles/123", fn conn ->
+      assert_has_json_api_headers(conn)
+      Plug.Conn.resp(conn, 200, Poison.encode! doc)
     end
+
+    assert {:ok, %Response{status: 200, doc: ^doc}} = Request.new(context.url <> "/articles")
+    |> id("123")
+    |> method(:get)
+    |> execute
+
+    assert {:ok, %Response{status: 200, doc: ^doc}} = Request.new(context.url <> "/articles")
+    |> id("123")
+    |> fetch
   end
 
   test "set user agent with user suffix", context do
     Mix.Config.persist(json_api_client: [user_agent_suffix: "my_sufix"])
-    with_mock HTTPoison, [], [
-      request: fn(_, _, _, headers, _) ->
-          assert Keyword.get(to_atoms_keys(headers), :"User-Agent") == "json_api_client/" <> Mix.Project.config[:version] <> "/my_sufix"
-          {:ok, %Response{status: 201}}
-        end
-      ] do
-      fetch Request.new(context.url <> "/articles/123")
-      Mix.Config.persist(json_api_client: [user_agent_suffix: Mix.Project.config[:app]])
+    Bypass.expect context.bypass, "GET", "/articles/123", fn conn ->
+      assert Keyword.get(get_headers(conn), :"user-agent") == "json_api_client/" <> Mix.Project.config[:version] <> "/my_sufix"
+      Plug.Conn.resp(conn, 200, Poison.encode! single_resource_doc())
+    end
+    Request.new(context.url <> "/articles") |> id("123") |> method(:get) |> execute
+    Mix.Config.persist(json_api_client: [user_agent_suffix: Mix.Project.config[:app]])
+  end
+
+  test "use configured HTTP Backend", context do
+    http_backend = Application.get_env(:json_api_client, :http_client_backend, JsonApiClient.HTTPClient.HTTPoison)
+    Mix.Config.persist(json_api_client: [http_client_backend: TestMock])
+    with_mock TestMock, [], [request: fn(_, _, _, _, _) -> {:ok, %{status_code: 200, headers: [], body: ""}} end] do
+      assert {:ok, %Response{status: 200}} = fetch Request.new(context.url <> "/articles/123")
+
+      Mix.Config.persist(json_api_client: [http_client_backend: http_backend])
     end
   end
 
   test "get a list of resources", context do
     doc = multiple_resource_doc()
-    with_mock HTTPoison, [], [
-      request: fn(:get, url, _, headers, options) ->
-          assert url == context.url <> "/articles"
-          assert_has_json_api_headers(headers)
-          assert [
-            {"custom1", "1"},
-            {"custom2", "2"},
-            {"fields[articles]", "title,topic"},
-            {"fields[authors]", "first-name,last-name,twitter"},
-            {"filter[published]", "true"},
-            {"include", "author"},
-            {"page[size]", "10"},
-            {"page[number]", "1"},
-            {"sort", "id"}] == Keyword.get(options, :params)
-
-          {:ok, %Response{status: 200, doc: doc}}
-        end
-      ] do
-      assert {:ok, %Response{status: 200, doc: ^doc}} = Request.new(context.url <> "/articles")
-      |> fields(articles: "title,topic", authors: "first-name,last-name,twitter")
-      |> include(:author)
-      |> sort(:id)
-      |> page(size: 10, number: 1)
-      |> filter(published: true)
-      |> params(custom1: 1, custom2: 2)
-      |> fetch
+    Bypass.expect context.bypass, fn conn ->
+      conn = Plug.Conn.fetch_query_params(conn)
+      assert %{
+        "fields" => %{
+          "articles" => "title,topic",
+          "authors" => "first-name,last-name,twitter",
+        },
+        "include" => "author",
+        "sort" => "id",
+        "page" => %{"size" => "10", "number" => "1"},
+        "filter" => %{"published" => "true"},
+        "custom1" => "1",
+        "custom2" => "2",
+      } = conn.query_params
+      assert_has_json_api_headers(conn)
+      Plug.Conn.resp(conn, 200, Poison.encode! doc)
     end
+
+    assert {:ok, %Response{status: 200, doc: ^doc}} = Request.new(context.url <> "/articles")
+    |> fields(articles: "title,topic", authors: "first-name,last-name,twitter")
+    |> include(:author)
+    |> sort(:id)
+    |> page(size: 10, number: 1)
+    |> filter(published: true)
+    |> params(custom1: 1, custom2: 2)
+    |> fetch
   end
 
   test "delete a resource", context do
-    with_mock HTTPoison, [], [
-      request: fn(:delete, url, _, headers, _) ->
-          assert url == context.url <> "/articles/123"
-          assert_has_json_api_headers(headers)
-          {:ok, %Response{status: 204}}
-        end
-      ] do
-
-      assert {:ok, %Response{status: 204, doc: nil}} = Request.new(context.url <> "/articles")
-      |> id("123")
-      |> delete
+    Bypass.expect context.bypass, "DELETE", "/articles/123", fn conn ->
+      assert_has_json_api_headers(conn)
+      Plug.Conn.resp(conn, 204, "")
     end
+
+    assert {:ok, %Response{status: 204, doc: nil}} = Request.new(context.url)
+    |> resource(%Resource{type: "articles", id: "123"})
+    |> delete
+
+    assert {:ok, %Response{status: 204, doc: nil}} = Request.new(context.url <> "/articles")
+    |> id("123")
+    |> delete
   end
 
   test "create a resource", context do
     doc = single_resource_doc()
-    with_mock HTTPoison, [], [
-      request: fn(:post, url, body, headers, _) ->
-          assert url == context.url <> "/articles"
-          assert_has_json_api_headers(headers)
-          assert %{
-            "data" => %{
-              "type" => "articles",
-              "attributes" => %{
-                "title" => "JSON API paints my bikeshed!",
-              },
-            }
-          } = Poison.decode! body
+    Bypass.expect context.bypass, "POST", "/articles", fn conn ->
+      assert_has_json_api_headers(conn)
 
-          {:ok, %Response{status: 201, doc: doc}}
-        end
-      ] do
-
-      new_article = %Resource{
-        type: "articles",
-        attributes: %{
-          title: "JSON API paints my bikeshed!",
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      assert %{
+        "data" => %{
+          "type" => "articles",
+          "attributes" => %{
+            "title" => "JSON API paints my bikeshed!",
+          },
         }
-      }
+      } = Poison.decode! body
 
-      assert {:ok, %Response{status: 201, doc: ^doc}} = Request.new(context.url)
-      |> resource(new_article)
-      |> create
+      Plug.Conn.resp(conn, 201, Poison.encode! doc)
     end
+
+    new_article = %Resource{
+      type: "articles",
+      attributes: %{
+        title: "JSON API paints my bikeshed!",
+      }
+    }
+
+    assert {:ok, %Response{status: 201, doc: ^doc}} = Request.new(context.url)
+    |> resource(new_article)
+    |> create
   end
 
   test "update a resource", context do
     doc = single_resource_doc()
-    with_mock HTTPoison, [], [
-      request: fn(:patch, url, body, headers, _) ->
-          assert url == context.url <> "/articles"
-          assert_has_json_api_headers(headers)
-          assert %{
-            "data" => %{
-              "type" => "articles",
-              "attributes" => %{
-                "title" => "JSON API paints my bikeshed!",
-              },
-            }
-          } = Poison.decode! body
+    Bypass.expect context.bypass, "PATCH", "/articles/123", fn conn ->
+      assert_has_json_api_headers(conn)
 
-          {:ok, %Response{status: 201, doc: doc}}
-        end
-      ] do
-
-      new_article = %Resource{
-        type: "articles",
-        attributes: %{
-          title: "JSON API paints my bikeshed!",
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      assert %{
+        "data" => %{
+          "type" => "articles",
+          "attributes" => %{
+            "title" => "JSON API paints my bikeshed!",
+          },
         }
-      }
+      } = Poison.decode! body
 
-      assert {:ok, %Response{status: 201, doc: ^doc}} = Request.new(context.url)
-      |> resource(new_article)
-      |> update
+      Plug.Conn.resp(conn, 200, Poison.encode! doc)
     end
+
+    new_article = %Resource{
+      type: "articles",
+      id: "123",
+      attributes: %{
+        title: "JSON API paints my bikeshed!",
+      }
+    }
+
+    assert {:ok, %Response{status: 200, doc: ^doc}} = Request.new(context.url)
+    |> resource(new_article)
+    |> update
   end
 
   describe "Error Contidions" do
@@ -308,18 +325,15 @@ defmodule JsonApiClientTest do
     }
   end
 
-  def to_map(keyword) do
-    for [key, val] <- Enum.chunk(keyword, 2), do: {key, val}
+  def get_headers(conn) do
+    for {name, value} <- conn.req_headers, do: {String.to_atom(name), value}
   end
 
-  def to_atoms_keys(headers) do
-    for {name, value} <- headers, do: {String.to_atom(name), value}
-  end
+  def assert_has_json_api_headers(conn) do
+    headers = get_headers(conn)
 
-  def assert_has_json_api_headers(headers) do
-    headers = to_atoms_keys(headers)
-    assert Keyword.get(headers, :"Accept") == "application/vnd.api+json"
-    assert Keyword.get(headers, :"Content-Type") == "application/vnd.api+json"
-    assert Keyword.get(headers, :"User-Agent") == "json_api_client/" <> Mix.Project.config[:version] <> "/#{Mix.Project.config[:app]}"
+    assert Keyword.get(headers, :accept) == "application/vnd.api+json"
+    assert Keyword.get(headers, :"content-type") == "application/vnd.api+json"
+    assert Keyword.get(headers, :"user-agent") == "json_api_client/" <> Mix.Project.config[:version] <> "/#{Mix.Project.config[:app]}"
   end
 end

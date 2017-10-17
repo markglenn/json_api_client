@@ -8,8 +8,7 @@ defmodule JsonApiClient do
   @version Mix.Project.config[:version]
   @package_name JsonApiClient.Mixfile.project[:app]
 
-  alias __MODULE__.{Request}
-  alias __MODULE__.HTTPClient.{HTTPoison}
+  alias __MODULE__.{Request, RequestError, Response, Parser}
   alias Mix.Project
 
   @doc "Execute a JSON API Request using HTTP GET"
@@ -54,6 +53,22 @@ defmodule JsonApiClient do
 
   """
   def execute(req) do
+    with {:ok, response} <- do_request(req),
+         {:ok, parsed}   <- parse_response(response)
+    do
+      {:ok, parsed}
+    end
+  end
+
+  @doc "Error raising version of `execute/1`"
+  def execute!(req) do
+    case execute(req) do
+      {:ok, response} -> response
+      {:error, error} -> raise error
+    end
+  end
+
+  defp do_request(req) do
     url          = Request.get_url(req)
     query_params = Request.get_query_params(req)
     headers      = default_headers()
@@ -65,16 +80,36 @@ defmodule JsonApiClient do
                    |> Enum.into([])
     body = Request.get_body(req)
 
-    HTTPoison.request(req.method, url, body, headers, http_options)
-  end
-
-  @doc "Error raising version of `execute/1`"
-  def execute!(req) do
-    case execute(req) do
-      {:ok, response} -> response
-      {:error, error} -> raise error
+    case http_client_backend().request(req.method, url, body, headers, http_options) do
+      {:ok, _} = result -> result
+      {:error, error} ->
+        {:error, %RequestError{
+          original_error: error,
+          message: "Error completing HTTP request: #{error.reason}",
+        }}
     end
   end
+
+  defp parse_response(response) do
+    with {:ok, doc} <- parse_document(response.body)
+    do
+      {:ok, %Response{
+        status: response.status_code,
+        doc: doc,
+        headers: response.headers,
+      }}
+    else
+      {:error, error} ->
+        {:error, %RequestError{
+          message: "Error Parsing JSON API Document",
+          original_error: error,
+          status: response.status_code,
+        }}
+    end
+  end
+
+  defp parse_document(""), do: {:ok, nil}
+  defp parse_document(json), do: Parser.parse(json)
 
   defp default_options do
     %{
@@ -102,7 +137,7 @@ defmodule JsonApiClient do
   end
 
   defp http_client_backend do
-    Application.get_env(:json_api_client, :http_client_backend, JsonApiClient.HTTPClient.HTTPoison)
+    Application.get_env(:json_api_client, :http_client_backend, __MODULE__.HTTPClient.HTTPoison)
   end
 
   defp timeout do
