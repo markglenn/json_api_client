@@ -80,7 +80,7 @@ defmodule JsonApiClient do
                    |> Enum.into([])
     body = Request.get_body(req)
 
-    case HTTPoison.request(req.method, url, body, headers, http_options) do
+    case http_client_backend().request(req.method, url, body, headers, http_options) do
       {:ok, _} = result -> result
       {:error, error} ->
         {:error, %RequestError{
@@ -134,6 +134,10 @@ defmodule JsonApiClient do
 
   defp user_agent_suffix do
     Application.get_env(:json_api_client, :user_agent_suffix, Project.config[:app])
+  end
+
+  defp http_client_backend do
+    Application.get_env(:json_api_client, :http_client_backend, __MODULE__.HTTPClient.HTTPoison)
   end
 
   defp timeout do
