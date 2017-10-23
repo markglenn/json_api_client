@@ -9,7 +9,7 @@ defmodule JsonApiClient do
   @package_name JsonApiClient.Mixfile.project[:app]
 
   alias __MODULE__.{Request, RequestError, Response, Parser}
-  alias JsonApiClient.Middleware.Runner
+  alias __MODULE__.Middleware.Runner
   alias Mix.Project
 
   @doc "Execute a JSON API Request using HTTP GET"
