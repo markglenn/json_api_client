@@ -5,7 +5,7 @@ defmodule JsonApiClient.Middleware.FuseTest do
   import Mock
   alias JsonApiClient.Middleware.Fuse
 
-  @env %{foo: "bar"}
+  @request %{foo: "bar"}
   @options [{:name, "my circuit breaker"}, {:opts, {:standard, 1, 20_000}, {:reset, 10_000}}]
 
   test "returns error and doesn not call next middleware when circuit breaker is closed" do
@@ -21,9 +21,9 @@ defmodule JsonApiClient.Middleware.FuseTest do
         }
       ]
       ) do
-        assert {:error, "Unavailable"} =  Fuse.call(@env, fn env ->
+        assert {:error, "Unavailable"} =  Fuse.call(@request, fn request ->
           Agent.update(agent, fn count -> count + 1 end)
-          assert env == @env
+          assert request == @request
         end, [])
 
         assert Agent.get(agent, fn count -> count end) == 0
@@ -43,9 +43,9 @@ defmodule JsonApiClient.Middleware.FuseTest do
         }
       ]
       ) do
-      Fuse.call(@env, fn env ->
+      Fuse.call(@request, fn request ->
         Agent.update(agent, fn count -> count + 1 end)
-        assert env == @env
+        assert request == @request
       end, [])
 
       assert Agent.get(agent, fn count -> count end) == 1
@@ -74,7 +74,7 @@ defmodule JsonApiClient.Middleware.FuseTest do
         }
       ]
       ) do
-      Fuse.call(@env, fn _env -> end, @options)
+      Fuse.call(@request, fn _env -> end, @options)
     end
   end
 
