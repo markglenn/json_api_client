@@ -1,12 +1,15 @@
 defmodule JsonApiClient.Middleware.Fuse do
   @behaviour JsonApiClient.Middleware
 
-    @moduledoc """
-    Circuit Breaker middleware using [fuse](https://github.com/jlouis/fuse)
-    ### Options
-    - `service_name -> :opts` - fuse options per service
-    - `:opts` - fuse options when options are not configured per service (see fuse docs for reference)
-    """
+  @moduledoc """
+  Circuit Breaker middleware using [fuse](https://github.com/jlouis/fuse)
+  ### Options
+  - `service_name -> :opts` - fuse options per service
+  - `:opts` - fuse options when options are not configured per service (see fuse docs for reference)
+  """
+
+  alias JsonApiClient.RequestError
+  import JsonApiClient.Instrumentation
 
   @defaults {{:standard, 2, 10_000}, {:reset, 60_000}}
 
@@ -19,7 +22,11 @@ defmodule JsonApiClient.Middleware.Fuse do
         run(request, next, name)
 
       :blown ->
-        {:error, %{reason: "Unavailable - #{name} circuit blown"}}
+        add_instrumentation({:error, %RequestError {
+          original_error: "Unavailable - #{name} circuit blown",
+          message: "Unavailable - #{name} circuit blown",
+          status: nil
+        }}, :fuse, %{}, 0)
 
       {:error, :not_found} ->
         :fuse.install(name, fuse_options(service_name, opts))
@@ -32,10 +39,11 @@ defmodule JsonApiClient.Middleware.Fuse do
 
   defp run(env, next, name) do
     case next.(env) do
-      {:error, error} ->
+      {:error, error, stats} ->
         :fuse.melt(name)
-        {:error, error}
-      success -> success
+        {:error, error, stats}
+      success ->
+        success
     end
   end
 end

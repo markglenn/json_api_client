@@ -8,7 +8,7 @@ defmodule JsonApiClient do
   @version Mix.Project.config[:version]
   @package_name JsonApiClient.Mixfile.project[:app]
 
-  alias __MODULE__.{Request, RequestError, Response, Parser}
+  alias __MODULE__.{Request, Instrumentation}
   alias __MODULE__.Middleware.Runner
   alias Mix.Project
 
@@ -54,11 +54,7 @@ defmodule JsonApiClient do
 
   """
   def execute(req) do
-    with {:ok, response} <- do_request(req),
-         {:ok, parsed}   <- parse_response(response)
-    do
-      {:ok, parsed}
-    end
+    do_request(req)
   end
 
   @doc "Error raising version of `execute/1`"
@@ -88,36 +84,12 @@ defmodule JsonApiClient do
       http_options: http_options,
       service_name: req.service_name
     }
-    case Runner.run(request) do
-      {:ok, _} = result -> result
-      {:error, error} ->
-        {:error, %RequestError{
-          original_error: error,
-          message: "Error completing HTTP request: #{error.reason}",
-        }}
-    end
-  end
+    {code, result, instrumentation} = Runner.run(request)
 
-  defp parse_response(response) do
-    with {:ok, doc} <- parse_document(response.body)
-    do
-      {:ok, %Response{
-        status: response.status_code,
-        doc: doc,
-        headers: response.headers,
-      }}
-    else
-      {:error, error} ->
-        {:error, %RequestError{
-          message: "Error Parsing JSON API Document",
-          original_error: error,
-          status: response.status_code,
-        }}
-    end
-  end
+    Instrumentation.log(instrumentation)
 
-  defp parse_document(""), do: {:ok, nil}
-  defp parse_document(json), do: Parser.parse(json)
+    {code, result}
+  end
 
   defp default_options do
     %{

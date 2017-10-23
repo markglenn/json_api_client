@@ -2,10 +2,12 @@ defmodule JsonApiClientTest do
   use ExUnit.Case
   doctest JsonApiClient, import: true
 
+  import Mock
+
   import JsonApiClient
   import JsonApiClient.Request
-  alias JsonApiClient.{Request, Resource, Response, RequestError}
-  alias JsonApiClient.Middleware.Fuse
+  alias JsonApiClient.Middleware.{Runner, Fuse}
+  alias JsonApiClient.{Request, Resource, Response, RequestError, Instrumentation}
 
   setup do
     bypass = Bypass.open
@@ -205,10 +207,10 @@ defmodule JsonApiClientTest do
         {Fuse, [{:opts, {{:standard, max_fuse_request, 10_000}, {:reset, 60_000}}}]}
       ]])
 
-      for _ <- 0..max_fuse_request do fetch(Request.new(context.url <> "/")) end
+      for _ <- 0..max_fuse_request + 1 do fetch(Request.new(context.url <> "/")) end
 
       assert {:error, %RequestError{
-        original_error: %{reason: "Unavailable - json_api_client circuit blown"},
+        original_error: "Unavailable - json_api_client circuit blown",
         status: nil,
       }} = fetch(Request.new(context.url <> "/"))
 
@@ -317,6 +319,27 @@ defmodule JsonApiClientTest do
     test "update!" , %{request: req}, do: assert %Response{} = update!  req
     test "create!" , %{request: req}, do: assert %Response{} = create!  req
     test "delete!" , %{request: req}, do: assert %Response{} = delete!  req
+  end
+
+
+  test "logs instrumentation", context do
+    instrumentation = %{time: %{action: 10}}
+
+    with_mocks(
+      [
+        {
+          Runner, [], [
+            run: fn(_request) -> {:error, :not_found, instrumentation} end,
+          ]
+        },
+        {
+          Instrumentation, [], [
+            log: fn(to_log) -> assert to_log == instrumentation end,
+          ]
+        }
+      ]) do
+      Request.new(context.url <> "/articles") |> fetch
+    end
   end
 
   def error_doc do

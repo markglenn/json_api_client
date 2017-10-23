@@ -3,7 +3,7 @@ defmodule JsonApiClient.Middleware.FuseTest do
   doctest JsonApiClient.Middleware.Fuse, import: true
 
   import Mock
-  alias JsonApiClient.Request
+  alias JsonApiClient.{Request, RequestError}
   alias JsonApiClient.Middleware.Fuse
 
   @request %Request{}
@@ -24,7 +24,10 @@ defmodule JsonApiClient.Middleware.FuseTest do
         }
       ]
       ) do
-        assert {:error, %{reason: "Unavailable - json_api_client circuit blown"}} =
+        assert {:error, %RequestError{
+          message: "Unavailable - json_api_client circuit blown",
+          original_error: "Unavailable - json_api_client circuit blown",
+          status: nil}, _} =
         Fuse.call(@request, fn request ->
           Agent.update(agent, fn count -> count + 1 end)
           assert request == @request
@@ -86,7 +89,7 @@ defmodule JsonApiClient.Middleware.FuseTest do
         }
       ]
       ) do
-      Fuse.call(@request, fn _request -> {:error, "error"} end, [])
+      Fuse.call(@request, fn _request -> {:error, "error", %{}} end, [])
       assert called :fuse.melt("json_api_client")
     end
   end

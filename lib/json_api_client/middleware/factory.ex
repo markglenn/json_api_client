@@ -4,7 +4,10 @@ defmodule JsonApiClient.Middleware.Factory do
   """
 
   def middlewares do
-    configured_middlewares() ++ [{JsonApiClient.Middleware.HTTPClient, nil}]
+    configured_middlewares() ++ [
+      {JsonApiClient.Middleware.DocumentParser, nil},
+      {JsonApiClient.Middleware.HTTPClient, nil}
+    ]
   end
 
   defp configured_middlewares do
