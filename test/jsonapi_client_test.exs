@@ -1,13 +1,10 @@
 defmodule JsonApiClientTest do
   use ExUnit.Case
-  Code.require_file("mock_http_client.exs", "./test/json_api_client")
   doctest JsonApiClient, import: true
 
-  import Mock
   import JsonApiClient
   import JsonApiClient.Request
   alias JsonApiClient.{Request, Resource, Response, RequestError}
-  alias JsonApiClient.HTTPClient.{TestMock}
 
   setup do
     bypass = Bypass.open
@@ -53,16 +50,6 @@ defmodule JsonApiClientTest do
     end
     Request.new(context.url <> "/articles") |> id("123") |> method(:get) |> execute
     Mix.Config.persist(json_api_client: [user_agent_suffix: Mix.Project.config[:app]])
-  end
-
-  test "use configured HTTP Backend", context do
-    http_backend = Application.get_env(:json_api_client, :http_client_backend, JsonApiClient.HTTPClient.HTTPoison)
-    Mix.Config.persist(json_api_client: [http_client_backend: TestMock])
-    with_mock TestMock, [], [request: fn(_, _, _, _, _) -> {:ok, %{status_code: 200, headers: [], body: ""}} end] do
-      assert {:ok, %Response{status: 200}} = fetch Request.new(context.url <> "/articles/123")
-
-      Mix.Config.persist(json_api_client: [http_client_backend: http_backend])
-    end
   end
 
   test "get a list of resources", context do
