@@ -5,11 +5,11 @@ defmodule JsonApiClient.Middleware do
 
   @doc ~S"""
   Manipulates a Request and Response objects.
-  If the Request should be processed `next.(env)` has to be called.
+  If the Request should be processed by the next middleware then `next.(request)` has to be called.
 
   Args:
 
-    * `env` - holds http request properties:
+    * `request` - holds http request properties:
     - `method` - HTTP method as an atom (`:get`, `:head`, `:post`, `:put`,
       `:delete`, etc.)
     - `url` - target url as a binary string or char list
@@ -24,7 +24,7 @@ defmodule JsonApiClient.Middleware do
     - `headers`- HTTP headers (e.g., `[{"Accept", "application/json"}]`)
 
   """
-  @type env :: %{method: atom, url: binary, body: any, headers: Keyword.t, http_options: Keyword.t}
-  @callback call(env, ((env) -> {:ok, %{body: any, status_code: binary, headers: Keyword.t}} | {:error, any}),
+  @type request :: %{method: atom, url: binary, body: any, headers: Keyword.t, http_options: Keyword.t}
+  @callback call(request, ((request) -> {:ok, %{body: any, status_code: binary, headers: Keyword.t}} | {:error, any}),
                 options :: any) :: {:ok, %{body: any, status_code: binary, headers: Keyword.t}} | {:error, any}
 end

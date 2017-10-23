@@ -81,8 +81,8 @@ defmodule JsonApiClient do
                    |> Enum.into([])
     body = Request.get_body(req)
 
-    env = %{method: req.method, url: url, body: body, headers: headers, http_options: http_options}
-    case Runner.run(env) do
+    request = %{method: req.method, url: url, body: body, headers: headers, http_options: http_options}
+    case Runner.run(request) do
       {:ok, _} = result -> result
       {:error, error} ->
         {:error, %RequestError{

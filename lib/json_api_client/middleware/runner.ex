@@ -5,15 +5,15 @@ defmodule JsonApiClient.Middleware.Runner do
 
   alias JsonApiClient.Middleware.Factory
 
-  def run(env) do
-    middleware_runner(Factory.middlewares()).(env)
+  def run(request) do
+    middleware_runner(Factory.middlewares()).(request)
   end
 
   defp middleware_runner([]) do end
 
   defp middleware_runner([{middleware, options} | rest]) do
-    fn(env) ->
-      middleware.call(env, middleware_runner(rest), options)
+    fn(request) ->
+      middleware.call(request, middleware_runner(rest), options)
     end
   end
 end
