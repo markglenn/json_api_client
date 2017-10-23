@@ -9,6 +9,7 @@ defmodule JsonApiClient do
   @package_name JsonApiClient.Mixfile.project[:app]
 
   alias __MODULE__.{Request, RequestError, Response, Parser}
+  alias __MODULE__.Middleware.Runner
   alias Mix.Project
 
   @doc "Execute a JSON API Request using HTTP GET"
@@ -80,7 +81,8 @@ defmodule JsonApiClient do
                    |> Enum.into([])
     body = Request.get_body(req)
 
-    case http_client_backend().request(req.method, url, body, headers, http_options) do
+    request = %{method: req.method, url: url, body: body, headers: headers, http_options: http_options}
+    case Runner.run(request) do
       {:ok, _} = result -> result
       {:error, error} ->
         {:error, %RequestError{
@@ -134,10 +136,6 @@ defmodule JsonApiClient do
 
   defp user_agent_suffix do
     Application.get_env(:json_api_client, :user_agent_suffix, Project.config[:app])
-  end
-
-  defp http_client_backend do
-    Application.get_env(:json_api_client, :http_client_backend, __MODULE__.HTTPClient.HTTPoison)
   end
 
   defp timeout do
