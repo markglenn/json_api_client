@@ -4,15 +4,15 @@ defmodule JsonApiClient.Middleware.Fuse do
     @moduledoc """
     Circuit Breaker middleware using [fuse](https://github.com/jlouis/fuse)
     ### Options
-    - `:name` - fuse name (defaults to 'json_api_client')
-    - `:opts` - fuse options (see fuse docs for reference)
+    - `service_name -> :opts` - fuse options per service
+    - `:opts` - fuse options when options are not configured per service (see fuse docs for reference)
     """
 
   @defaults {{:standard, 2, 10_000}, {:reset, 60_000}}
 
-  def call(request, next, options) do
+  def call(%{service_name: service_name} = request, next, options) do
     opts = options || []
-    name = Keyword.get(opts, :name, "json_api_client")
+    name = if is_nil(service_name), do: "json_api_client", else: service_name
 
     case :fuse.ask(name, :sync) do
       :ok ->
@@ -22,10 +22,13 @@ defmodule JsonApiClient.Middleware.Fuse do
         {:error, "Unavailable"}
 
       {:error, :not_found} ->
-        :fuse.install(name, Keyword.get(opts, :opts, @defaults))
+        :fuse.install(name, fuse_options(service_name, opts))
         run(request, next, name)
     end
   end
+
+  defp fuse_options(service_name, opts) when is_nil(service_name), do: Keyword.get(opts, :opts, @defaults)
+  defp fuse_options(service_name, opts), do: Keyword.get(opts, service_name, fuse_options(nil, opts))
 
   defp run(env, next, name) do
     case next.(env) do

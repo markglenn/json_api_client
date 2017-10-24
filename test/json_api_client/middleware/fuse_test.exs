@@ -3,10 +3,15 @@ defmodule JsonApiClient.Middleware.FuseTest do
   doctest JsonApiClient.Middleware.Fuse, import: true
 
   import Mock
+  alias JsonApiClient.Request
   alias JsonApiClient.Middleware.Fuse
 
-  @request %{foo: "bar"}
-  @options [{:name, "my circuit breaker"}, {:opts, {:standard, 1, 20_000}, {:reset, 10_000}}]
+  @request %Request{}
+  @service_name :my_service
+  @options [
+    {@service_name, {{:standard, 3, 30_000}, {:reset, 30_000}}},
+    {:opts, {{:standard, 4, 40_000}, {:reset, 40_000}}}
+  ]
 
   test "returns error and doesn not call next middleware when circuit breaker is closed" do
     {:ok, agent} = Agent.start_link fn -> 0 end
@@ -14,9 +19,7 @@ defmodule JsonApiClient.Middleware.FuseTest do
       [
         {
           :fuse, [], [
-            ask: fn("json_api_client", :sync) -> {:error, :not_found} end,
-            ask: fn("json_api_client", :sync) -> :blown end,
-            install: fn("json_api_client", {{:standard, 2, 10_000}, {:reset, 60_000}}) -> :ok end
+            ask: fn(_, :sync) -> :blown end,
           ]
         }
       ]
@@ -30,15 +33,14 @@ defmodule JsonApiClient.Middleware.FuseTest do
     end
   end
 
-  test "returns OK and calls next middleware when circuit breaker is opened" do
+  test "returns OK and calls next middleware when circuit breaker is installed" do
     {:ok, agent} = Agent.start_link fn -> 0 end
     with_mocks(
       [
         {
           :fuse, [], [
-            ask: fn("json_api_client", :sync) -> {:error, :not_found} end,
-            ask: fn("json_api_client", :sync) -> :ok end,
-            install: fn("json_api_client", {{:standard, 2, 10_000}, {:reset, 60_000}}) -> :ok end
+            ask: fn(_, :sync) -> {:error, :not_found} end,
+            install: fn(_, _) -> :ok end,
           ]
         }
       ]
@@ -52,38 +54,105 @@ defmodule JsonApiClient.Middleware.FuseTest do
     end
   end
 
-  test "uses name and configuration form otions" do
+  test "returns OK and calls next middleware when circuit breaker is opened" do
+    {:ok, agent} = Agent.start_link fn -> 0 end
+    with_mocks(
+      [
+        {
+          :fuse, [], [
+            ask: fn(_, :sync) -> :ok end,
+          ]
+        }
+      ]
+      ) do
+      Fuse.call(@request, fn request ->
+        Agent.update(agent, fn count -> count + 1 end)
+        assert request == @request
+      end, [])
+
+      assert Agent.get(agent, fn count -> count end) == 1
+    end
+  end
+
+  test "melt use when error" do
+    with_mocks(
+      [
+        {
+          :fuse, [], [
+            ask: fn(_, :sync) -> :ok end,
+            melt: fn(_name) -> :ok end,
+          ]
+        }
+      ]
+      ) do
+      Fuse.call(@request, fn request -> {:error, "error"} end, [])
+    end
+  end
+
+  test "uses default name when service name is not configured" do
+    check_name(@request, "json_api_client")
+  end
+
+  test "uses service as name when service name is configured" do
+    check_name(Request.service_name(@request, @service_name), @service_name)
+  end
+
+  test "uses default options when service name is not configured and no global options" do
+    check_options(@request, [], {{:standard, 2, 10_000}, {:reset, 60_000}})
+  end
+
+  test "uses gloal when service name is not configured and global options exist" do
+    check_options(@request, @options, Keyword.get(@options, :opts))
+  end
+
+  test "uses gloal when service is configured (no confoguration) and global options exist" do
+    check_options(Request.service_name(@request, :foo), @options, Keyword.get(@options, :opts))
+  end
+
+  test "uses service options when service is configured service options exist" do
+
+    check_options(Request.service_name(@request, @service_name), @options, Keyword.get(@options, @service_name))
+  end
+
+  defp check_name(request, fuse_name) do
     with_mocks(
       [
         {
           :fuse, [], [
             ask: fn(name, :sync) ->
-              check_name(name)
+              assert name == fuse_name
               {:error, :not_found}
             end,
-            ask: fn(name, :sync) ->
-              check_name(name)
-              :ok
-            end,
-            install: fn(name, opts) ->
-              check_name(name)
-              check_options(opts)
+            install: fn(name, _opts) ->
+              assert name == fuse_name
               :ok
             end
           ]
         }
       ]
       ) do
-      Fuse.call(@request, fn _env -> end, @options)
+      Fuse.call(request, fn _env -> nil end, @options)
     end
   end
 
-  defp check_name(name) do
-    assert name == Keyword.get(@options, :name)
-  end
-
-  defp check_options(opts) do
-    assert opts == Keyword.get(@options, :opts, %{})
+  defp check_options(request, options, fuse_options) do
+    with_mocks(
+      [
+        {
+          :fuse, [], [
+            ask: fn(_name, :sync) ->
+              {:error, :not_found}
+            end,
+            install: fn(_name, opts) ->
+              assert fuse_options == opts
+              :ok
+            end
+          ]
+        }
+      ]
+      ) do
+      Fuse.call(request, fn _env -> nil end, options)
+    end
   end
 end
 
