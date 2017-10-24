@@ -335,7 +335,7 @@ defmodule JsonApiClientTest do
       [
         {
           Runner, [], [
-            run: fn(_request) -> {:error, :not_found, stats} end,
+            run: fn(_request) -> {:error,  %Response{attributes: %{stats: stats}}} end,
           ]
         },
         {

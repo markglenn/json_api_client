@@ -4,6 +4,7 @@ defmodule JsonApiClient.Middleware.HTTPClientTest do
 
   import Mock
 
+  alias JsonApiClient.Response
   alias JsonApiClient.Middleware.HTTPClient
 
   @response_body "body"
@@ -42,9 +43,9 @@ defmodule JsonApiClient.Middleware.HTTPClientTest do
       |> Plug.Conn.resp(200, "")
     end
 
-    {:ok, response, _instrumentation} = call_middleware(context)
+    {:ok, response} = call_middleware(context)
 
-    assert response.status_code == 200
+    assert response.status == 200
   end
 
   test "includes headers from the HTTP response", context do
@@ -54,19 +55,19 @@ defmodule JsonApiClient.Middleware.HTTPClientTest do
       |> Plug.Conn.put_resp_header("x-test-header", "42")
     end
 
-    {:ok, response, _instrumentation} = call_middleware(context)
+    {:ok, response} = call_middleware(context)
 
     assert Enum.member?(response.headers, {"x-test-header", "42"})
   end
 
-  test "includes body from the HTTP response", context do
+  test "includes doc from the HTTP response", context do
     Bypass.expect context.bypass, "GET", "/articles", fn conn ->
       Plug.Conn.resp(conn, 200, @response_body)
     end
 
-    {:ok, response, _instrumentation} = call_middleware(context)
+    {:ok, response} = call_middleware(context)
 
-    assert response.body == @response_body
+    assert response.doc == @response_body
   end
 
   test "includes time stats", context do
@@ -74,7 +75,9 @@ defmodule JsonApiClient.Middleware.HTTPClientTest do
       Plug.Conn.resp(conn, 200, @response_body)
     end
 
-    {:ok, _, %{time: %{request: time}}} = call_middleware(context)
+    {:ok, %Response{
+      attributes: %{stats: %{time: %{request: time}}}
+    }} = call_middleware(context)
 
     assert is_number time
   end

@@ -26,7 +26,7 @@ defmodule JsonApiClient.Middleware.Fuse do
           original_error: "Unavailable - #{name} circuit blown",
           message: "Unavailable - #{name} circuit blown",
           status: nil
-        }}, %{})
+        }})
 
       {:error, :not_found} ->
         :fuse.install(name, fuse_options(service_name, opts))
@@ -38,12 +38,14 @@ defmodule JsonApiClient.Middleware.Fuse do
   defp fuse_options(service_name, opts), do: Keyword.get(opts, service_name, fuse_options(nil, opts))
 
   defp run(env, next, name) do
-    case next.(env) do
-      {:error, error, stats} ->
-        :fuse.melt(name)
-        {:error, error, stats}
-      success ->
-        success
-    end
+    track_stats(:fuse, fn ->
+      case next.(env) do
+        {:error, error} ->
+          :fuse.melt(name)
+          {:error, error}
+        success ->
+          success
+      end
+    end)
   end
 end

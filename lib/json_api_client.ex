@@ -72,9 +72,9 @@ defmodule JsonApiClient do
       http_options: http_options,
       service_name: req.service_name
     }
-    {code, result, stats} = Runner.run(request)
+    {code, result} = Runner.run(request)
 
-    Instrumentation.log(stats)
+    Instrumentation.log(result.attributes[:stats])
 
     {code, result}
   end

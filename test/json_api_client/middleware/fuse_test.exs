@@ -3,7 +3,7 @@ defmodule JsonApiClient.Middleware.FuseTest do
   doctest JsonApiClient.Middleware.Fuse, import: true
 
   import Mock
-  alias JsonApiClient.{Request, RequestError}
+  alias JsonApiClient.{Request, Response, RequestError}
   alias JsonApiClient.Middleware.Fuse
 
   @request %Request{}
@@ -27,7 +27,8 @@ defmodule JsonApiClient.Middleware.FuseTest do
         assert {:error, %RequestError{
           message: "Unavailable - json_api_client circuit blown",
           original_error: "Unavailable - json_api_client circuit blown",
-          status: nil}, _} =
+          attributes: %{stats: %{time: %{fuse: 0}}},
+          status: nil}} =
         Fuse.call(@request, fn request ->
           Agent.update(agent, fn count -> count + 1 end)
           assert request == @request
@@ -52,6 +53,7 @@ defmodule JsonApiClient.Middleware.FuseTest do
       Fuse.call(@request, fn request ->
         Agent.update(agent, fn count -> count + 1 end)
         assert request == @request
+        {:ok, %Response{}}
       end, [])
 
       assert Agent.get(agent, fn count -> count end) == 1
@@ -72,6 +74,7 @@ defmodule JsonApiClient.Middleware.FuseTest do
       Fuse.call(@request, fn request ->
         Agent.update(agent, fn count -> count + 1 end)
         assert request == @request
+        {:ok, %Response{}}
       end, [])
 
       assert Agent.get(agent, fn count -> count end) == 1
@@ -89,7 +92,7 @@ defmodule JsonApiClient.Middleware.FuseTest do
         }
       ]
       ) do
-      Fuse.call(@request, fn _request -> {:error, "error", %{}} end, [])
+      Fuse.call(@request, fn _request -> {:error, %RequestError{}} end, [])
       assert called :fuse.melt("json_api_client")
     end
   end
@@ -136,7 +139,7 @@ defmodule JsonApiClient.Middleware.FuseTest do
         }
       ]
       ) do
-      Fuse.call(request, fn _env -> nil end, @options)
+      Fuse.call(request, fn _env -> {:ok, %Response{}} end, @options)
     end
   end
 
@@ -156,7 +159,7 @@ defmodule JsonApiClient.Middleware.FuseTest do
         }
       ]
       ) do
-      Fuse.call(request, fn _env -> nil end, options)
+      Fuse.call(request, fn _env -> {:ok, %Response{}} end, options)
     end
   end
 end
