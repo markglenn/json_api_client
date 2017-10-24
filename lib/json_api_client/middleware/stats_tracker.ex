@@ -5,7 +5,7 @@ defmodule JsonApiClient.Middleware.StatsTracker do
 
   def call(request, next, [wrap: {middleware, middleware_options}]) do
     {microseconds, {status, result}} = :timer.tc fn -> middleware.call(request, next, middleware_options) end
-    timer_tuple = {middleware, microseconds / 1_000_000}
+    timer_tuple = {middleware, microseconds / 1_000}
 
     attributes = result.attributes
     |> update_in([:stats], &(&1 || %{}))
