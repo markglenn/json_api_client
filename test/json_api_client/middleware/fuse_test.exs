@@ -24,7 +24,7 @@ defmodule JsonApiClient.Middleware.FuseTest do
         }
       ]
       ) do
-        assert {:error, "Unavailable"} =  Fuse.call(@request, fn request ->
+        assert {:error, "Unavailable - json_api_client circuit blown"} =  Fuse.call(@request, fn request ->
           Agent.update(agent, fn count -> count + 1 end)
           assert request == @request
         end, [])
@@ -75,17 +75,23 @@ defmodule JsonApiClient.Middleware.FuseTest do
   end
 
   test "melt use when error" do
+    {:ok, agent} = Agent.start_link fn -> 0 end
     with_mocks(
       [
         {
           :fuse, [], [
             ask: fn(_, :sync) -> :ok end,
-            melt: fn(_name) -> :ok end,
+            melt: fn(_name) ->
+                Agent.update(agent, fn count -> count + 1 end)
+              :ok
+            end,
           ]
         }
       ]
       ) do
       Fuse.call(@request, fn _request -> {:error, "error"} end, [])
+
+      assert Agent.get(agent, fn count -> count end) == 1
     end
   end
 
