@@ -198,7 +198,7 @@ defmodule JsonApiClientTest do
   end
 
   describe "Circuit Breaker middleware" do
-    test "stops requests processing", context do
+    setup context do
       Bypass.down(context.bypass)
 
       configured       = Application.get_env(:json_api_client, :middlewares, [])
@@ -207,14 +207,20 @@ defmodule JsonApiClientTest do
         {Fuse, [{:opts, {{:standard, max_fuse_request, 10_000}, {:reset, 60_000}}}]}
       ]])
 
-      for _ <- 0..max_fuse_request + 1 do fetch(Request.new(context.url <> "/")) end
+      on_exit fn ->
+        Mix.Config.persist(json_api_client: [middlewares: configured])
+      end
+
+      %{max_fuse_request: max_fuse_request}
+    end
+
+    test "stops requests processing", context do
+      for _ <- 0..context.max_fuse_request + 1 do fetch(Request.new(context.url <> "/")) end
 
       assert {:error, %RequestError{
         original_error: "Unavailable - json_api_client circuit blown",
         status: nil,
       }} = fetch(Request.new(context.url <> "/"))
-
-      Mix.Config.persist(json_api_client: [middlewares: configured])
     end
   end
 
