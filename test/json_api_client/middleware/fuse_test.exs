@@ -27,7 +27,6 @@ defmodule JsonApiClient.Middleware.FuseTest do
         assert {:error, %RequestError{
           message: "Unavailable - json_api_client circuit blown",
           original_error: "Unavailable - json_api_client circuit blown",
-          attributes: %{stats: %{time: %{fuse: 0}}},
           status: nil}} =
         Fuse.call(@request, fn request ->
           Agent.update(agent, fn count -> count + 1 end)

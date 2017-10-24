@@ -4,26 +4,29 @@ defmodule JsonApiClient.Middleware.StatsLoggerTest do
   doctest JsonApiClient.Middleware.StatsLogger, import: true
   
   alias JsonApiClient.Middleware.StatsLogger
+  alias JsonApiClient.Response
 
   @request %{url: "http://example.com"}
 
   test "logs stats from the response" do
-    response = %{
-      stats: %{ 
-        timers: [
-          {:"Elixir.JsonApiClient.Middleware.TestMiddleware1", 30},
-          {:"Elixir.JsonApiClient.Middleware.TestMiddleware2", 20},
-          {:"Elixir.JsonApiClient.Middleware.TestMiddleware3", 15},
-        ]
+    response = %Response{
+      attributes: %{
+        stats: %{ 
+          timers: [
+            {:"Elixir.JsonApiClient.Middleware.TestMiddleware1", 30},
+            {:"Elixir.JsonApiClient.Middleware.TestMiddleware2", 20},
+            {:"Elixir.JsonApiClient.Middleware.TestMiddleware3", 15},
+          ]
+        }
       }
     }
-    next = fn _ -> response end
+    next = fn _ -> {:ok, response} end
 
     log = capture_log fn -> 
-      assert response == StatsLogger.call(@request, next, [log_level: :info])
+      assert {:ok, response} == StatsLogger.call(@request, next, log_level: :info)
     end
 
-    assert log =~ "json_api_client_ms=30"
+    assert log =~ ~r/total_ms=\d+(\.\d+)?/
     assert log =~ "test_middleware1_ms=10"
     assert log =~ "test_middleware2_ms=5"
     assert log =~ "test_middleware3_ms=15"
@@ -31,7 +34,7 @@ defmodule JsonApiClient.Middleware.StatsLoggerTest do
 
   test "logs the url" do
     log = capture_log fn -> 
-      StatsLogger.call(@request, fn _ -> %{} end, [log_level: :info])
+      StatsLogger.call(@request, fn _ -> {:ok, %Response{}} end, [log_level: :info])
     end
 
     assert log =~ "url=#{@request.url}"

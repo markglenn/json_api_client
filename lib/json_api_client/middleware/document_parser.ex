@@ -8,17 +8,10 @@ defmodule JsonApiClient.Middleware.DocumentParser do
   import JsonApiClient.Instrumentation
 
   def call(request, next, _options) do
-    with {:ok, response} <- call_next(request, next),
-         {:ok, parsed}   <- track_stats(:parse_document, fn -> parse_response(response) end )
+    with {:ok, response} <- next.(request),
+         {:ok, parsed}   <- parse_response(response)
     do
       {:ok, parsed}
-    end
-  end
-
-  defp call_next(request, next) do
-    case next.(request) do
-      {:ok, _} = result -> result
-      {:error, error} -> track_stats(:parse_document, {:error, error})
     end
   end
 

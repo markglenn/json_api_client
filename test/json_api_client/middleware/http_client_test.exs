@@ -70,18 +70,6 @@ defmodule JsonApiClient.Middleware.HTTPClientTest do
     assert response.doc == @response_body
   end
 
-  test "includes time stats", context do
-    Bypass.expect context.bypass, "GET", "/articles", fn conn ->
-      Plug.Conn.resp(conn, 200, @response_body)
-    end
-
-    {:ok, %Response{
-      attributes: %{stats: %{time: %{request: time}}}
-    }} = call_middleware(context)
-
-    assert is_number time
-  end
-
   defp call_middleware(context) do
     HTTPClient.call(context.env, nil, nil)
   end

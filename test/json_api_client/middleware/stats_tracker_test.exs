@@ -8,9 +8,10 @@ defmodule JsonApiClient.Middleware.StatsTrackerTest do
   doctest JsonApiClient.Middleware.StatsTracker, import: true
   
   alias JsonApiClient.Middleware.StatsTracker
+  alias JsonApiClient.Response
 
   @request %{url: "http://example.com"}
-  @response %{}
+  @response {:ok, %Response{}}
 
   test "adds timer stats to the response" do
     test_middleware_options = {:test_middleware_option, 1}
@@ -21,7 +22,7 @@ defmodule JsonApiClient.Middleware.StatsTrackerTest do
       returned = StatsTracker.call(@request, next, options)
 
       assert called TestMiddleware.call(@request, next, test_middleware_options)
-      assert %{stats: %{timers: [{TestMiddleware, ms}]}} = returned
+      assert {:ok, %{attributes: %{stats: %{timers: [{TestMiddleware, ms}]}}}} = returned
       assert is_number ms
     end
   end

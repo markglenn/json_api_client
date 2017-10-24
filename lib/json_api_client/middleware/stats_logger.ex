@@ -6,21 +6,21 @@ defmodule JsonApiClient.Middleware.StatsLogger do
   def call(request, next, options) do
     log_level = Access.get(options, :log_level, @log_level)
 
-    response = next.(request)
+    {microseconds, {status, response}} = :timer.tc fn -> next.(request) end
 
-    stats = []
+    stats = [total_ms: microseconds / 1_000]
     |> Enum.concat(stats_from_request(request))
     |> Enum.concat(stats_from_response(response))
 
     log stats, log_level
 
-    response
+    {status, response}
   end
 
   defp stats_from_response(response) do
-    timers = Enum.reverse(get_in(response, [:stats, :timers]) || [])
+    timers = Enum.reverse(get_in(response.attributes, [:stats, :timers]) || [])
 
-    {stats, total} = Enum.reduce(timers, {[], 0}, fn ({module, ms}, {result, ms_spent_elsewhere}) ->
+    {stats, _} = Enum.reduce(timers, {[], 0}, fn ({module, ms}, {result, ms_spent_elsewhere}) ->
       name = module
       |> Module.split
       |> List.last
@@ -30,7 +30,7 @@ defmodule JsonApiClient.Middleware.StatsLogger do
       {[{name, ms - ms_spent_elsewhere} | result], ms}
     end)
 
-    [{:json_api_client_ms, total} | stats]
+    stats
   end
 
   defp stats_from_request(request) do

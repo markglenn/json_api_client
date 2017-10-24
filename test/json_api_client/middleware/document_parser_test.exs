@@ -30,7 +30,6 @@ defmodule JsonApiClient.Middleware.DocumentParserTest do
     doc: Poison.encode!(@resource_doc),
     status: 200,
     headers: [{:foo, :bar}],
-    attributes: %{stats: %{time: %{action: 10}}}
   }
   @succses_result {:ok, @succses_response}
 
@@ -41,7 +40,6 @@ defmodule JsonApiClient.Middleware.DocumentParserTest do
       doc: doc,
       status: 200,
       headers: [foo: :bar],
-      attributes: %{stats: %{time: %{action: 10, parse_document: time}}}
       }
     } = DocumentParser.call(@request, fn  request ->
       assert request == @request
@@ -49,20 +47,15 @@ defmodule JsonApiClient.Middleware.DocumentParserTest do
     end, %{})
 
     assert @resource_doc == doc
-    assert is_number time
   end
 
   test "when the next Middleware response is error" do
-    originan_error = %RequestError{}
     assert {
       :error,
       %RequestError{
         original_error: "unknown",
-        attributes: %{stats: %{time: %{parse_document: time}}}
       }
     } = DocumentParser.call(@request, fn _request -> {:error, @error} end, %{})
-
-    assert is_number time
   end
 
   test "when a response body is empty" do
@@ -70,20 +63,15 @@ defmodule JsonApiClient.Middleware.DocumentParserTest do
       doc: nil,
       status: 200,
       headers: [foo: :bar],
-      attributes: %{stats: %{time: %{action: 10, parse_document: time}}}
     }} = DocumentParser.call(@request, fn _request -> {:ok, %{@succses_response | doc: ""}} end, %{})
-
-    assert is_number time
   end
 
   test "when a response cannot be parsed" do
     assert {:error, %RequestError{
       original_error: _,
       message: message,
-      attributes: %{stats: %{time: %{action: 10, parse_document: time}}}
     }} = DocumentParser.call(@request, fn _request -> {:ok, %{@succses_response | doc: "invalid"}} end, %{})
 
     assert message =~ "Error Parsing JSON API Document"
-    assert is_number time
   end
 end

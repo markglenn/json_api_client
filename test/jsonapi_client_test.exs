@@ -1,12 +1,13 @@
 defmodule JsonApiClientTest do
   use ExUnit.Case
+  import ExUnit.CaptureLog
   doctest JsonApiClient, import: true
 
   import Mock
 
   import JsonApiClient
   import JsonApiClient.Request
-  alias JsonApiClient.Middleware.{Runner, Fuse}
+  alias JsonApiClient.Middleware.{Runner, Fuse, StatsLogger, StatsTracker, DocumentParser, HTTPClient}
   alias JsonApiClient.{Request, Resource, Response, RequestError, Instrumentation}
 
   setup do
@@ -224,6 +225,41 @@ defmodule JsonApiClientTest do
     end
   end
 
+  describe "Stats Tracking middleware" do
+    setup context do
+      Bypass.expect context.bypass, fn conn ->
+        Plug.Conn.resp(conn, 200, Poison.encode! single_resource_doc())
+      end
+
+      configured = Application.get_env(:json_api_client, :middlewares, [])
+      Mix.Config.persist(json_api_client: [
+        middlewares: [
+          {StatsLogger, log_level: :info},
+          {StatsTracker, wrap: {DocumentParser, nil}},
+          {StatsTracker, wrap: {HTTPClient, nil}},
+        ]
+      ])
+
+      on_exit fn ->
+        Mix.Config.persist(json_api_client: [middlewares: configured])
+      end
+
+      :ok
+    end
+
+    test "logs stats", context do
+      url = context.url <> "/article/123"
+      log = capture_log fn ->
+        fetch(Request.new(url))
+      end
+
+      assert log =~ ~r/total_ms=\d+(\.\d+)?/
+      assert log =~ ~r/document_parser_ms=\d+(\.\d+)?/
+      assert log =~ ~r/http_client_ms=\d+(\.\d+)?/
+      assert log =~ "url=#{url}"
+    end
+  end
+
   def single_resource_doc do
     %JsonApiClient.Document{
       links: %JsonApiClient.Links{
@@ -327,26 +363,6 @@ defmodule JsonApiClientTest do
     test "delete!" , %{request: req}, do: assert %Response{} = delete!  req
   end
 
-
-  test "logs stats", context do
-    stats = %{time: %{action: 10}}
-
-    with_mocks(
-      [
-        {
-          Runner, [], [
-            run: fn(_request) -> {:error,  %Response{attributes: %{stats: stats}}} end,
-          ]
-        },
-        {
-          Instrumentation, [], [
-            log: fn(to_log) -> assert to_log == stats end,
-          ]
-        }
-      ]) do
-      Request.new(context.url <> "/articles") |> fetch
-    end
-  end
 
   def error_doc do
     %JsonApiClient.Document{

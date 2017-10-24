@@ -65,18 +65,13 @@ defmodule JsonApiClient do
                    |> Enum.into([])
     body = Request.get_body(req)
 
-    request = %{
+    Runner.run %{
       method: req.method,
       url: url, body: body,
       headers: headers,
       http_options: http_options,
       service_name: req.service_name
     }
-    {code, result} = Runner.run(request)
-
-    Instrumentation.log(result.attributes[:stats])
-
-    {code, result}
   end
 
   @doc "Error raising version of `execute/1`"
