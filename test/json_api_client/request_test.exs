@@ -191,4 +191,13 @@ defmodule JsonApiClient.RequestTest do
       assert %Request{headers: %{"X-My-Header" => "My header 2"}} = req
     end
   end
+
+  describe "service_name" do
+    test "sents new value" do
+      req = new("http://api.net")
+      |> service_name("my service")
+
+      assert %Request{service_name: "my service"} = req
+    end
+  end
 end

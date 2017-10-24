@@ -12,6 +12,7 @@ defmodule JsonApiClient.Request do
     method: :get,
     headers: %{},
     options: %{},
+    service_name: nil
   )
 
   @doc "Create a request with the given base URL"
@@ -27,6 +28,9 @@ defmodule JsonApiClient.Request do
 
   @doc "Associate a resource with this request"
   def resource(req, resource), do: Map.put(req, :resource, resource)
+
+  @doc "Associate a service_name with this request"
+  def service_name(req, service_name), do: Map.put(req, :service_name, service_name)
 
   @doc "Associate a path with this request"
   def path(req, %{type: _, id: _} = res), do: Map.merge(req, %{base_url: get_url(resource(req, res))})
