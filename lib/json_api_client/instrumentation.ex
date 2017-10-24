@@ -22,7 +22,7 @@ defmodule JsonApiClient.Instrumentation do
 
   def log(stats, log_level \\ @log_level) do
     if log_level do
-      Logger.log(:warn, to_logfmt(Iteraptor.to_flatmap(stats)))
+      Logger.log(log_level, to_logfmt(Iteraptor.to_flatmap(stats)))
     end
   end
 
