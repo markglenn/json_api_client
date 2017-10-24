@@ -5,19 +5,23 @@ defmodule JsonApiClient.Instrumentation do
 
   @log_level Application.get_env(:json_api_client, :log_level)
 
-  def track_stats(action, result, stats) when not is_function(result) do
-    add_stats(result, action, stats, 0)
+  def track_stats(action, {status, response}) do
+    add_stats({status, response}, action, 0)
   end
 
-  def track_stats(action, fun, stats) do
+  def track_stats(action, fun) do
     {microseconds, result} = :timer.tc(fun)
     ms = microseconds / 1_000
 
-    add_stats(result, action, stats, ms)
+    add_stats(result, action, ms)
   end
 
-  defp add_stats(result, action, stats, time) do
-    Tuple.append(result, DeepMerge.deep_merge(%{time: %{action => time}}, stats))
+  defp add_stats({status, response}, action, time) do
+    {status, assign(response, %{time: %{action => time}})}
+  end
+
+  defp assign(response, stats) do
+    %{response | attributes: DeepMerge.deep_merge(response.attributes, %{stats: stats})}
   end
 
   def log(stats, log_level \\ @log_level) do

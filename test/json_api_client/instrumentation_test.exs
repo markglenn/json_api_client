@@ -4,30 +4,40 @@ defmodule JsonApiClient.InstrumentationTest do
 
   import ExUnit.CaptureLog
   alias JsonApiClient.Instrumentation
+  alias JsonApiClient.Response
 
   describe ".track_stats" do
     test "returns a result and stats" do
-      assert{:foo, :bar, %{time: %{action: time}}} =
-        Instrumentation.track_stats(:action, fn -> {:foo, :bar} end, %{})
+      assert {:ok, %Response{
+        attributes: %{stats: %{time: %{action: time}}}
+      }} = Instrumentation.track_stats(:action, fn -> {:ok, %Response{}} end)
 
-       assert is_number time
+      assert is_number time
     end
 
     test "merges instrumentations" do
-      assert {:foo, :bar, %{time: %{action: time, action1: 10}}} =
-        Instrumentation.track_stats(:action, fn -> {:foo, :bar} end, %{time: %{action1: 10}})
+      assert {:ok, %Response{
+        attributes: %{stats: %{time: %{action: time, action1: 10}}}
+      }} = Instrumentation.track_stats(:action, fn -> {:ok, response_with_stats()} end)
 
        assert is_number time
     end
 
     test "when no function is provided it returns a result and stats" do
-      assert{:foo, :bar, %{time: %{action: 0}}} =  Instrumentation.track_stats( :action, {:foo, :bar}, %{})
+      assert {:ok, %Response{
+        attributes: %{stats: %{time: %{action: 0}}}
+      }} = Instrumentation.track_stats(:action, {:ok, %Response{}})
     end
 
     test "when no function is provided it merges stats" do
-      assert {:foo, :bar, %{time: %{action: 0, action1: 10}}} =
-        Instrumentation.track_stats( :action, {:foo, :bar}, %{time: %{action1: 10}})
+      assert {:ok, %Response{
+        attributes: %{stats: %{time: %{action: 0, action1: 10}}}
+      }} = Instrumentation.track_stats(:action, {:ok, response_with_stats()} )
     end
+  end
+
+  defp response_with_stats do
+    %Response{attributes: %{stats: %{time: %{action1: 10}}}}
   end
 
   describe ".log" do

@@ -8,50 +8,38 @@ defmodule JsonApiClient.Middleware.DocumentParser do
   import JsonApiClient.Instrumentation
 
   def call(request, next, _options) do
-    with {:ok, response, stats} <- call_next(request, next),
-         {:ok, parsed, parsing_stats}   <- parse_response(response, stats)
+    with {:ok, response} <- call_next(request, next),
+         {:ok, parsed}   <- track_stats(:parse_document, fn -> parse_response(response) end )
     do
-      {:ok, parsed, parsing_stats}
+      {:ok, parsed}
     end
   end
 
   defp call_next(request, next) do
     case next.(request) do
-      {:ok, _, _} = result -> result
-      {:error, error, stats} ->
-        add_empty_stats({:error, %RequestError{
-          original_error: error,
-          message: "Error completing HTTP request: #{error.reason}"
-        }}, stats)
+      {:ok, _} = result -> result
+      {:error, error} -> track_stats(:parse_document, {:error, error})
     end
   end
 
-  defp parse_response(response, stats) do
-    with {:ok, doc, stats} <- parse_document(response.body, stats)
+  defp parse_response(response) do
+    with {:ok, doc} <- parse_document(response.doc)
     do
-      {:ok, %Response{
-        status: response.status_code,
-        doc: doc,
-        headers: response.headers,
-      }, stats}
+      {:ok, %{response | doc: doc}}
     else
-      {:error, error, stats} ->
+      {:error, error} ->
         {:error, %RequestError{
           message: "Error Parsing JSON API Document",
           original_error: error,
-          status: response.status_code,
-        }, stats}
+          status: response.status,
+          attributes: response.attributes
+        }
+      }
     end
   end
 
-  defp parse_document("", stats), do: add_empty_stats({:ok, nil}, stats)
-  defp parse_document(json, stats) do
-    track_stats(:parse_document, fn ->
-      Parser.parse(json)
-    end, stats)
-  end
-
-  defp add_empty_stats(result, stats) do
-    track_stats(:parse_document, result, stats)
+  defp parse_document(""), do: {:ok, nil}
+  defp parse_document(json) do
+    Parser.parse(json)
   end
 end
