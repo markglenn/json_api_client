@@ -9,7 +9,6 @@ defmodule JsonApiClient.Middleware.Fuse do
   """
 
   alias JsonApiClient.RequestError
-  import JsonApiClient.Instrumentation
 
   @defaults {{:standard, 2, 10_000}, {:reset, 60_000}}
 

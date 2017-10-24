@@ -1,4 +1,7 @@
 defmodule JsonApiClient.Middleware.StatsTracker do
+  @moduledoc """
+  Middleware that adds stats data to response. Usually to be logged by `JsonApiClient.Middleware.StatsLogger`.
+  """
 
   def call(request, next, [wrap: {middleware, middleware_options}]) do
     {microseconds, {status, result}} = :timer.tc fn -> middleware.call(request, next, middleware_options) end
@@ -11,5 +14,5 @@ defmodule JsonApiClient.Middleware.StatsTracker do
 
     {status, %{result | attributes: attributes}}
   end
-  
+
 end

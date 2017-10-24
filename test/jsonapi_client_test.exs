@@ -3,12 +3,10 @@ defmodule JsonApiClientTest do
   import ExUnit.CaptureLog
   doctest JsonApiClient, import: true
 
-  import Mock
-
   import JsonApiClient
   import JsonApiClient.Request
-  alias JsonApiClient.Middleware.{Runner, Fuse, StatsLogger, StatsTracker, DocumentParser, HTTPClient}
-  alias JsonApiClient.{Request, Resource, Response, RequestError, Instrumentation}
+  alias JsonApiClient.Middleware.{Fuse, StatsLogger, StatsTracker, DocumentParser, HTTPClient}
+  alias JsonApiClient.{Request, Resource, Response, RequestError}
 
   setup do
     bypass = Bypass.open

@@ -8,7 +8,7 @@ defmodule JsonApiClient do
   @version Mix.Project.config[:version]
   @package_name JsonApiClient.Mixfile.project[:app]
 
-  alias __MODULE__.{Request, Instrumentation}
+  alias __MODULE__.Request
   alias __MODULE__.Middleware.Runner
   alias Mix.Project
 

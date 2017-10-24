@@ -46,8 +46,7 @@ defmodule JsonApiClient.Mixfile do
       {:exjsx, "~> 4.0.0"},
       {:uri_query, "~> 0.1.1"},
       {:deep_merge, "~> 0.1.0"},
-      {:fuse, "~> 2.4"},
-      {:iteraptor, "~> 0.7"}
+      {:fuse, "~> 2.4"}
     ]
   end
 

@@ -4,7 +4,6 @@ defmodule JsonApiClient.Middleware.HTTPClientTest do
 
   import Mock
 
-  alias JsonApiClient.Response
   alias JsonApiClient.Middleware.HTTPClient
 
   @response_body "body"

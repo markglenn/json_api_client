@@ -125,23 +125,64 @@ If the API your making requests of follows a different URI pattern you can pass 
 
 Every request made carries a special `User-Agent` header that looks like: `json_api_client/1.0.0/user_agent_suffix`. Each client is expected to set its `user_agent_suffix` via:
 
-```
+```elixir
 config :json_api_client, user_agent_suffix: "yourSufix"
 ```
-
-### http backend
-
-HTTP Backend can be configured via:
-```
-config :json_api_client, http_client_backend: JsonApiClient.HTTPClient.MyHTTBackend
-```
-
-The default HTTP Backend is `JsonApiClient.HTTPClient.HTTPoison`.
 
 ### timeout
 
 This library allows its users to specify a timeout for all its service calls by using a `timeout` setting. By default, the timeout is set to 500msecs.
 
-```
+```elixir
 config :json_api_client, timeout: 200
+```
+
+### middlewares
+
+JsonApiClient is implemented using a middleware architecture. You can configure the middleware stack by setting `middlewares` to a list of `{Module, opts}` tuples where `Module` is a module that implements the `JsonApiClient.Middleware` behavior and `opts` is the options that will be passed as the last argument to the modules `call` function.
+
+```elixir
+config :json_api_client,
+  middlewares: [
+    {JsonApiClient.Middleware.DocumentParser, nil}
+    {JsonApiClient.Middleware.HTTPClient, nil},
+  ]
+```
+
+If you don't configure a value for `middlewares` you'll get a stack equivilent to the one configured in the preceding example. 
+
+#### Fuse
+
+JsonApiClient ships with a middleware that uses the [Fuse](https://github.com/jlouis/fuse) circiut breaker library. It can be configured like this:
+
+```elixir
+config :json_api_client,
+  middlewares: [
+    {JsonApiClient.Middleware.Fuse, 
+      opts: {{:standard, 2, 10_000}, {:reset, 60_000}},
+      service1: {{:standard, 10, 5_000}, {:reset, 120_000}},
+    }
+  ]
+```
+
+In this example we're specifying the default fuse options with `opts` and then specifying different fuse options for the `service1` fuse. Fuses are named based on the `service_name` of the request, if present.
+
+#### StatsTracker & StatsLogger
+
+The `JsonApiClient.Middleware.StatsTracker` and `JsonApiClient.Middleware.StatsLogger` middlewares provide instrumentation for your requests. `StatsTracker` can be used to wrap another middleware and add data about how long that middleware took to run to the `Response` struct. `StatsLogger` looks for that data in the `Response` struct and logs it. Here's a sampel Configuration to add stats tracking to the http request and parsing.
+
+```elixir
+config :json_api_client,
+  middlewares: [
+    {JsonApiClient.Middleware.StatsLogger, log_level: :info},
+    {JsonApiClient.Middleware.StatsTracker, wrap: {JsonApiClient.Middleware.DocumentParser, nil}}
+    {JsonApiClient.Middleware.StatsTracker, wrap: {JsonApiClient.Middleware.HTTPClient, nil}},
+  ]
+
+```
+
+That would cause something like the following to be logged on each request:
+
+```
+15:57:30.198 [info]  total_ms=67.968 url=http://example.com/articles/123 document_parser_ms=0.01 http_client_ms=0.056517
 ```

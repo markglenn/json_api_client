@@ -1,4 +1,7 @@
 defmodule JsonApiClient.Middleware.StatsLogger do
+  @moduledoc """
+  Middleware that logs stats about the request, usually added by `JsonApiClient.Middleware.StatsTracker`
+  """
   require Logger
 
   @log_level Application.get_env(:json_api_client, :log_level)
@@ -36,10 +39,10 @@ defmodule JsonApiClient.Middleware.StatsLogger do
   defp stats_from_request(request) do
     [url: request.url]
   end
-  
+
   def log(stats, log_level) do
     Logger.log log_level, fn ->
-      to_logfmt(stats) 
+      to_logfmt(stats)
     end
   end
 

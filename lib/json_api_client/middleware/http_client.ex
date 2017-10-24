@@ -4,7 +4,6 @@ defmodule JsonApiClient.Middleware.HTTPClient do
   HTTP client Middleware based on HTTPoison library.
   """
 
-  import JsonApiClient.Instrumentation
   alias JsonApiClient.{Response, RequestError}
 
   def call(%{method: method, url: url, body: body, headers: headers, http_options: http_options}, _, _) do
@@ -21,4 +20,3 @@ defmodule JsonApiClient.Middleware.HTTPClient do
     end
   end
 end
-
