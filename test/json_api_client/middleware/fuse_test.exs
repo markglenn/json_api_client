@@ -85,7 +85,7 @@ defmodule JsonApiClient.Middleware.FuseTest do
         }
       ]
       ) do
-      Fuse.call(@request, fn request -> {:error, "error"} end, [])
+      Fuse.call(@request, fn _request -> {:error, "error"} end, [])
     end
   end
 
