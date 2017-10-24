@@ -75,23 +75,18 @@ defmodule JsonApiClient.Middleware.FuseTest do
   end
 
   test "melt use when error" do
-    {:ok, agent} = Agent.start_link fn -> 0 end
     with_mocks(
       [
         {
           :fuse, [], [
             ask: fn(_, :sync) -> :ok end,
-            melt: fn(_name) ->
-                Agent.update(agent, fn count -> count + 1 end)
-              :ok
-            end,
+            melt: fn(_name) -> :ok end,
           ]
         }
       ]
       ) do
       Fuse.call(@request, fn _request -> {:error, "error"} end, [])
-
-      assert Agent.get(agent, fn count -> count end) == 1
+      assert called :fuse.melt("json_api_client")
     end
   end
 
@@ -161,4 +156,3 @@ defmodule JsonApiClient.Middleware.FuseTest do
     end
   end
 end
-
