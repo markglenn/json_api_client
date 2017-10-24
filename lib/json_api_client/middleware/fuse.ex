@@ -19,7 +19,7 @@ defmodule JsonApiClient.Middleware.Fuse do
         run(request, next, name)
 
       :blown ->
-        {:error, "Unavailable - #{name} circuit blown"}
+        {:error, %{reason: "Unavailable - #{name} circuit blown"}}
 
       {:error, :not_found} ->
         :fuse.install(name, fuse_options(service_name, opts))
