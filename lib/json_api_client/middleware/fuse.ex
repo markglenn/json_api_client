@@ -22,11 +22,11 @@ defmodule JsonApiClient.Middleware.Fuse do
         run(request, next, name)
 
       :blown ->
-        add_instrumentation({:error, %RequestError {
+        track_stats(:fuse, {:error, %RequestError {
           original_error: "Unavailable - #{name} circuit blown",
           message: "Unavailable - #{name} circuit blown",
           status: nil
-        }}, :fuse, %{}, 0)
+        }}, %{})
 
       {:error, :not_found} ->
         :fuse.install(name, fuse_options(service_name, opts))

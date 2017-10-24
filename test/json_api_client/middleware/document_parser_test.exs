@@ -27,8 +27,8 @@ defmodule JsonApiClient.Middleware.DocumentParserTest do
 
   @request %{path: "foo"}
   @succses_response %{body: Poison.encode!(@resource_doc), status_code: 200, headers: [{:foo, :bar}]}
-  @instrumentation %{time: %{action: 10}}
-  @succses_result {:ok, @succses_response, @instrumentation}
+  @stats %{time: %{action: 10}}
+  @succses_result {:ok, @succses_response, @stats}
 
   @error %{reason: "unknown"}
 
@@ -50,7 +50,7 @@ defmodule JsonApiClient.Middleware.DocumentParserTest do
       :error,
       %RequestError{original_error: @error, message: "Error completing HTTP request: #{@error.reason}"},
       %{time: %{action: 10, parse_document: 0}}
-    } == DocumentParser.call(@request, fn _request -> {:error, @error, @instrumentation} end, %{})
+    } == DocumentParser.call(@request, fn _request -> {:error, @error, @stats} end, %{})
   end
 
   test "when a response body is empty" do
@@ -58,7 +58,7 @@ defmodule JsonApiClient.Middleware.DocumentParserTest do
      :ok,
      %Response{doc: nil, status: 200, headers: []},
      %{time: %{action: 10, parse_document: 0}}
-    } == DocumentParser.call(@request, fn _request -> {:ok, %{body: "", status_code: 200, headers: []}, @instrumentation} end, %{})
+    } == DocumentParser.call(@request, fn _request -> {:ok, %{body: "", status_code: 200, headers: []}, @stats} end, %{})
   end
 
   test "when a response cannot be parsed" do
@@ -66,7 +66,7 @@ defmodule JsonApiClient.Middleware.DocumentParserTest do
      :error,
      %RequestError{original_error: _, message: message},
      %{time: %{action: 10, parse_document: time}}
-    } = DocumentParser.call(@request, fn _request -> {:ok, %{body: "invalid", status_code: 200, headers: []}, @instrumentation} end, %{})
+    } = DocumentParser.call(@request, fn _request -> {:ok, %{body: "invalid", status_code: 200, headers: []}, @stats} end, %{})
 
     assert message =~ "Error Parsing JSON API Document"
     assert is_number time

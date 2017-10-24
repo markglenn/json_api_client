@@ -5,37 +5,36 @@ defmodule JsonApiClient.InstrumentationTest do
   import ExUnit.CaptureLog
   alias JsonApiClient.Instrumentation
 
-  describe ".instrumentation" do
-    test "returrns a result and instrumentation" do
+  describe ".track_stats" do
+    test "returns a result and stats" do
       assert{:foo, :bar, %{time: %{action: time}}} =
-        Instrumentation.instrumentation(:action, fn -> {:foo, :bar} end, %{})
+        Instrumentation.track_stats(:action, fn -> {:foo, :bar} end, %{})
 
        assert is_number time
     end
 
-    test "merge instrumentations" do
+    test "merges instrumentations" do
       assert {:foo, :bar, %{time: %{action: time, action1: 10}}} =
-        Instrumentation.instrumentation(:action, fn -> {:foo, :bar} end, %{time: %{action1: 10}})
+        Instrumentation.track_stats(:action, fn -> {:foo, :bar} end, %{time: %{action1: 10}})
 
        assert is_number time
     end
-  end
 
-  describe ".add_instrumentation" do
-    test "returrns a result and instrumentation" do
-      assert{:foo, :bar, %{time: %{action: 2}}} =  Instrumentation.add_instrumentation( {:foo, :bar}, :action, %{}, 2)
+    test "when no function is provided it returns a result and stats" do
+      assert{:foo, :bar, %{time: %{action: 0}}} =  Instrumentation.track_stats( :action, {:foo, :bar}, %{})
     end
 
-    test "merge instrumentations" do
-      assert {:foo, :bar, %{time: %{action: 2, action1: 10}}} =
-        Instrumentation.add_instrumentation( {:foo, :bar}, :action, %{time: %{action1: 10}}, 2)
+    test "when no function is provided it merges stats" do
+      assert {:foo, :bar, %{time: %{action: 0, action1: 10}}} =
+        Instrumentation.track_stats( :action, {:foo, :bar}, %{time: %{action1: 10}})
     end
   end
 
   describe ".log" do
     test "when logging is enabled" do
       stats = %{time: %{action: 10}}
-      assert capture_log(fn -> Instrumentation.log(stats, :warn) end) =~ Poison.encode!(stats)
+      log   = capture_log(fn -> Instrumentation.log(stats, :warn) end)
+      assert log  =~ "time.action=10"
     end
 
     test "when logging is disabled" do

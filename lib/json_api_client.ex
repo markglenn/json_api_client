@@ -54,18 +54,6 @@ defmodule JsonApiClient do
 
   """
   def execute(req) do
-    do_request(req)
-  end
-
-  @doc "Error raising version of `execute/1`"
-  def execute!(req) do
-    case execute(req) do
-      {:ok, response} -> response
-      {:error, error} -> raise error
-    end
-  end
-
-  defp do_request(req) do
     url          = Request.get_url(req)
     query_params = Request.get_query_params(req)
     headers      = default_headers()
@@ -84,11 +72,19 @@ defmodule JsonApiClient do
       http_options: http_options,
       service_name: req.service_name
     }
-    {code, result, instrumentation} = Runner.run(request)
+    {code, result, stats} = Runner.run(request)
 
-    Instrumentation.log(instrumentation)
+    Instrumentation.log(stats)
 
     {code, result}
+  end
+
+  @doc "Error raising version of `execute/1`"
+  def execute!(req) do
+    case execute(req) do
+      {:ok, response} -> response
+      {:error, error} -> raise error
+    end
   end
 
   defp default_options do

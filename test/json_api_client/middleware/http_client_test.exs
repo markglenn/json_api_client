@@ -69,7 +69,7 @@ defmodule JsonApiClient.Middleware.HTTPClientTest do
     assert response.body == @response_body
   end
 
-  test "includes time instrumentation", context do
+  test "includes time stats", context do
     Bypass.expect context.bypass, "GET", "/articles", fn conn ->
       Plug.Conn.resp(conn, 200, @response_body)
     end

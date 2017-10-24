@@ -322,19 +322,19 @@ defmodule JsonApiClientTest do
   end
 
 
-  test "logs instrumentation", context do
-    instrumentation = %{time: %{action: 10}}
+  test "logs stats", context do
+    stats = %{time: %{action: 10}}
 
     with_mocks(
       [
         {
           Runner, [], [
-            run: fn(_request) -> {:error, :not_found, instrumentation} end,
+            run: fn(_request) -> {:error, :not_found, stats} end,
           ]
         },
         {
           Instrumentation, [], [
-            log: fn(to_log) -> assert to_log == instrumentation end,
+            log: fn(to_log) -> assert to_log == stats end,
           ]
         }
       ]) do

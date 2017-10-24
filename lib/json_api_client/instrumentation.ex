@@ -5,20 +5,30 @@ defmodule JsonApiClient.Instrumentation do
 
   @log_level Application.get_env(:json_api_client, :log_level)
 
-  def instrumentation(action, fun, instrumentation) do
+  def track_stats(action, result, stats) when not is_function(result) do
+    add_stats(result, action, stats, 0)
+  end
+
+  def track_stats(action, fun, stats) do
     {microseconds, result} = :timer.tc(fun)
     ms = microseconds / 1_000
 
-    add_instrumentation(result, action, instrumentation, ms)
+    add_stats(result, action, stats, ms)
   end
 
-  def add_instrumentation(result, action, instrumentation, time) do
-    Tuple.append(result, DeepMerge.deep_merge(%{time: %{action => time}}, instrumentation))
+  defp add_stats(result, action, stats, time) do
+    Tuple.append(result, DeepMerge.deep_merge(%{time: %{action => time}}, stats))
   end
 
-  def log(opts, log_level \\ @log_level) do
+  def log(stats, log_level \\ @log_level) do
     if log_level do
-      Logger.log(:warn, Poison.encode!(opts))
+      Logger.log(:warn, to_logfmt(Iteraptor.to_flatmap(stats)))
     end
+  end
+
+  defp to_logfmt(enum) do
+    enum
+    |> Enum.map(fn {k, v} -> "#{k}=#{v}" end)
+    |> Enum.join(" ")
   end
 end

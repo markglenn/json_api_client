@@ -7,7 +7,7 @@ defmodule JsonApiClient.Middleware.HTTPClient do
   import JsonApiClient.Instrumentation
 
   def call(%{method: method, url: url, body: body, headers: headers, http_options: http_options}, _, _) do
-    instrumentation(:request, fn ->
+    track_stats(:request, fn ->
       HTTPoison.request(method, url, body, headers, http_options)
     end, %{})
   end
