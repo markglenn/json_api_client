@@ -4,17 +4,13 @@ defmodule JsonApiClient.Middleware.FactoryTest do
 
   alias JsonApiClient.Middleware.Factory
 
-  test "includes HTTPClient Middleware" do
-    assert Enum.member?(Factory.middlewares(), {JsonApiClient.Middleware.HTTPClient, nil})
-  end
-
-  test "includes configured Middleware (HTTPClient Middleware is the last)" do
-    [{JsonApiClient.Middleware.HTTPClient, _} | middlewares] = Factory.middlewares()
+  test "includes configured Middleware (DocumentParser and HTTPClient Middleware are the last)" do
+    middlewares = Application.get_env(:json_api_client, :middlewares, [])
     configured  = {JsonApiClient.Middleware.Fuse, [{:opts, {{:standard, 2, 10_000}, {:reset, 60_000}}}]}
 
     Mix.Config.persist(json_api_client: [middlewares: [configured]])
 
-    assert Factory.middlewares() == [configured, {JsonApiClient.Middleware.HTTPClient, nil}]
+    assert Factory.middlewares() == [configured, {JsonApiClient.Middleware.DocumentParser, nil}, {JsonApiClient.Middleware.HTTPClient, nil}]
 
     Mix.Config.persist(json_api_client: [middlewares: [middlewares]])
   end

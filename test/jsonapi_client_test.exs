@@ -1,11 +1,12 @@
 defmodule JsonApiClientTest do
   use ExUnit.Case
+  import ExUnit.CaptureLog
   doctest JsonApiClient, import: true
 
   import JsonApiClient
   import JsonApiClient.Request
+  alias JsonApiClient.Middleware.{Fuse, StatsTracker, DocumentParser, HTTPClient}
   alias JsonApiClient.{Request, Resource, Response, RequestError}
-  alias JsonApiClient.Middleware.Fuse
 
   setup do
     bypass = Bypass.open
@@ -196,7 +197,7 @@ defmodule JsonApiClientTest do
   end
 
   describe "Circuit Breaker middleware" do
-    test "stops requests processing", context do
+    setup context do
       Bypass.down(context.bypass)
 
       configured       = Application.get_env(:json_api_client, :middlewares, [])
@@ -205,14 +206,56 @@ defmodule JsonApiClientTest do
         {Fuse, [{:opts, {{:standard, max_fuse_request, 10_000}, {:reset, 60_000}}}]}
       ]])
 
-      for _ <- 0..max_fuse_request do fetch(Request.new(context.url <> "/")) end
+      on_exit fn ->
+        Mix.Config.persist(json_api_client: [middlewares: configured])
+      end
+
+      %{max_fuse_request: max_fuse_request}
+    end
+
+    test "stops requests processing", context do
+      for _ <- 0..context.max_fuse_request + 1 do fetch(Request.new(context.url <> "/")) end
 
       assert {:error, %RequestError{
-        original_error: %{reason: "Unavailable - json_api_client circuit blown"},
+        original_error: "Unavailable - json_api_client circuit blown",
         status: nil,
       }} = fetch(Request.new(context.url <> "/"))
+    end
+  end
 
-      Mix.Config.persist(json_api_client: [middlewares: configured])
+  describe "Stats Tracking middleware" do
+    setup context do
+      Bypass.expect context.bypass, fn conn ->
+        Plug.Conn.resp(conn, 200, Poison.encode! single_resource_doc())
+      end
+
+      configured = Application.get_env(:json_api_client, :middlewares, [])
+      Mix.Config.persist(json_api_client: [
+        middlewares: [
+          {StatsTracker, name: :parse_response, log: :info},
+          {DocumentParser, nil},
+          {StatsTracker, name: :http_request},
+          {HTTPClient, nil},
+        ]
+      ])
+
+      on_exit fn ->
+        Mix.Config.persist(json_api_client: [middlewares: configured])
+      end
+
+      :ok
+    end
+
+    test "logs stats", context do
+      url = context.url <> "/article/123"
+      log = capture_log fn ->
+        fetch(Request.new(url))
+      end
+
+      assert log =~ ~r/total_ms=\d+(\.\d+)?/
+      assert log =~ ~r/parse_response_ms=\d+(\.\d+)?/
+      assert log =~ ~r/http_request_ms=\d+(\.\d+)?/
+      assert log =~ "url=#{url}"
     end
   end
 
@@ -318,6 +361,7 @@ defmodule JsonApiClientTest do
     test "create!" , %{request: req}, do: assert %Response{} = create!  req
     test "delete!" , %{request: req}, do: assert %Response{} = delete!  req
   end
+
 
   def error_doc do
     %JsonApiClient.Document{
