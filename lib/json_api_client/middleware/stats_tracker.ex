@@ -65,15 +65,15 @@ defmodule JsonApiClient.Middleware.StatsTracker do
     name = Access.get(opts, :name)
     log_level = Access.get(opts, :log, false)
 
-    {microseconds, {status, result}} = :timer.tc fn -> next.(request) end
+    {microseconds, {status, response}} = :timer.tc fn -> next.(request) end
     timer_tuple = {name, microseconds / 1_000}
 
-    attributes = result.attributes
+    attributes = response.attributes
     |> update_in([:stats], &(&1 || %{}))
     |> update_in([:stats, :timers], &(&1 || []))
     |> update_in([:stats, :timers], &[timer_tuple | &1])
 
-    response = %{result | attributes: attributes}
+    response = %{response | attributes: attributes}
 
     log_level && log_stats(request, response, log_level)
 
@@ -93,11 +93,11 @@ defmodule JsonApiClient.Middleware.StatsTracker do
     timers = get_in(response.attributes, [:stats, :timers]) || []
     [{_, total_ms} | _] = timers
 
-    {stats, _} = Enum.reduce(Enum.reverse(timers), {[], 0}, fn ({name, ms}, {result, ms_spent_elsewhere}) ->
-      {[{:"#{name}_ms", ms - ms_spent_elsewhere} | result], ms}
+    {stats, _} = Enum.reduce(Enum.reverse(timers), {[], 0}, fn ({name, ms}, {stats, ms_spent_elsewhere}) ->
+      {[{:"#{name}_ms", ms - ms_spent_elsewhere} | stats], ms}
     end)
 
-    [{:total_ms, total_ms} |stats]
+    [{:total_ms, total_ms} | stats]
   end
 
   @doc false
