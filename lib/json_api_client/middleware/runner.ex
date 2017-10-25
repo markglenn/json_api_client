@@ -1,7 +1,5 @@
 defmodule JsonApiClient.Middleware.Runner do
-  @moduledoc """
-  Responsible for Middlewares stack execution.
-  """
+  @moduledoc false
 
   alias JsonApiClient.Middleware.Factory
 

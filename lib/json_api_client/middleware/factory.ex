@@ -1,7 +1,5 @@
 defmodule JsonApiClient.Middleware.Factory do
-  @moduledoc """
-  Provides all configured Middlewares.
-  """
+  @moduledoc false
 
   def middlewares do
     configured_middlewares() ++ [
