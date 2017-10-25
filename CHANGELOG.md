@@ -5,15 +5,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.1.0] - 2017-25-17
 ### Changed
-- Added `Request.header/3` method
 - Renamed client_name to user_agent_suffix
-- Use package name as prefix instead of ExApiClient.
-- set Mix.Project.config[:app] as a default value for user_agent_suffix
-- added possibility to configure HTTP Client Backend
+- use Mix.Project.config[:app] as a default value for user_agent_suffix
+- Use "JsonApiClient" (package name) as user agent prefix instead of "ExApiClient".
+
+### Added
+- Added `Request.header/3` method
 - Added middleware architecture
 - Added `Fuse` and `StatsTracker` middlewares
-- Bug fix when path generation is a post request
+
+### Fixed
+- Path generation from a now works correctly for post requests when `resource` specified
 
 ## [1.0.0] - 2017-10-17
 ### Added
