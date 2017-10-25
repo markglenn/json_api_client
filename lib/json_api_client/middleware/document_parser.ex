@@ -4,7 +4,7 @@ defmodule JsonApiClient.Middleware.DocumentParser do
   HTTP client JSON API doucment parser.
   """
 
-  alias JsonApiClient.{RequestError, Response, Parser}
+  alias JsonApiClient.{RequestError, Parser}
 
   def call(request, next, _options) do
     with {:ok, response} <- next.(request),

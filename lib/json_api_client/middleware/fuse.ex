@@ -7,7 +7,6 @@ defmodule JsonApiClient.Middleware.Fuse do
   - `service_name -> :opts` - fuse options per service
   - `:opts` - fuse options when options are not configured per service (see fuse docs for reference)
 
-
   ```elixir
   config :json_api_client,
     middlewares: [
