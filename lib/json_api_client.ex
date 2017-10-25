@@ -8,7 +8,7 @@ defmodule JsonApiClient do
   @version Mix.Project.config[:version]
   @package_name JsonApiClient.Mixfile.project[:app]
 
-  alias __MODULE__.{Request, RequestError, Response, Parser}
+  alias __MODULE__.Request
   alias __MODULE__.Middleware.Runner
   alias Mix.Project
 
@@ -54,22 +54,6 @@ defmodule JsonApiClient do
 
   """
   def execute(req) do
-    with {:ok, response} <- do_request(req),
-         {:ok, parsed}   <- parse_response(response)
-    do
-      {:ok, parsed}
-    end
-  end
-
-  @doc "Error raising version of `execute/1`"
-  def execute!(req) do
-    case execute(req) do
-      {:ok, response} -> response
-      {:error, error} -> raise error
-    end
-  end
-
-  defp do_request(req) do
     url          = Request.get_url(req)
     query_params = Request.get_query_params(req)
     headers      = default_headers()
@@ -81,43 +65,22 @@ defmodule JsonApiClient do
                    |> Enum.into([])
     body = Request.get_body(req)
 
-    request = %{
+    Runner.run %{
       method: req.method,
       url: url, body: body,
       headers: headers,
       http_options: http_options,
       service_name: req.service_name
     }
-    case Runner.run(request) do
-      {:ok, _} = result -> result
-      {:error, error} ->
-        {:error, %RequestError{
-          original_error: error,
-          message: "Error completing HTTP request: #{error.reason}",
-        }}
-    end
   end
 
-  defp parse_response(response) do
-    with {:ok, doc} <- parse_document(response.body)
-    do
-      {:ok, %Response{
-        status: response.status_code,
-        doc: doc,
-        headers: response.headers,
-      }}
-    else
-      {:error, error} ->
-        {:error, %RequestError{
-          message: "Error Parsing JSON API Document",
-          original_error: error,
-          status: response.status_code,
-        }}
+  @doc "Error raising version of `execute/1`"
+  def execute!(req) do
+    case execute(req) do
+      {:ok, response} -> response
+      {:error, error} -> raise error
     end
   end
-
-  defp parse_document(""), do: {:ok, nil}
-  defp parse_document(json), do: Parser.parse(json)
 
   defp default_options do
     %{
