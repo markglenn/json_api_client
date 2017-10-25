@@ -6,6 +6,21 @@ defmodule JsonApiClient.Middleware.Fuse do
   ### Options
   - `service_name -> :opts` - fuse options per service
   - `:opts` - fuse options when options are not configured per service (see fuse docs for reference)
+
+
+  ```elixir
+  config :json_api_client,
+    middlewares: [
+      {JsonApiClient.Middleware.Fuse, 
+        opts: {{:standard, 2, 10_000}, {:reset, 60_000}},
+        service1: {{:standard, 10, 5_000}, {:reset, 120_000}},
+      }
+    ]
+  ```
+
+  In this example we're specifying the default fuse options with `opts` and
+  then specifying different fuse options for the `service1` fuse. Fuses are
+  named based on the `service_name` of the request, if present.
   """
 
   alias JsonApiClient.RequestError

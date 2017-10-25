@@ -5,7 +5,7 @@ defmodule JsonApiClientTest do
 
   import JsonApiClient
   import JsonApiClient.Request
-  alias JsonApiClient.Middleware.{Fuse, StatsLogger, StatsTracker, DocumentParser, HTTPClient}
+  alias JsonApiClient.Middleware.{Fuse, StatsTracker, DocumentParser, HTTPClient}
   alias JsonApiClient.{Request, Resource, Response, RequestError}
 
   setup do
@@ -232,10 +232,9 @@ defmodule JsonApiClientTest do
       configured = Application.get_env(:json_api_client, :middlewares, [])
       Mix.Config.persist(json_api_client: [
         middlewares: [
-          {StatsLogger, log_level: :info},
-          {StatsTracker, :parse_response},
+          {StatsTracker, name: :parse_response, log: :info},
           {DocumentParser, nil},
-          {StatsTracker, :http_request},
+          {StatsTracker, name: :http_request},
           {HTTPClient, nil},
         ]
       ])
