@@ -169,20 +169,45 @@ In this example we're specifying the default fuse options with `opts` and then s
 
 #### StatsTracker & StatsLogger
 
-The `JsonApiClient.Middleware.StatsTracker` and `JsonApiClient.Middleware.StatsLogger` middlewares provide instrumentation for your requests. `StatsTracker` can be used to wrap another middleware and add data about how long that middleware took to run to the `Response` struct. `StatsLogger` looks for that data in the `Response` struct and logs it. Here's a sampel Configuration to add stats tracking to the http request and parsing.
+The `JsonApiClient.Middleware.StatsTracker` and `JsonApiClient.Middleware.StatsLogger` middlewares provide instrumentation for your requests. `StatsTracker` can be added to the middleware stack to track the time spent in the middleware that comes after it and add that data to the `Response` struct. `StatsLogger` looks for that data in the `Response` struct and logs it. Here's a sampel Configuration to add stats tracking to the http request and parsing.
 
 ```elixir
 config :json_api_client,
   middlewares: [
     {JsonApiClient.Middleware.StatsLogger, log_level: :info},
-    {JsonApiClient.Middleware.StatsTracker, wrap: {JsonApiClient.Middleware.DocumentParser, nil}}
-    {JsonApiClient.Middleware.StatsTracker, wrap: {JsonApiClient.Middleware.HTTPClient, nil}},
+    {JsonApiClient.Middleware.StatsTracker, :parse_response},
+    {JsonApiClient.Middleware.DocumentParser, nil},
+    {JsonApiClient.Middleware.StatsTracker, :http_request},
+    {JsonApiClient.Middleware.HTTPClient, nil},
   ]
-
 ```
 
 That would cause something like the following to be logged on each request:
 
 ```
-15:57:30.198 [info]  total_ms=67.968 url=http://example.com/articles/123 document_parser_ms=0.01 http_client_ms=0.056517
+15:57:30.198 [info]  total_ms=73.067 url=http://example.com/articles/123 parse_response_ms=7.01 http_request=66.057
+```
+
+Note that the `StatsTracker` middleware tracks the time spent in all the middleware that comes after it in the stack. When `StatsLogger` logs this data it subtacts the time recorded by the next StatsTracker in the stack so that you can see the time spent in distinct potions of the middleware stack.
+
+Consider this stack, for example:
+
+```elixir
+config :json_api_client,
+  middlewares: [
+    {JsonApiClient.Middleware.StatsLogger, log_level: :info},
+    {JsonApiClient.Middleware.StatsTracker, :custom_middleware}, 
+    {CustomMiddleware1, nil},
+    {CustomMiddleware2, nil},
+    {CustomMiddleware3, nil},
+    {JsonApiClient.Middleware.StatsTracker, :request_and_parsing},
+    {JsonApiClient.Middleware.DocumentParser, nil},
+    {JsonApiClient.Middleware.HTTPClient, nil},
+  ]
+```
+
+`StatsLogger` will log thew time spent in all three custom loggers as one value and the time spent preforming the http request and parsing the response as another.
+
+```
+15:57:30.198 [info]  total_ms=100 url=http://example.com/articles/123 custom_middleware_ms=12 request_and_parsing=88
 ```

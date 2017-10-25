@@ -13,9 +13,9 @@ defmodule JsonApiClient.Middleware.StatsLoggerTest do
       attributes: %{
         stats: %{ 
           timers: [
-            {:"Elixir.JsonApiClient.Middleware.TestMiddleware1", 30},
-            {:"Elixir.JsonApiClient.Middleware.TestMiddleware2", 20},
-            {:"Elixir.JsonApiClient.Middleware.TestMiddleware3", 15},
+            test_middleware1: 30,
+            test_middleware2: 20,
+            test_middleware3: 15,
           ]
         }
       }

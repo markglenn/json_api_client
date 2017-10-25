@@ -233,8 +233,10 @@ defmodule JsonApiClientTest do
       Mix.Config.persist(json_api_client: [
         middlewares: [
           {StatsLogger, log_level: :info},
-          {StatsTracker, wrap: {DocumentParser, nil}},
-          {StatsTracker, wrap: {HTTPClient, nil}},
+          {StatsTracker, :parse_response},
+          {DocumentParser, nil},
+          {StatsTracker, :http_request},
+          {HTTPClient, nil},
         ]
       ])
 
@@ -252,8 +254,8 @@ defmodule JsonApiClientTest do
       end
 
       assert log =~ ~r/total_ms=\d+(\.\d+)?/
-      assert log =~ ~r/document_parser_ms=\d+(\.\d+)?/
-      assert log =~ ~r/http_client_ms=\d+(\.\d+)?/
+      assert log =~ ~r/parse_response_ms=\d+(\.\d+)?/
+      assert log =~ ~r/http_request_ms=\d+(\.\d+)?/
       assert log =~ "url=#{url}"
     end
   end

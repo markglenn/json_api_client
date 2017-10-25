@@ -23,14 +23,8 @@ defmodule JsonApiClient.Middleware.StatsLogger do
   defp stats_from_response(response) do
     timers = Enum.reverse(get_in(response.attributes, [:stats, :timers]) || [])
 
-    {stats, _} = Enum.reduce(timers, {[], 0}, fn ({module, ms}, {result, ms_spent_elsewhere}) ->
-      name = module
-      |> Module.split
-      |> List.last
-      |> Macro.underscore
-      |> String.replace(~r/$/, "_ms")
-
-      {[{name, ms - ms_spent_elsewhere} | result], ms}
+    {stats, _} = Enum.reduce(timers, {[], 0}, fn ({name, ms}, {result, ms_spent_elsewhere}) ->
+      {[{"#{name}_ms", ms - ms_spent_elsewhere} | result], ms}
     end)
 
     stats
