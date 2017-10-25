@@ -6,11 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
-- Added `Request.header/3` method 
+- Added `Request.header/3` method
 - Renamed client_name to user_agent_suffix
 - Use package name as prefix instead of ExApiClient.
 - set Mix.Project.config[:app] as a default value for user_agent_suffix
-- added possibility to configure HTTP Client Backend 
+- added possibility to configure HTTP Client Backend
+- Bug fix when path generation is a post request
 
 ## [1.0.0] - 2017-10-17
 ### Added
