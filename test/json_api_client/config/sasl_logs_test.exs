@@ -7,4 +7,8 @@ defmodule JsonApiClient.Config.SASLLogsTest do
   test "suppresses SASL reports" do
     assert SASLLogs.suppress(1, :info, :report, {:progress, :foo}) == :skip
   end
+
+  test "does not suppress anything but SASL reports" do
+    assert SASLLogs.suppress(1, :info, :format, "foo") == :none
+  end
 end
