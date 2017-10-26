@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Middleware call `request` parameter type is changed to `Request`. 
+- Added `Request.attributes`
+- Added `DefaultRequestConfig` middleware
+- Added `Request.new/0` method 
 
 ## [1.1.0] - 2017-25-17
 ### Changed
