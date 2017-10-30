@@ -3,7 +3,6 @@ MAINTAINER Team Aegis <aegis@decisiv.com>
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get -y update && apt-get install -y --no-install-recommends apt-utils build-essential
 RUN mkdir /app
 WORKDIR /app
 ADD . /app
