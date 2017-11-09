@@ -164,6 +164,12 @@ defmodule JsonApiClient.RequestTest do
 
       assert "http://api.net/notes/123/replies" = url
     end
+
+    test "adds a `/` path if no other path specified" do
+      # Plays nicer with httposion/hackney: https://github.com/edgurgel/httpoison/issues/300
+      assert "http://api.net/" = get_url new("http://api.net")
+      assert "http://api.net:8080/" = get_url new("http://api.net:8080")
+    end
   end
 
   describe "path()" do
