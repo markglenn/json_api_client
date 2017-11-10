@@ -150,13 +150,21 @@ defmodule JsonApiClient.Request do
       "http://api.net/posts/123"
   """
   def get_url(%Request{base_url: base_url, id: id}) when not is_nil(id),
-    do: join_url_parts [base_url, id]
+    do: [base_url, id] |> join_url_parts |> normalize_url
   def get_url(%Request{base_url: base_url, resource: %{type: type}, method: :post}),
-    do: join_url_parts [base_url, type]
+    do: [base_url, type] |> join_url_parts |> normalize_url
   def get_url(%Request{base_url: base_url, resource: %{type: type, id: id}}),
-    do: join_url_parts [base_url, type, id]
+    do: [base_url, type, id] |> join_url_parts |> normalize_url
   def get_url(%Request{base_url: base_url}),
-    do: base_url
+    do: base_url |> normalize_url
+
+  defp normalize_url(url) do
+    set_default_path = &(%{&1 | path: &1.path || "/"})
+    url
+    |> URI.parse
+    |> set_default_path.()
+    |> to_string
+  end
 
   defp join_url_parts(parts) do
     parts
