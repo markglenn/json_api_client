@@ -151,9 +151,11 @@ config :json_api_client,
 
 If you don't configure a value for `middlewares` you'll get a stack equivilent to the one configured in the preceding example. 
 
-#### Included Middlewre
+#### included middlewre
 
-The following middleware ships with `JsonApiClient`
+The following middleware ships with `JsonApiClient`:
 
 * `JsonApiClient.Middleware.Fuse`
 * `JsonApiClient.Middleware.StatsTracker`
+
+**Please refer to the module documentation for each middleware for information**
