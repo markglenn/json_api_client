@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 ### Removed
 - Hard dependency on fuse and sasl erlang packages. Fuse is now declared as optional.
+- JsonApiClient.Config.SASLLogs log translator in favor of direct configuration of sasl.
 
 ## [1.2.0] 2017-10-27
 ### Changed
