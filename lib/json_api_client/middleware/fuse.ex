@@ -1,8 +1,25 @@
+if Code.ensure_loaded?(:fuse) do
 defmodule JsonApiClient.Middleware.Fuse do
   @behaviour JsonApiClient.Middleware
 
   @moduledoc """
-  Circuit Breaker middleware using [fuse](https://github.com/jlouis/fuse)
+  Circuit Breaker middleware using [fuse](https://github.com/jlouis/fuse). In order to use this middleware the
+  fuse package must be added to your mix project and the `fuse` and `sasl` applications must be started. e.g:
+
+  ```elixir
+  defp deps do
+    [
+      {:fuse, "~> 2.4"}
+    ]
+  end
+
+  defp applications do
+    [
+      extra_applications: [:sasl, :fuse]
+    ]
+  end
+  ```
+
   ### Options
   - `service_name -> :opts` - fuse options per service
   - `:opts` - fuse options when options are not configured per service (see fuse docs for reference)
@@ -59,4 +76,5 @@ defmodule JsonApiClient.Middleware.Fuse do
         success
     end
   end
+end
 end

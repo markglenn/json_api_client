@@ -206,7 +206,10 @@ defmodule JsonApiClientTest do
         {Fuse, [{:opts, {{:standard, max_fuse_request, 10_000}, {:reset, 60_000}}}]}
       ]])
 
+      {:ok, fuse_deps} = Application.ensure_all_started(:fuse)
+
       on_exit fn ->
+        Enum.each(fuse_deps, &Application.stop/1)
         Mix.Config.persist(json_api_client: [middlewares: configured])
       end
 
