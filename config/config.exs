@@ -26,10 +26,4 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 
-config :logger, [
-  handle_sasl_reports: true
-]
-
-Logger.add_translator {JsonApiClient.Config.SASLLogs, :suppress}
-
 import_config "#{Mix.env}.exs"
