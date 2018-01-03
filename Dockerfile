@@ -1,9 +1,8 @@
-FROM elixir:1.5.1-slim
+FROM elixir:1.5.2-slim
 MAINTAINER Team Aegis <aegis@decisiv.com>
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get -y update && apt-get install -y --no-install-recommends apt-utils build-essential
 RUN mkdir /app
 WORKDIR /app
 ADD . /app
