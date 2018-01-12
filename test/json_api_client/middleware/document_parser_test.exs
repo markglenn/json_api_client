@@ -29,7 +29,7 @@ defmodule JsonApiClient.Middleware.DocumentParserTest do
   @succses_response %Response{
     doc: Poison.encode!(@resource_doc),
     status: 200,
-    headers: [{:foo, :bar}],
+    headers: [{:foo, :bar}]
   }
   @succses_result {:ok, @succses_response}
 
@@ -37,40 +37,44 @@ defmodule JsonApiClient.Middleware.DocumentParserTest do
 
   test "when the doc is OK" do
     assert {:ok, %Response{
-      doc: doc,
-      status: 200,
-      headers: [foo: :bar],
-      }
-    } = DocumentParser.call(@request, fn  request ->
-      assert request == @request
-      @succses_result
-    end, %{})
+             doc: doc,
+             status: 200,
+             headers: [foo: :bar]
+           }} =
+             DocumentParser.call(
+               @request,
+               fn request ->
+                 assert request == @request
+                 @succses_result
+               end,
+               %{}
+             )
 
     assert @resource_doc == doc
   end
 
   test "when the next Middleware response is error" do
     assert {
-      :error,
-      %RequestError{
-        original_error: "unknown",
-      }
-    } = DocumentParser.call(@request, fn _request -> {:error, @error} end, %{})
+             :error,
+             %RequestError{
+               original_error: "unknown"
+             }
+           } = DocumentParser.call(@request, fn _request -> {:error, @error} end, %{})
   end
 
   test "when a response body is empty" do
     assert {:ok, %Response{
-      doc: nil,
-      status: 200,
-      headers: [foo: :bar],
-    }} = DocumentParser.call(@request, fn _request -> {:ok, %{@succses_response | doc: ""}} end, %{})
+             doc: nil,
+             status: 200,
+             headers: [foo: :bar]
+           }} = DocumentParser.call(@request, fn _request -> {:ok, %{@succses_response | doc: ""}} end, %{})
   end
 
   test "when a response cannot be parsed" do
     assert {:error, %RequestError{
-      original_error: _,
-      message: message,
-    }} = DocumentParser.call(@request, fn _request -> {:ok, %{@succses_response | doc: "invalid"}} end, %{})
+             original_error: _,
+             message: message
+           }} = DocumentParser.call(@request, fn _request -> {:ok, %{@succses_response | doc: "invalid"}} end, %{})
 
     assert message =~ "Error Parsing JSON API Document"
   end

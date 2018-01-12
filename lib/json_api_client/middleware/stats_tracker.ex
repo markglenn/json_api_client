@@ -67,13 +67,14 @@ defmodule JsonApiClient.Middleware.StatsTracker do
     name = Access.get(opts, :name)
     log_level = Access.get(opts, :log, false)
 
-    {microseconds, {status, response}} = :timer.tc fn -> next.(request) end
+    {microseconds, {status, response}} = :timer.tc(fn -> next.(request) end)
     timer_tuple = {name, microseconds / 1_000}
 
-    attributes = response.attributes
-    |> update_in([:stats], &(&1 || %{}))
-    |> update_in([:stats, :timers], &(&1 || []))
-    |> update_in([:stats, :timers], &[timer_tuple | &1])
+    attributes =
+      response.attributes
+      |> update_in([:stats], &(&1 || %{}))
+      |> update_in([:stats, :timers], &(&1 || []))
+      |> update_in([:stats, :timers], &[timer_tuple | &1])
 
     response = %{response | attributes: attributes}
 
@@ -83,11 +84,12 @@ defmodule JsonApiClient.Middleware.StatsTracker do
   end
 
   defp log_stats(request, response, log_level) do
-    stats = []
-    |> Enum.concat(stats_from_request(request))
-    |> Enum.concat(stats_from_response(response))
+    stats =
+      []
+      |> Enum.concat(stats_from_request(request))
+      |> Enum.concat(stats_from_response(response))
 
-    log stats, log_level
+    log(stats, log_level)
   end
 
   @doc false
@@ -95,9 +97,10 @@ defmodule JsonApiClient.Middleware.StatsTracker do
     timers = get_in(response.attributes, [:stats, :timers]) || []
     [{_, total_ms} | _] = timers
 
-    {stats, _} = Enum.reduce(Enum.reverse(timers), {[], 0}, fn ({name, ms}, {stats, ms_spent_elsewhere}) ->
-      {[{:"#{name}_ms", ms - ms_spent_elsewhere} | stats], ms}
-    end)
+    {stats, _} =
+      Enum.reduce(Enum.reverse(timers), {[], 0}, fn {name, ms}, {stats, ms_spent_elsewhere} ->
+        {[{:"#{name}_ms", ms - ms_spent_elsewhere} | stats], ms}
+      end)
 
     [{:total_ms, total_ms} | stats]
   end
@@ -108,9 +111,9 @@ defmodule JsonApiClient.Middleware.StatsTracker do
   end
 
   defp log(stats, log_level) do
-    Logger.log log_level, fn ->
+    Logger.log(log_level, fn ->
       to_logfmt(stats)
-    end
+    end)
   end
 
   defp to_logfmt(enum) do
@@ -118,5 +121,4 @@ defmodule JsonApiClient.Middleware.StatsTracker do
     |> Enum.map(fn {k, v} -> "#{k}=#{v}" end)
     |> Enum.join(" ")
   end
-
 end

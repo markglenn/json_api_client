@@ -66,14 +66,17 @@ defmodule JsonApiClient.Request do
   def header(req, header_name, header_value), do: %{req | headers: Map.put(req.headers, header_name, header_value)}
 
   defp encode_fields(%{fields: %{} = fields} = params) do
-    encoded_fields = fields
+    encoded_fields =
+      fields
       |> Enum.map(fn
         {k, v} when is_list(v) -> {k, Enum.join(v, ",")}
         {k, v} -> {k, v}
       end)
       |> Enum.into(%{})
+
     Map.put(params, :fields, encoded_fields)
   end
+
   defp encode_fields(params), do: params
 
   @doc """
@@ -87,23 +90,26 @@ defmodule JsonApiClient.Request do
       include(%Request{}, ["author", "comments.author"])
   """
   def include(req, relationship_list)
-  when is_list(relationship_list)
-  do
+      when is_list(relationship_list) do
     existring_relationships = req.params[:include] || []
     params(req, include: existring_relationships ++ relationship_list)
   end
+
   def include(req, relationships)
-  when is_binary(relationships) or is_atom(relationships)
-  do
+      when is_binary(relationships) or is_atom(relationships) do
     existring_relationships = req.params[:include] || []
     params(req, include: existring_relationships ++ [relationships])
   end
+
   defp encode_include(%{include: include} = params) when is_list(include) do
-    encoded_include = include
-    |> List.flatten
-    |> Enum.join(",")
+    encoded_include =
+      include
+      |> List.flatten()
+      |> Enum.join(",")
+
     Map.put(params, :include, encoded_include)
   end
+
   defp encode_include(include), do: include
 
   @doc "Specify the sort param for the request."
@@ -130,7 +136,7 @@ defmodule JsonApiClient.Request do
       "a=new&b=bar&c=baz"
   """
   def params(req, list) do
-    Enum.reduce(list, req, fn ({param, val}, acc) ->
+    Enum.reduce(list, req, fn {param, val}, acc ->
       new_params = Map.put(acc.params, param, val)
       put_in(acc.params, new_params)
     end)
@@ -151,17 +157,20 @@ defmodule JsonApiClient.Request do
   """
   def get_url(%Request{base_url: base_url, id: id}) when not is_nil(id),
     do: [base_url, id] |> join_url_parts |> normalize_url
+
   def get_url(%Request{base_url: base_url, resource: %{type: type}, method: :post}),
     do: [base_url, type] |> join_url_parts |> normalize_url
+
   def get_url(%Request{base_url: base_url, resource: %{type: type, id: id}}),
     do: [base_url, type, id] |> join_url_parts |> normalize_url
-  def get_url(%Request{base_url: base_url}),
-    do: base_url |> normalize_url
+
+  def get_url(%Request{base_url: base_url}), do: base_url |> normalize_url
 
   defp normalize_url(url) do
-    set_default_path = &(%{&1 | path: &1.path || "/"})
+    set_default_path = &%{&1 | path: &1.path || "/"}
+
     url
-    |> URI.parse
+    |> URI.parse()
     |> set_default_path.()
     |> to_string
   end
@@ -191,18 +200,18 @@ defmodule JsonApiClient.Request do
     params
     |> encode_fields
     |> encode_include
-    |> UriQuery.params
+    |> UriQuery.params()
   end
+
   def get_query_params(_req), do: []
 
   @doc """
   Retruns the HTTP body of the request
   """
   def get_body(%Request{method: method, resource: resource})
-  when method in [:post, :patch, :put] and not is_nil(resource)
-  do
+      when method in [:post, :patch, :put] and not is_nil(resource) do
     Poison.encode!(%{data: resource})
   end
-  def get_body(_req), do: ""
 
+  def get_body(_req), do: ""
 end

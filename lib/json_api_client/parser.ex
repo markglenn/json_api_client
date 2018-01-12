@@ -55,7 +55,9 @@ defmodule JsonApiClient.Parser do
           {:error, error} -> {:error, error}
           {:ok, values} -> {:ok, struct(representation, values)}
         end
-      error -> error
+
+      error ->
+        error
     end
   end
 
@@ -64,7 +66,7 @@ defmodule JsonApiClient.Parser do
   end
 
   defp array_field_value(name, field_definition, value) do
-    Enum.reduce_while(Enum.reverse(value), {:ok, []}, fn(entry, {_, acc}) ->
+    Enum.reduce_while(Enum.reverse(value), {:ok, []}, fn entry, {_, acc} ->
       case field_value(name, Map.put(field_definition, :array, false), entry) do
         {:error, error} -> {:halt, {:error, error}}
         {:ok, value} -> {:cont, {:ok, [value | acc]}}
@@ -73,7 +75,7 @@ defmodule JsonApiClient.Parser do
   end
 
   defp compute_values(fields, data) do
-    Enum.reduce_while(fields, {:ok, %{}}, fn({k, definition}, {_, acc}) ->
+    Enum.reduce_while(fields, {:ok, %{}}, fn {k, definition}, {_, acc} ->
       case field_value(k, definition, data[to_string(k)]) do
         {:error, error} -> {:halt, {:error, error}}
         {:ok, value} -> {:cont, {:ok, Map.put(acc, k, value)}}
