@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] 
+- `mix format` codebase
+
 ## [2.0.0] 2018-01-03
 ### Fixed
 - urls with explicit ports but no path are normalized so they don't [cause errors](https://github.com/edgurgel/httpoison/issues/300) in HTTPoison/hackney. 
@@ -57,7 +60,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - The `RequestError` struct lost the `reson` attribute. We now just use `message`
 
 
-[Unreleased]: https://github.com/decisiv/json_api_client/compare/0.5.1...HEAD
+[Unreleased]: https://github.com/decisiv/json_api_client/compare/2.0.0...HEAD
+[2.0.0]: https://github.com/decisiv/json_api_client/compare/1.2.0...2.0.0
+[1.2.0]: https://github.com/decisiv/json_api_client/compare/1.1.0...1.2.0
+[1.1.0]: https://github.com/decisiv/json_api_client/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/decisiv/json_api_client/compare/0.5.2...1.0.0
 [0.5.2]: https://github.com/decisiv/json_api_client/compare/0.5.1...0.5.2
 [0.5.1]: https://github.com/decisiv/json_api_client/compare/0.5.0...0.5.1
