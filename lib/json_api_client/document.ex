@@ -47,7 +47,7 @@ defmodule JsonApiClient.Error do
     title: nil,
     detail: nil,
     meta: nil,
-    source: nil,
+    source: nil
   )
 end
 
@@ -76,12 +76,12 @@ defmodule JsonApiClient.Resource do
   """
 
   defstruct(
-    id:            nil,
-    type:          nil,
-    attributes:    nil,
-    links:         nil,
+    id: nil,
+    type: nil,
+    attributes: nil,
+    links: nil,
     relationships: nil,
-    meta:          nil,
+    meta: nil
   )
 end
 

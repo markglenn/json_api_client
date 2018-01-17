@@ -8,15 +8,13 @@ defmodule JsonApiClient.Middleware.DocumentParser do
 
   def call(request, next, _options) do
     with {:ok, response} <- next.(request),
-         {:ok, parsed}   <- parse_response(response)
-    do
+         {:ok, parsed} <- parse_response(response) do
       {:ok, parsed}
     end
   end
 
   defp parse_response(response) do
-    with {:ok, doc} <- parse_document(response.doc)
-    do
+    with {:ok, doc} <- parse_document(response.doc) do
       {:ok, %{response | doc: doc}}
     else
       {:error, error} ->
@@ -25,12 +23,12 @@ defmodule JsonApiClient.Middleware.DocumentParser do
           original_error: error,
           status: response.status,
           attributes: response.attributes
-        }
-      }
+        }}
     end
   end
 
   defp parse_document(""), do: {:ok, nil}
+
   defp parse_document(json) do
     Parser.parse(json)
   end

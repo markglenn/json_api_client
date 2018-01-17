@@ -9,17 +9,19 @@ defmodule JsonApiClient.Middleware.RunnerTest do
   @req %Request{}
 
   test "calls Middleware in the correct order" do
-    with_mock Factory, [], [middlewares: fn() ->
-      [{FirstTestMiddleware, nil}, {LastTestMiddleware, nil}]
-    end] do
+    with_mock Factory, [],
+      middlewares: fn ->
+        [{FirstTestMiddleware, nil}, {LastTestMiddleware, nil}]
+      end do
       assert Runner.run(@req) == [:first, :last]
     end
   end
 
   test "does not call Middleware when `before` Middleware does not call next" do
-    with_mock Factory, [], [middlewares: fn() ->
-      [{StopTestMiddleware, nil}, {LastTestMiddleware, nil}]
-    end] do
+    with_mock Factory, [],
+      middlewares: fn ->
+        [{StopTestMiddleware, nil}, {LastTestMiddleware, nil}]
+      end do
       assert Runner.run(@req) == [:stop]
     end
   end

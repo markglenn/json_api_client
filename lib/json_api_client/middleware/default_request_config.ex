@@ -5,14 +5,14 @@ defmodule JsonApiClient.Middleware.DefaultRequestConfig do
   """
 
   @timeout Application.get_env(:json_api_client, :timeout, 500)
-  @version Mix.Project.config[:version]
-  @package_name JsonApiClient.Mixfile.project[:app]
+  @version Mix.Project.config()[:version]
+  @package_name JsonApiClient.Mixfile.project()[:app]
 
   alias Mix.Project
   alias JsonApiClient.Request
 
   def call(%Request{} = request, next, _) do
-    headers      = Map.merge(default_headers(), request.headers)
+    headers = Map.merge(default_headers(), request.headers)
     http_options = Map.merge(default_options(), request.options)
 
     next.(Map.merge(request, %{headers: headers, options: http_options}))
@@ -20,27 +20,27 @@ defmodule JsonApiClient.Middleware.DefaultRequestConfig do
 
   defp default_headers do
     %{
-      "Accept"       => "application/vnd.api+json",
+      "Accept" => "application/vnd.api+json",
       "Content-Type" => "application/vnd.api+json",
-      "User-Agent"   => user_agent()              ,
+      "User-Agent" => user_agent()
     }
   end
 
   defp default_options do
     %{
       timeout: timeout(),
-      recv_timeout: timeout(),
+      recv_timeout: timeout()
     }
   end
 
   defp user_agent do
     [@package_name, @version, user_agent_suffix()]
-      |> Enum.reject(&is_nil/1)
-      |> Enum.join("/")
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join("/")
   end
 
   defp user_agent_suffix do
-    Application.get_env(:json_api_client, :user_agent_suffix, Project.config[:app])
+    Application.get_env(:json_api_client, :user_agent_suffix, Project.config()[:app])
   end
 
   defp timeout do

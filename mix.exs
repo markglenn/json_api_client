@@ -6,22 +6,22 @@ defmodule JsonApiClient.Mixfile do
       app: :json_api_client,
       version: "2.0.0",
       elixir: "~> 1.5",
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
       name: "JsonApiClient",
       description: description(),
       package: package(),
       aliases: aliases(),
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
-        "ci": :test,
+        ci: :test,
         "coveralls.html": :test,
         "coveralls.post": :test,
-        "coveralls": :test,
+        coveralls: :test
       ],
       deps: deps(),
       docs: docs(),
-      source_url: "https://github.com/Decisiv/json_api_client",
+      source_url: "https://github.com/Decisiv/json_api_client"
     ]
   end
 
@@ -54,7 +54,7 @@ defmodule JsonApiClient.Mixfile do
     [
       main: "readme",
       source_url: "https://github.com/Decisiv/json_api_client",
-      extras: ["README.md"],
+      extras: ["README.md"]
     ]
   end
 
@@ -66,7 +66,7 @@ defmodule JsonApiClient.Mixfile do
         "Cloves Carneiro",
         "George Murphy",
         "Michael Lagutko",
-        "Trevor Little",
+        "Trevor Little"
       ],
       links: %{
         "Github" => "https://github.com/Decisiv/json_api_client"
@@ -82,7 +82,7 @@ defmodule JsonApiClient.Mixfile do
 
   defp aliases do
     [
-      "ci": ["compile", "credo --strict", "coveralls.html --raise"]
+      ci: ["compile", "credo --strict", "coveralls.html --raise"]
     ]
   end
 end

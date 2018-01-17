@@ -19,6 +19,9 @@ defmodule JsonApiClient.Middleware do
 
   """
   @type request :: JsonApiClient.Request
-  @callback call(request, ((request) -> {:ok, %{body: any, status_code: binary, headers: Keyword.t}} | {:error, any}),
-                 options :: any) :: {:ok, %{body: any, status_code: binary, headers: Keyword.t}} | {:error, any}
+  @callback call(
+              request,
+              (request -> {:ok, %{body: any, status_code: binary, headers: Keyword.t()}} | {:error, any}),
+              options :: any
+            ) :: {:ok, %{body: any, status_code: binary, headers: Keyword.t()}} | {:error, any}
 end

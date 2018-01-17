@@ -11,8 +11,9 @@ defmodule JsonApiClient.Parser.FieldValidation do
   end
 
   defp to_validate(name, field_definition) do
-    either_fields   = field_definition[:either_fields] || []
+    either_fields = field_definition[:either_fields] || []
     required_fields = field_definition[:required_fields] || []
+
     [
       %{
         fields: either_fields,
@@ -36,10 +37,10 @@ defmodule JsonApiClient.Parser.FieldValidation do
   end
 
   def validate_required_fields(fields, data) do
-    fields |> Enum.all?(&(Map.has_key?(data, &1)))
+    fields |> Enum.all?(&Map.has_key?(data, &1))
   end
 
   def validate_either_fields(fields, data) do
-    fields |> Enum.any?(&(Map.has_key?(data, &1)))
+    fields |> Enum.any?(&Map.has_key?(data, &1))
   end
 end
