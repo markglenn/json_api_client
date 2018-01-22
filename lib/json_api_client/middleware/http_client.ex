@@ -1,11 +1,13 @@
 defmodule JsonApiClient.Middleware.HTTPClient do
-  @behaviour JsonApiClient.Middleware
   @moduledoc """
   HTTP client Middleware based on HTTPoison library.
   """
 
+  @behaviour JsonApiClient.Middleware
+
   alias JsonApiClient.{Response, RequestError, Request}
 
+  @impl JsonApiClient.Middleware
   def call(%Request{} = req, _, _) do
     url = Request.get_url(req)
 

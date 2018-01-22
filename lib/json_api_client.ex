@@ -8,24 +8,24 @@ defmodule JsonApiClient do
   alias __MODULE__.Middleware.Runner
 
   @doc "Execute a JSON API Request using HTTP GET"
-  def fetch(req), do: req |> Request.method(:get) |> execute
+  def fetch(%Request{} = req), do: req |> Request.method(:get) |> execute
   @doc "Error raising version of `fetch/1`"
-  def fetch!(req), do: req |> Request.method(:get) |> execute!
+  def fetch!(%Request{} = req), do: req |> Request.method(:get) |> execute!
 
   @doc "Execute a JSON API Request using HTTP POST"
-  def create(req), do: req |> Request.method(:post) |> execute
+  def create(%Request{} = req), do: req |> Request.method(:post) |> execute
   @doc "Error raising version of `create/1`"
-  def create!(req), do: req |> Request.method(:post) |> execute!
+  def create!(%Request{} = req), do: req |> Request.method(:post) |> execute!
 
   @doc "Execute a JSON API Request using HTTP PATCH"
-  def update(req), do: req |> Request.method(:patch) |> execute
+  def update(%Request{} = req), do: req |> Request.method(:patch) |> execute
   @doc "Error raising version of `update/1`"
-  def update!(req), do: req |> Request.method(:patch) |> execute!
+  def update!(%Request{} = req), do: req |> Request.method(:patch) |> execute!
 
   @doc "Execute a JSON API Request using HTTP DELETE"
-  def delete(req), do: req |> Request.method(:delete) |> execute
+  def delete(%Request{} = req), do: req |> Request.method(:delete) |> execute
   @doc "Error raising version of `delete/1`"
-  def delete!(req), do: req |> Request.method(:delete) |> execute!
+  def delete!(%Request{} = req), do: req |> Request.method(:delete) |> execute!
 
   @doc """
   Execute a JSON API Request
@@ -48,12 +48,12 @@ defmodule JsonApiClient do
   | socket error | n/a                   | `{:error, %RequestError{status: nil, message: "Error completing HTTP request econnrefused", original_error: error}}` |
 
   """
-  def execute(req) do
+  def execute(%Request{} = req) do
     Runner.run(req)
   end
 
   @doc "Error raising version of `execute/1`"
-  def execute!(req) do
+  def execute!(%Request{} = req) do
     case execute(req) do
       {:ok, response} -> response
       {:error, error} -> raise error

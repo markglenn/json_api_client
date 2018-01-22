@@ -1,7 +1,5 @@
 if Code.ensure_loaded?(:fuse) do
   defmodule JsonApiClient.Middleware.Fuse do
-    @behaviour JsonApiClient.Middleware
-
     @moduledoc """
     Circuit Breaker middleware using [fuse](https://github.com/jlouis/fuse). In order to use this middleware the
     fuse package must be added to your mix project and the `fuse` and `sasl` applications must be started. e.g:
@@ -39,13 +37,16 @@ if Code.ensure_loaded?(:fuse) do
     named based on the `service_name` of the request, if present.
     """
 
+    @behaviour JsonApiClient.Middleware
+
     alias JsonApiClient.{RequestError, Request}
 
     @defaults {{:standard, 2, 10_000}, {:reset, 60_000}}
 
+    @impl JsonApiClient.Middleware
     def call(%Request{service_name: service_name} = request, next, options) do
       opts = options || []
-      name = if is_nil(service_name), do: "json_api_client", else: service_name
+      name = service_name || "json_api_client"
 
       case :fuse.ask(name, :sync) do
         :ok ->
@@ -64,8 +65,10 @@ if Code.ensure_loaded?(:fuse) do
       end
     end
 
-    defp fuse_options(service_name, opts) when is_nil(service_name), do: Keyword.get(opts, :opts, @defaults)
-    defp fuse_options(service_name, opts), do: Keyword.get(opts, service_name, fuse_options(nil, opts))
+    defp fuse_options(nil, opts), do: Keyword.get(opts, :opts, @defaults)
+    defp fuse_options(service_name, opts) do
+      Keyword.get_lazy(opts, service_name, fn -> fuse_options(nil, opts) end)
+    end
 
     defp run(env, next, name) do
       case next.(env) do

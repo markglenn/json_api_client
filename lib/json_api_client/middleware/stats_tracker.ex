@@ -59,10 +59,15 @@ defmodule JsonApiClient.Middleware.StatsTracker do
   15:57:30.198 [info]  total_ms=100 url=http://example.com/articles/123 custom_middleware_ms=12 request_and_parsing=88
   ```
   """
+
+  @behaviour JsonApiClient.Middleware
+
   require Logger
 
-  alias JsonApiClient.Request
+  alias JsonApiClient.{Response, Request}
+  
 
+  @impl JsonApiClient.Middleware
   def call(%Request{} = request, next, opts) do
     name = Access.get(opts, :name)
     log_level = Access.get(opts, :log, false)
@@ -76,7 +81,7 @@ defmodule JsonApiClient.Middleware.StatsTracker do
       |> update_in([:stats, :timers], &(&1 || []))
       |> update_in([:stats, :timers], &[timer_tuple | &1])
 
-    response = %{response | attributes: attributes}
+    response = %Response{response | attributes: attributes}
 
     log_level && log_stats(request, response, log_level)
 
@@ -84,12 +89,10 @@ defmodule JsonApiClient.Middleware.StatsTracker do
   end
 
   defp log_stats(request, response, log_level) do
-    stats =
-      []
-      |> Enum.concat(stats_from_request(request))
-      |> Enum.concat(stats_from_response(response))
-
-    log(stats, log_level)
+    []
+    |> Enum.concat(stats_from_request(request))
+    |> Enum.concat(stats_from_response(response))
+    |> log(log_level)
   end
 
   @doc false

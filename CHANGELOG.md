@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased] 
 - `mix format` codebase
+- Misc code cleanup
 
 ## [2.0.0] 2018-01-03
 ### Fixed

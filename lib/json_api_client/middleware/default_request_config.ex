@@ -1,8 +1,9 @@
 defmodule JsonApiClient.Middleware.DefaultRequestConfig do
-  @behaviour JsonApiClient.Middleware
   @moduledoc """
   Adds default headers and options to the request.
   """
+
+  @behaviour JsonApiClient.Middleware
 
   @timeout Application.get_env(:json_api_client, :timeout, 500)
   @version Mix.Project.config()[:version]
@@ -11,11 +12,12 @@ defmodule JsonApiClient.Middleware.DefaultRequestConfig do
   alias Mix.Project
   alias JsonApiClient.Request
 
+  @impl JsonApiClient.Middleware
   def call(%Request{} = request, next, _) do
     headers = Map.merge(default_headers(), request.headers)
     http_options = Map.merge(default_options(), request.options)
 
-    next.(Map.merge(request, %{headers: headers, options: http_options}))
+    next.(%Request{request | headers: headers, options: http_options})
   end
 
   defp default_headers do

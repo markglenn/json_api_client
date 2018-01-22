@@ -27,20 +27,20 @@ defmodule JsonApiClient.Request do
   end
 
   @doc "Add an id to the request."
-  def id(req, id), do: Map.put(req, :id, id)
+  def id(%Request{} = req, id), do: %Request{req | id: id}
 
   @doc "Specify the HTTP method for the request."
-  def method(req, method), do: Map.put(req, :method, method)
+  def method(%Request{} = req, method), do: %Request{req | method: method}
 
   @doc "Associate a resource with this request"
-  def resource(req, resource), do: Map.put(req, :resource, resource)
+  def resource(%Request{} = req, resource), do: %Request{req | resource: resource}
 
   @doc "Associate a service_name with this request"
-  def service_name(req, service_name), do: Map.put(req, :service_name, service_name)
+  def service_name(%Request{} = req, service_name), do: %Request{req | service_name: service_name}
 
   @doc "Associate a path with this request"
-  def path(req, %{type: _, id: _} = res), do: Map.merge(req, %{base_url: get_url(resource(req, res))})
-  def path(req, path), do: Map.merge(req, %{base_url: join_url_parts([req.base_url, String.trim(path, "/")])})
+  def path(%Request{} = req, %{type: _, id: _} = res), do: %Request{req | base_url: get_url(resource(req, res))}
+  def path(%Request{} = req, path), do: %Request{req | base_url: join_url_parts([req.base_url, String.trim(path, "/")])}
 
   @doc """
   Specify which fields to include
@@ -52,10 +52,10 @@ defmodule JsonApiClient.Request do
       fields(%Request{}, user: ~(name, email), comment: ~(body))
       fields(%Request{}, user: "name,email", comment: "body")
   """
-  def fields(req, fields_to_add) do
+  def fields(%Request{} = req, fields_to_add) do
     current_fields = req.params[:fields] || %{}
     new_fields = Enum.into(fields_to_add, current_fields)
-    params(req, fields: new_fields)
+    params(%Request{} = req, fields: new_fields)
   end
 
   @doc """
@@ -63,7 +63,7 @@ defmodule JsonApiClient.Request do
 
       header(%Request{}, "X-My-Header", "My header value")
   """
-  def header(req, header_name, header_value), do: %{req | headers: Map.put(req.headers, header_name, header_value)}
+  def header(%Request{} = req, header_name, header_value), do: %Request{req | headers: Map.put(req.headers, header_name, header_value)}
 
   defp encode_fields(%{fields: %{} = fields} = params) do
     encoded_fields =
@@ -89,16 +89,16 @@ defmodule JsonApiClient.Request do
       include(%Request{}, "coments.author")
       include(%Request{}, ["author", "comments.author"])
   """
-  def include(req, relationship_list)
+  def include(%Request{} = req, relationship_list)
       when is_list(relationship_list) do
     existring_relationships = req.params[:include] || []
     params(req, include: existring_relationships ++ relationship_list)
   end
 
-  def include(req, relationships)
+  def include(%Request{} = req, relationships)
       when is_binary(relationships) or is_atom(relationships) do
     existring_relationships = req.params[:include] || []
-    params(req, include: existring_relationships ++ [relationships])
+    params(%Request{} = req, include: existring_relationships ++ [relationships])
   end
 
   defp encode_include(%{include: include} = params) when is_list(include) do
@@ -113,11 +113,11 @@ defmodule JsonApiClient.Request do
   defp encode_include(include), do: include
 
   @doc "Specify the sort param for the request."
-  def sort(req, sort), do: params(req, sort: sort)
+  def sort(%Request{} = req, sort), do: params(req, sort: sort)
   @doc "Specify the page param for the request."
-  def page(req, page), do: params(req, page: page)
+  def page(%Request{} = req, page), do: params(req, page: page)
   @doc "Specify the filter param for the request."
-  def filter(req, filter), do: params(req, filter: filter)
+  def filter(%Request{} = req, filter), do: params(req, filter: filter)
 
   @doc ~S"""
   Add query params to the request.
@@ -135,10 +135,10 @@ defmodule JsonApiClient.Request do
       iex> req |> get_query_params |> URI.encode_query
       "a=new&b=bar&c=baz"
   """
-  def params(req, list) do
+  def params(%Request{} = req, list) do
     Enum.reduce(list, req, fn {param, val}, acc ->
       new_params = Map.put(acc.params, param, val)
-      put_in(acc.params, new_params)
+      %Request{acc | params: new_params}
     end)
   end
 
@@ -203,7 +203,7 @@ defmodule JsonApiClient.Request do
     |> UriQuery.params()
   end
 
-  def get_query_params(_req), do: []
+  def get_query_params(%Request{} = _req), do: []
 
   @doc """
   Retruns the HTTP body of the request
@@ -213,5 +213,5 @@ defmodule JsonApiClient.Request do
     Poison.encode!(%{data: resource})
   end
 
-  def get_body(_req), do: ""
+  def get_body(%Request{} = _req), do: ""
 end
