@@ -42,7 +42,7 @@ defmodule JsonApiClient.Middleware.StatsTracker do
   ```elixir
   config :json_api_client,
     middlewares: [
-      {JsonApiClient.Middleware.StatsTracker, name: :custom_middleware, log: :info}, 
+      {JsonApiClient.Middleware.StatsTracker, name: :custom_middleware, log: :info},
       {CustomMiddleware1, nil},
       {CustomMiddleware2, nil},
       {CustomMiddleware3, nil},
@@ -65,7 +65,7 @@ defmodule JsonApiClient.Middleware.StatsTracker do
   require Logger
 
   alias JsonApiClient.{Response, Request}
-  
+
 
   @impl JsonApiClient.Middleware
   def call(%Request{} = request, next, opts) do
