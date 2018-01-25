@@ -5,7 +5,6 @@ defmodule JsonApiClient.Middleware.DefaultRequestConfig do
 
   @behaviour JsonApiClient.Middleware
 
-  @timeout Application.get_env(:json_api_client, :timeout, 500)
   @version Mix.Project.config()[:version]
   @package_name JsonApiClient.Mixfile.project()[:app]
 
@@ -46,6 +45,6 @@ defmodule JsonApiClient.Middleware.DefaultRequestConfig do
   end
 
   defp timeout do
-    @timeout
+    Application.get_env(:json_api_client, :timeout, 500)
   end
 end
