@@ -66,7 +66,6 @@ defmodule JsonApiClient.Middleware.StatsTracker do
 
   alias JsonApiClient.{Response, Request}
 
-
   @impl JsonApiClient.Middleware
   def call(%Request{} = request, next, opts) do
     name = Access.get(opts, :name)
