@@ -5,25 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] 
+## [Unreleased]
 - `mix format` codebase
 - Misc code cleanup
+- fixed timeout constant inside config
 
 ## [2.0.0] 2018-01-03
 ### Fixed
-- urls with explicit ports but no path are normalized so they don't [cause errors](https://github.com/edgurgel/httpoison/issues/300) in HTTPoison/hackney. 
+- urls with explicit ports but no path are normalized so they don't [cause errors](https://github.com/edgurgel/httpoison/issues/300) in HTTPoison/hackney.
 ### Removed
 - Hard dependency on fuse and sasl erlang packages. Fuse is now declared as optional.
 - JsonApiClient.Config.SASLLogs log translator in favor of direct configuration of sasl.
 
 ## [1.2.0] 2017-10-27
 ### Changed
-- Middleware call `request` parameter type is changed to `Request`. 
+- Middleware call `request` parameter type is changed to `Request`.
 
 ### Added
 - Added `Request.attributes`
 - Added `DefaultRequestConfig` middleware
-- Added `Request.new/0` method 
+- Added `Request.new/0` method
 
 ## [1.1.0] - 2017-10-25
 ### Changed
