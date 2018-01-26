@@ -3,6 +3,14 @@ defmodule JsonApiClient.Middleware do
   The HTTP client middleware behaviour for the library.
   """
 
+  alias JsonApiClient.{Request, RequestError, Response}
+
+  @type request :: %Request{}
+  @type response :: %Response{}
+  @type error :: %RequestError{}
+  @type middleware_result :: {:ok, response} | {:error, error}
+  @type options :: any
+
   @doc ~S"""
   Manipulates a Request and Response objects.
   If the Request should be processed by the next middleware then `next.(request)` has to be called.
@@ -18,10 +26,5 @@ defmodule JsonApiClient.Middleware do
     - `headers`- HTTP headers (e.g., `[{"Accept", "application/json"}]`)
 
   """
-  @type request :: JsonApiClient.Request
-  @callback call(
-              request,
-              (request -> {:ok, %{body: any, status_code: binary, headers: Keyword.t()}} | {:error, any}),
-              options :: any
-            ) :: {:ok, %{body: any, status_code: binary, headers: Keyword.t()}} | {:error, any}
+  @callback call(request, (request -> middleware_result), options) :: middleware_result
 end

@@ -17,19 +17,19 @@ defmodule JsonApiClient.Parser.FieldValidation do
     [
       %{
         fields: either_fields,
-        method: :validate_either_fields,
+        method: &validate_either_fields/2,
         error: "A '#{name}' MUST contain at least one of the following members: #{Enum.join(either_fields, ", ")}"
       },
       %{
         fields: required_fields,
-        method: :validate_required_fields,
+        method: &validate_required_fields/2,
         error: "A '#{name}' MUST contain the following members: #{Enum.join(required_fields, ", ")}"
       }
     ]
   end
 
   defp validate_fields(fields, method, data, error) do
-    if !Enum.any?(fields) || apply(__MODULE__, method, [fields, data]) do
+    if !Enum.any?(fields) || method.(fields, data) do
       {:ok}
     else
       {:error, error}
@@ -37,10 +37,10 @@ defmodule JsonApiClient.Parser.FieldValidation do
   end
 
   def validate_required_fields(fields, data) do
-    fields |> Enum.all?(&Map.has_key?(data, &1))
+    Enum.all?(fields, &Map.has_key?(data, &1))
   end
 
   def validate_either_fields(fields, data) do
-    fields |> Enum.any?(&Map.has_key?(data, &1))
+    Enum.any?(fields, &Map.has_key?(data, &1))
   end
 end

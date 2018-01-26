@@ -1,12 +1,14 @@
 defmodule JsonApiClient.Middleware.DocumentParser do
-  @behaviour JsonApiClient.Middleware
   @moduledoc """
   HTTP client JSON API doucment parser.
   """
 
-  alias JsonApiClient.{RequestError, Parser}
+  @behaviour JsonApiClient.Middleware
 
-  def call(request, next, _options) do
+  alias JsonApiClient.{Request, RequestError, Parser}
+
+  @impl JsonApiClient.Middleware
+  def call(%Request{} = request, next, _options) do
     with {:ok, response} <- next.(request),
          {:ok, parsed} <- parse_response(response) do
       {:ok, parsed}

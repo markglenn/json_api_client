@@ -2,7 +2,7 @@ defmodule JsonApiClient.Middleware.DocumentParserTest do
   use ExUnit.Case
   doctest JsonApiClient.Middleware.DocumentParser, import: true
 
-  alias JsonApiClient.{Response, RequestError}
+  alias JsonApiClient.{Request, Response, RequestError}
   alias JsonApiClient.Middleware.DocumentParser
 
   @resource_doc %JsonApiClient.Document{
@@ -25,7 +25,7 @@ defmodule JsonApiClient.Middleware.DocumentParserTest do
     }
   }
 
-  @request %{path: "foo"}
+  @request %Request{}
   @succses_response %Response{
     doc: Poison.encode!(@resource_doc),
     status: 200,

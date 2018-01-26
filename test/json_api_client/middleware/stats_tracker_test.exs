@@ -75,7 +75,7 @@ defmodule JsonApiClient.Middleware.StatsTrackerTest do
     test "includes the url" do
       assert [
                url: "http://example.com/"
-             ] = stats_from_request(Request.new("http://example.com/"))
+             ] == stats_from_request(Request.new("http://example.com/"))
     end
   end
 end
