@@ -80,7 +80,7 @@ defmodule JsonApiClient.Middleware.StatsTracker do
       |> update_in([:stats, :timers], &(&1 || []))
       |> update_in([:stats, :timers], &[timer_tuple | &1])
 
-    response = %Response{response | attributes: attributes}
+    response = %{response | attributes: attributes}
 
     log_level && log_stats(request, response, log_level)
 

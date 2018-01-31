@@ -9,7 +9,7 @@ defmodule JsonApiClient.Middleware.StatsTrackerTest do
 
   alias JsonApiClient.Middleware.StatsTracker
   import JsonApiClient.Middleware.StatsTracker
-  alias JsonApiClient.{Response, Request}
+  alias JsonApiClient.{Response, Request, RequestError}
 
   @request Request.new("http://example.com")
 
@@ -23,8 +23,26 @@ defmodule JsonApiClient.Middleware.StatsTrackerTest do
                name: :some_name
              )
 
-    assert %{
+    assert %Response{
              doc: "the doc",
+             attributes: %{stats: %{timers: [some_name: ms]}}
+           } = response
+
+    assert is_number(ms)
+  end
+
+  test "adds timer stats to the error response" do
+    response = %RequestError{status: "404"}
+
+    assert {:ok, response} =
+             StatsTracker.call(
+               @request,
+               fn _ -> {:ok, response} end,
+               name: :some_name
+             )
+
+    assert %RequestError{
+             status: "404",
              attributes: %{stats: %{timers: [some_name: ms]}}
            } = response
 
