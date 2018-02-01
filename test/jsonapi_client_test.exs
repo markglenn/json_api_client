@@ -246,8 +246,9 @@ defmodule JsonApiClientTest do
         fetch(Request.new(context.url <> "/"))
       end
 
+      original_error = "Unavailable - #{context.url <> "/"} circuit blown"
       assert {:error, %RequestError{
-               original_error: "Unavailable - json_api_client circuit blown",
+               original_error: ^original_error,
                status: nil
              }} = fetch(Request.new(context.url <> "/"))
     end

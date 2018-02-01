@@ -120,6 +120,10 @@ defmodule JsonApiClient.Middleware.FuseTest do
     check_name(Request.service_name(@request, @service_name), @service_name)
   end
 
+  test "uses base url as name when service name is not configured and base url is configured" do
+    check_name(Request.new("http://localhost:58190/"), "http://localhost:58190/")
+  end
+
   test "uses default options when service name is not configured and no global options" do
     check_options(@request, [], {{:standard, 2, 10_000}, {:reset, 60_000}})
   end

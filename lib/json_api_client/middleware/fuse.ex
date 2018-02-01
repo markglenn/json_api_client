@@ -44,9 +44,9 @@ if Code.ensure_loaded?(:fuse) do
     @defaults {{:standard, 2, 10_000}, {:reset, 60_000}}
 
     @impl JsonApiClient.Middleware
-    def call(%Request{service_name: service_name} = request, next, options) do
+    def call(%Request{service_name: service_name, base_url: base_url} = request, next, options) do
       opts = options || []
-      name = service_name || "json_api_client"
+      name = service_name || base_url || "json_api_client"
 
       case :fuse.ask(name, :sync) do
         :ok ->
