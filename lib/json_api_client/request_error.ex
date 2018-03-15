@@ -8,7 +8,12 @@ defmodule JsonApiClient.RequestError do
   * status - The HTTP status code of the request, if any
   * attributes - Custom attributes.
   """
-
+  @type t :: %__MODULE__{
+    message: String.t() | nil,
+    original_error: any,
+    status: integer | nil,
+    attributes: map
+  }
   defexception(
     message: nil,
     original_error: nil,

@@ -3,6 +3,7 @@ defmodule JsonApiClient.Parser do
 
   alias JsonApiClient.Parser.{FieldValidation, Schema}
 
+  @spec parse(String.t() | map) :: {:ok, JsonApiClient.Document.t() | nil} | {:error, String.t()}
   def parse(json) when is_binary(json) do
     parse(Poison.decode!(json))
   rescue

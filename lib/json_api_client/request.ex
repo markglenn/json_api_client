@@ -3,7 +3,19 @@ defmodule JsonApiClient.Request do
   Describes a JSON API HTTP Request
   """
   alias __MODULE__
-
+  alias JsonApiClient.Resource
+  @type http_methods :: :get | :post | :update | :delete | :put | :head | :options | :connect | :trace | :patch
+  @type t :: %__MODULE__{
+    base_url: String.t() | nil,
+    params: map | nil,
+    id: binary | nil,
+    resource: Resource.t() | nil,
+    method: http_methods,
+    headers: map,
+    options: map,
+    service_name: String.t() | nil,
+    attributes: map
+  }
   defstruct(
     base_url: nil,
     params: %{},
@@ -16,29 +28,38 @@ defmodule JsonApiClient.Request do
     attributes: %{}
   )
 
+  @type name :: atom | String.t()
+
   @doc "Create a request"
+  @spec new() :: Request.t()
   def new do
     %__MODULE__{}
   end
 
   @doc "Create a request with the given base URL"
+  @spec new(base_url :: String.t()) :: Request.t()
   def new(base_url) do
     %__MODULE__{base_url: base_url}
   end
 
   @doc "Add an id to the request."
+  @spec id(req :: Request.t(), id :: binary) :: Request.t()
   def id(%Request{} = req, id), do: %Request{req | id: id}
 
   @doc "Specify the HTTP method for the request."
+  @spec method(req :: Request.t(), method :: atom) :: Request.t()
   def method(%Request{} = req, method), do: %Request{req | method: method}
 
   @doc "Associate a resource with this request"
+  @spec resource(req :: Request.t(), resource :: Resource.t) :: Request.t()
   def resource(%Request{} = req, resource), do: %Request{req | resource: resource}
 
   @doc "Associate a service_name with this request"
+  @spec service_name(req :: Request.t(), service_name :: name) :: Request.t()
   def service_name(%Request{} = req, service_name), do: %Request{req | service_name: service_name}
 
   @doc "Associate a path with this request"
+  @spec path(req :: Request.t(), Resource.t() | name) :: Request.t()
   def path(%Request{} = req, %{type: _, id: _} = res), do: %Request{req | base_url: get_url(resource(req, res))}
   def path(%Request{} = req, path), do: %Request{req | base_url: join_url_parts([req.base_url, String.trim(path, "/")])}
 
@@ -52,6 +73,7 @@ defmodule JsonApiClient.Request do
       fields(%Request{}, user: ~(name, email), comment: ~(body))
       fields(%Request{}, user: "name,email", comment: "body")
   """
+  @spec fields(req :: Request.t(), fields_to_add :: [{atom, name | [name]}]) :: any
   def fields(%Request{} = req, fields_to_add) do
     current_fields = req.params[:fields] || %{}
     new_fields = Enum.into(fields_to_add, current_fields)
@@ -63,6 +85,7 @@ defmodule JsonApiClient.Request do
 
       header(%Request{}, "X-My-Header", "My header value")
   """
+  @spec header(req :: Request.t(), header_name :: name, header_value :: String.t()) :: Request.t()
   def header(%Request{} = req, header_name, header_value), do: %Request{req | headers: Map.put(req.headers, header_name, header_value)}
 
   defp encode_fields(%{fields: %{} = fields} = params) do
@@ -89,16 +112,17 @@ defmodule JsonApiClient.Request do
       include(%Request{}, "coments.author")
       include(%Request{}, ["author", "comments.author"])
   """
+  @spec include(req :: Request.t(), [name] | name) :: Request.t()
   def include(%Request{} = req, relationship_list)
       when is_list(relationship_list) do
-    existring_relationships = req.params[:include] || []
-    params(req, include: existring_relationships ++ relationship_list)
+    existing_relationships = req.params[:include] || []
+    params(req, include: existing_relationships ++ relationship_list)
   end
 
   def include(%Request{} = req, relationships)
       when is_binary(relationships) or is_atom(relationships) do
-    existring_relationships = req.params[:include] || []
-    params(%Request{} = req, include: existring_relationships ++ [relationships])
+    existing_relationships = req.params[:include] || []
+    params(%Request{} = req, include: existing_relationships ++ [relationships])
   end
 
   defp encode_include(%{include: include} = params) when is_list(include) do
@@ -113,10 +137,13 @@ defmodule JsonApiClient.Request do
   defp encode_include(include), do: include
 
   @doc "Specify the sort param for the request."
+  @spec sort(req :: Request.t(), sort :: param_value) :: Request.t()
   def sort(%Request{} = req, sort), do: params(req, sort: sort)
   @doc "Specify the page param for the request."
+  @spec page(req :: Request.t(), page :: param_value) :: Request.t()
   def page(%Request{} = req, page), do: params(req, page: page)
   @doc "Specify the filter param for the request."
+  @spec filter(req :: Request.t(), filter :: param_value) :: Request.t()
   def filter(%Request{} = req, filter), do: params(req, filter: filter)
 
   @doc ~S"""
@@ -135,6 +162,9 @@ defmodule JsonApiClient.Request do
       iex> req |> get_query_params |> URI.encode_query
       "a=new&b=bar&c=baz"
   """
+  @type param_value :: atom | binary | number | param_enum
+  @type param_enum :: [{name, param_value}] | %{optional(name) => param_value}
+  @spec params(req :: Request.t(), list :: param_enum) :: Request.t()
   def params(%Request{} = req, list) do
     Enum.reduce(list, req, fn {param, val}, acc ->
       new_params = Map.put(acc.params, param, val)
@@ -155,6 +185,7 @@ defmodule JsonApiClient.Request do
       iex> new("http://api.net") |> resource(post) |> get_url
       "http://api.net/posts/123"
   """
+  @spec get_url(Request.t()) :: String.t()
   def get_url(%Request{base_url: base_url, id: id}) when not is_nil(id),
     do: [base_url, id] |> join_url_parts |> normalize_url
 
@@ -196,6 +227,7 @@ defmodule JsonApiClient.Request do
       iex> req |> params(a: %{b: %{c: "foo"}}) |> get_query_params
       [{"a[b][c]", "foo"}]
   """
+  @spec get_query_params(Request.t()) :: [{binary, binary}]
   def get_query_params(%Request{params: params}) when params != %{} do
     params
     |> encode_fields
@@ -208,6 +240,7 @@ defmodule JsonApiClient.Request do
   @doc """
   Retruns the HTTP body of the request
   """
+  @spec get_body(Request.t()) :: String.t
   def get_body(%Request{method: method, resource: resource})
       when method in [:post, :patch, :put] and not is_nil(resource) do
     Poison.encode!(%{data: resource})

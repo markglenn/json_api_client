@@ -64,7 +64,7 @@ defmodule JsonApiClient.Middleware.StatsTracker do
 
   require Logger
 
-  alias JsonApiClient.{Response, Request}
+  alias JsonApiClient.Request
 
   @impl JsonApiClient.Middleware
   def call(%Request{} = request, next, opts) do

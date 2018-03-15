@@ -5,9 +5,9 @@ defmodule JsonApiClient.Middleware do
 
   alias JsonApiClient.{Request, RequestError, Response}
 
-  @type request :: %Request{}
-  @type response :: %Response{}
-  @type error :: %RequestError{}
+  @type request :: Request.t()
+  @type response :: Response.t()
+  @type error :: RequestError.t()
   @type middleware_result :: {:ok, response} | {:error, error}
   @type options :: any
 

@@ -8,7 +8,12 @@ defmodule JsonApiClient.Response do
   * doc - A `JsonApiClient.Document` if one was present in the response or nil
   * attributes - Custom attributes.
   """
-
+  @type t :: %__MODULE__{
+    status: integer | nil,
+    headers: map | nil,
+    doc: JsonApiClient.Document.t() | nil,
+    attributes: map
+  }
   defstruct(
     status: nil,
     headers: nil,

@@ -8,23 +8,31 @@ defmodule JsonApiClient do
   alias __MODULE__.Middleware.Runner
 
   @doc "Execute a JSON API Request using HTTP GET"
+  @spec fetch(req :: Request.t()) :: {:ok, JsonApiClient.Response.t()} | {:error, JsonApiClient.RequestError.t()}
   def fetch(%Request{} = req), do: req |> Request.method(:get) |> execute
   @doc "Error raising version of `fetch/1`"
+  @spec fetch!(req :: Request.t()) :: JsonApiClient.Response.t() | no_return
   def fetch!(%Request{} = req), do: req |> Request.method(:get) |> execute!
 
   @doc "Execute a JSON API Request using HTTP POST"
+  @spec create(req :: Request.t()) :: {:ok, JsonApiClient.Response.t()} | {:error, JsonApiClient.RequestError.t()}
   def create(%Request{} = req), do: req |> Request.method(:post) |> execute
   @doc "Error raising version of `create/1`"
+  @spec create!(req :: Request.t()) :: JsonApiClient.Response.t() | no_return
   def create!(%Request{} = req), do: req |> Request.method(:post) |> execute!
 
   @doc "Execute a JSON API Request using HTTP PATCH"
+  @spec update(req :: Request.t()) :: {:ok, JsonApiClient.Response.t()} | {:error, JsonApiClient.RequestError.t()}
   def update(%Request{} = req), do: req |> Request.method(:patch) |> execute
   @doc "Error raising version of `update/1`"
+  @spec update!(req :: Request.t()) :: JsonApiClient.Response.t() | no_return
   def update!(%Request{} = req), do: req |> Request.method(:patch) |> execute!
 
   @doc "Execute a JSON API Request using HTTP DELETE"
+  @spec delete(req :: Request.t()) :: {:ok, JsonApiClient.Response.t()} | {:error, JsonApiClient.RequestError.t()}
   def delete(%Request{} = req), do: req |> Request.method(:delete) |> execute
   @doc "Error raising version of `delete/1`"
+  @spec delete!(req :: Request.t()) :: JsonApiClient.Response.t() | no_return
   def delete!(%Request{} = req), do: req |> Request.method(:delete) |> execute!
 
   @doc """
@@ -48,11 +56,13 @@ defmodule JsonApiClient do
   | socket error | n/a                   | `{:error, %RequestError{status: nil, message: "Error completing HTTP request econnrefused", original_error: error}}` |
 
   """
+  @spec execute(req :: Request.t()) :: {:ok, JsonApiClient.Response.t()} | {:error, term}
   def execute(%Request{} = req) do
     Runner.run(req)
   end
 
   @doc "Error raising version of `execute/1`"
+  @spec execute!(req :: Request.t()) :: JsonApiClient.Response.t() | no_return()
   def execute!(%Request{} = req) do
     case execute(req) do
       {:ok, response} -> response
