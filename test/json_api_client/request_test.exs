@@ -249,9 +249,19 @@ defmodule JsonApiClient.RequestTest do
     test "sents new value" do
       req =
         new("http://api.net")
-        |> service_name("my service")
+        |> service_name(:my_service)
 
-      assert %Request{service_name: "my service"} = req
+      assert %Request{service_name: :my_service} = req
+    end
+  end
+
+  describe "test only accepts atom for service_name" do
+    test "string for service_name" do
+      assert_raise FunctionClauseError, ~r/^no function clause matching/, fn ->
+      req =
+        new("http://api.net")
+        |> service_name("my_service")
+      end
     end
   end
 

@@ -13,7 +13,7 @@ defmodule JsonApiClient.Request do
     method: http_methods,
     headers: map,
     options: map,
-    service_name: String.t() | nil,
+    service_name: atom | nil,
     attributes: map
   }
   defstruct(
@@ -55,8 +55,10 @@ defmodule JsonApiClient.Request do
   def resource(%Request{} = req, resource), do: %Request{req | resource: resource}
 
   @doc "Associate a service_name with this request"
-  @spec service_name(req :: Request.t(), service_name :: name) :: Request.t()
-  def service_name(%Request{} = req, service_name), do: %Request{req | service_name: service_name}
+  @spec service_name(req :: Request.t(), service_name :: atom) :: Request.t()
+  def service_name(%Request{} = req, service_name) when is_atom(service_name) do
+    %Request{req | service_name: service_name}
+  end
 
   @doc "Associate a path with this request"
   @spec path(req :: Request.t(), Resource.t() | name) :: Request.t()
