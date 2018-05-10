@@ -4,7 +4,7 @@ defmodule JsonApiClient.Mixfile do
   def project do
     [
       app: :json_api_client,
-      version: "3.0.0",
+      version: "3.0.1",
       elixir: "~> 1.5",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,

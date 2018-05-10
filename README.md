@@ -5,7 +5,7 @@
 A JSON API Client for elixir.
 
 **NOTICE**: This library is new and in active development. There could be
-backwards incompatable changes as the design shakes out. YMMV, PRs welcome.
+backwards incompatible changes as the design shakes out. YMMV, PRs welcome.
 
 ## Installation
 
@@ -15,7 +15,7 @@ by adding `json_api_client` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:json_api_client, "~> 1.0.0"}
+    {:json_api_client, "~> 3.0"}
   ]
 end
 ```
@@ -74,11 +74,11 @@ new_article = %Resource{
 
 ### Non-compliant servers
 
-For the most part this library assumes that the server you're talking to implements the JSON:API spec correctly and treats deviations from that spec as exceptional (causing `JsonApiClient.execute/1` to return an `{:error, _}` tuple for example). One exception to this rule is the case where a server sends back an invalid body (HTML or some non-json string) along with a 4** or 5** status code. In those cases the body will simple be ignored. See the docs for `JsonApiClient.execute/1` for more details.
+For the most part this library assumes that the server you're talking to implements the JSON:API spec correctly and treats deviations from that spec as exceptional (causing `JsonApiClient.execute/1` to return an `{:error, _}` tuple for example). One exception to this rule is the case where a server sends back an invalid body (HTML or some non-json string) along with a 4** or 5** status code. In those cases the body will simply be ignored. See the docs for `JsonApiClient.execute/1` for more details.
 
 ### Helpers for common URI structures
 
-The JSON:API specification doesn't provide any guidance on [URI structure](http://jsonapi.org/faq/#position-uri-structure-custom-endpoints), but there is a common convention for REST apis to expose an enpoints with the following structure
+The JSON:API specification doesn't provide any guidance on [URI structure](http://jsonapi.org/faq/#position-uri-structure-custom-endpoints), but there is a common convention for REST apis to expose an endpoints with the following structure
 
 ```
 # fetch a list of resources of a given type
@@ -117,7 +117,7 @@ You can also build paths to nested resources by passing a `Resource` to `path/2`
 |> fetch
 ```
 
-If the API your making requests of follows a different URI pattern you can pass a string to `path/2` and it will be appended to the base url.
+If the API your making requests which follows a different URI pattern you can pass a string to `path/2` and it will be appended to the base url.
 
 ## Configuration
 
@@ -149,7 +149,7 @@ config :json_api_client,
   ]
 ```
 
-If you don't configure a value for `middlewares` you'll get a stack equivilent to the one configured in the preceding example. 
+If you don't configure a value for `middlewares` you'll get a stack equivalent to the one configured in the preceding example.
 
 #### included middlewre
 

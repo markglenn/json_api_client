@@ -5,10 +5,9 @@ defmodule JsonApiClient.Middleware.DefaultRequestConfig do
 
   @behaviour JsonApiClient.Middleware
 
-  @version Mix.Project.config()[:version]
+  @version JsonApiClient.Mixfile.project()[:version]
   @package_name JsonApiClient.Mixfile.project()[:app]
 
-  alias Mix.Project
   alias JsonApiClient.Request
 
   @impl JsonApiClient.Middleware
@@ -41,7 +40,7 @@ defmodule JsonApiClient.Middleware.DefaultRequestConfig do
   end
 
   defp user_agent_suffix do
-    Application.get_env(:json_api_client, :user_agent_suffix, Project.config()[:app])
+    Application.get_env(:json_api_client, :user_agent_suffix, "")
   end
 
   defp timeout do
