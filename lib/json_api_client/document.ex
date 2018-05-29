@@ -107,7 +107,7 @@ defmodule JsonApiClient.Resource do
     id: any,
     type: any,
     attributes: map | nil,
-    links: JsonApiClient.Links.t(),
+    links: JsonApiClient.Links.t() | nil,
     relationships: %{optional(String.t()) => JsonApiClient.Relationship.t()} | nil,
     meta: map | nil
   }
@@ -141,7 +141,7 @@ defmodule JsonApiClient.Document do
   @type t :: %__MODULE__{
     jsonapi: JsonApiClient.JsonApi.t(),
     data: [JsonApiClient.ResourceIdentifier.t()] | JsonApiClient.ResourceIdentifier.t() | nil,
-    links: JsonApiClient.Links.t(),
+    links: JsonApiClient.Links.t() | nil,
     meta: map | nil,
     included: [JsonApiClient.ResourceIdentifier.t()],
     errors: [JsonApiClient.Error.t()]

@@ -258,7 +258,6 @@ defmodule JsonApiClient.RequestTest do
   describe "test only accepts atom for service_name" do
     test "string for service_name" do
       assert_raise FunctionClauseError, ~r/^no function clause matching/, fn ->
-      req =
         new("http://api.net")
         |> service_name("my_service")
       end
