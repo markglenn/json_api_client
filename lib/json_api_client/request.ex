@@ -123,8 +123,7 @@ defmodule JsonApiClient.Request do
 
   def include(%Request{} = req, relationships)
       when is_binary(relationships) or is_atom(relationships) do
-    existing_relationships = req.params[:include] || []
-    params(%Request{} = req, include: existing_relationships ++ [relationships])
+    include(req, [relationships])
   end
 
   defp encode_include(%{include: include} = params) when is_list(include) do
@@ -164,7 +163,7 @@ defmodule JsonApiClient.Request do
       iex> req |> get_query_params |> URI.encode_query
       "a=new&b=bar&c=baz"
   """
-  @type param_value :: atom | binary | number | param_enum
+  @type param_value :: atom | binary | number | param_enum | list
   @type param_enum :: [{name, param_value}] | %{optional(name) => param_value}
   @spec params(req :: Request.t(), list :: param_enum) :: Request.t()
   def params(%Request{} = req, list) do
