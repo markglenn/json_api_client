@@ -25,7 +25,7 @@ if Code.ensure_loaded?(:fuse) do
     ```elixir
     config :json_api_client,
       middlewares: [
-        {JsonApiClient.Middleware.Fuse, 
+        {JsonApiClient.Middleware.Fuse,
           opts: {{:standard, 2, 10_000}, {:reset, 60_000}},
           service1: {{:standard, 10, 5_000}, {:reset, 120_000}},
         }
@@ -39,7 +39,7 @@ if Code.ensure_loaded?(:fuse) do
 
     @behaviour JsonApiClient.Middleware
 
-    alias JsonApiClient.{RequestError, Request}
+    alias JsonApiClient.{Request, RequestError}
 
     @defaults {{:standard, 2, 10_000}, {:reset, 60_000}}
 

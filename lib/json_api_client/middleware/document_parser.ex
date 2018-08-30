@@ -5,7 +5,7 @@ defmodule JsonApiClient.Middleware.DocumentParser do
 
   @behaviour JsonApiClient.Middleware
 
-  alias JsonApiClient.{Request, RequestError, Parser}
+  alias JsonApiClient.{Parser, Request, RequestError}
 
   @impl JsonApiClient.Middleware
   def call(%Request{} = request, next, _options) do

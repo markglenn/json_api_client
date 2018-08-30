@@ -93,11 +93,10 @@ defmodule JsonApiClient.Request do
   defp encode_fields(%{fields: %{} = fields} = params) do
     encoded_fields =
       fields
-      |> Enum.map(fn
+      |> Enum.into(%{}, fn
         {k, v} when is_list(v) -> {k, Enum.join(v, ",")}
         {k, v} -> {k, v}
       end)
-      |> Enum.into(%{})
 
     Map.put(params, :fields, encoded_fields)
   end

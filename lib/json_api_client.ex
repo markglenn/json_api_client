@@ -4,8 +4,8 @@ defmodule JsonApiClient do
   the JSON API spec described at http://jsonapi.org
   """
 
-  alias __MODULE__.Request
   alias __MODULE__.Middleware.Runner
+  alias __MODULE__.Request
 
   @doc "Execute a JSON API Request using HTTP GET"
   @spec fetch(req :: Request.t()) :: {:ok, JsonApiClient.Response.t()} | {:error, JsonApiClient.RequestError.t()}
