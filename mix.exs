@@ -26,7 +26,9 @@ defmodule JsonApiClient.Mixfile do
         plt_add_deps: :transitive,
         # We are using Mix.Config.persist, etc. in tests
         plt_add_apps: [:mix],
-        remove_defaults: [:unknown]
+        remove_defaults: [:unknown],
+        flags: ["-Werror_handling", "-Wrace_conditions"],
+        ignore_warnings: ".dialyzer_ignore.exs"
       ]
     ]
   end
