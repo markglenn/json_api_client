@@ -4,7 +4,7 @@ defmodule JsonApiClient.Mixfile do
   def project do
     [
       app: :json_api_client,
-      version: "3.0.3",
+      version: "3.0.4",
       elixir: "~> 1.5",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -22,9 +22,14 @@ defmodule JsonApiClient.Mixfile do
       deps: deps(),
       docs: docs(),
       source_url: "https://github.com/Decisiv/json_api_client",
-      dialyzer: [plt_add_deps: :transitive,
-                 # We are using Mix.Config.persist, etc. in tests
-                 plt_add_apps: [:mix]]
+      dialyzer: [
+        plt_add_deps: :transitive,
+        # We are using Mix.Config.persist, etc. in tests
+        plt_add_apps: [:mix],
+        remove_defaults: [:unknown],
+        flags: ["-Werror_handling", "-Wrace_conditions"],
+        ignore_warnings: ".dialyzer_ignore.exs"
+      ]
     ]
   end
 
@@ -39,7 +44,7 @@ defmodule JsonApiClient.Mixfile do
   defp deps do
     [
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.0.0-rc3", only: [:dev], runtime: false},
       {:excoveralls, "~> 0.7.2", only: [:dev, :test]},
       {:ex_doc, "~>0.16.3", only: :dev},
       {:httpoison, "~> 0.13.0"},

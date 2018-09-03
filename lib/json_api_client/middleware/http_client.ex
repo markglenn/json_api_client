@@ -5,7 +5,7 @@ defmodule JsonApiClient.Middleware.HTTPClient do
 
   @behaviour JsonApiClient.Middleware
 
-  alias JsonApiClient.{Response, RequestError, Request}
+  alias JsonApiClient.{Request, RequestError, Response}
 
   @impl JsonApiClient.Middleware
   def call(%Request{} = req, _, _) do
