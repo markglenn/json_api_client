@@ -46,7 +46,7 @@ defmodule JsonApiClient.Mixfile do
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0.0-rc3", only: [:dev], runtime: false},
       {:excoveralls, "~> 0.7.2", only: [:dev, :test]},
-      {:ex_doc, "~>0.16.3", only: :dev},
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:httpoison, "~> 0.13.0"},
       {:poison, "~> 3.1"},
       {:mock, "~> 0.3.0", only: :test, runtime: false},
