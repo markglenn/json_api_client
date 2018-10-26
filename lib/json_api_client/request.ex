@@ -66,11 +66,13 @@ defmodule JsonApiClient.Request do
 
   @doc "Associate a path with this request"
   @spec path(req :: Request.t(), Resource.t() | name) :: Request.t()
-  def path(%Request{} = req, %{type: _, id: _} = res),
-    do: %Request{req | base_url: get_url(resource(req, res))}
+  def path(%Request{} = req, %{type: _, id: _} = res) do
+    %Request{req | base_url: get_url(resource(req, res))}
+  end
 
-  def path(%Request{} = req, path),
-    do: %Request{req | path: String.trim(path, "/")}
+  def path(%Request{} = req, path) do
+    %Request{req | path: String.trim(path, "/")}
+  end
 
   @doc """
   Specify which fields to include

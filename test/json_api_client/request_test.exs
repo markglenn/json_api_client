@@ -1,7 +1,7 @@
 defmodule JsonApiClient.RequestTest do
   use ExUnit.Case
   doctest JsonApiClient.Request, import: true
-  alias JsonApiClient.Request
+  alias JsonApiClient.{Request, Resource}
   import JsonApiClient.Request
 
   describe "params()" do
@@ -232,6 +232,15 @@ defmodule JsonApiClient.RequestTest do
         |> path("/foo/bar/")
 
       assert "http://api.net/foo/bar" = get_url(req)
+    end
+
+    test "setting path by string will not infer url from resource" do
+      req =
+        new("http://api.net")
+        |> resource(%Resource{type: "article"})
+        |> path("/articles")
+
+      assert "http://api.net/articles" == get_url(req)
     end
   end
 
