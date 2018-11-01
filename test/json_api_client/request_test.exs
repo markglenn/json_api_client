@@ -1,7 +1,7 @@
 defmodule JsonApiClient.RequestTest do
   use ExUnit.Case
   doctest JsonApiClient.Request, import: true
-  alias JsonApiClient.Request
+  alias JsonApiClient.{Request, Resource}
   import JsonApiClient.Request
 
   describe "params()" do
@@ -83,7 +83,8 @@ defmodule JsonApiClient.RequestTest do
   end
 
   def assert_updates_param(field_name) do
-    assert %{params: %{^field_name => "someval"}} = apply(Request, field_name, [%Request{}, "someval"])
+    assert %{params: %{^field_name => "someval"}} =
+             apply(Request, field_name, [%Request{}, "someval"])
   end
 
   test "id", do: assert_updates_field(:id)
@@ -140,7 +141,11 @@ defmodule JsonApiClient.RequestTest do
     test "when request method is a post" do
       url =
         new("http://api.net")
-        |> resource(%JsonApiClient.Resource{type: "articles", id: "1", attributes: %{comment: "some_comment"}})
+        |> resource(%JsonApiClient.Resource{
+          type: "articles",
+          id: "1",
+          attributes: %{comment: "some_comment"}
+        })
         |> method(:post)
         |> get_url
 
@@ -170,7 +175,11 @@ defmodule JsonApiClient.RequestTest do
       url =
         new("http://api.net")
         |> path(%JsonApiClient.Resource{type: "notes", id: "123"})
-        |> resource(%JsonApiClient.Resource{type: "replies", id: "345", attributes: %{body: "body"}})
+        |> resource(%JsonApiClient.Resource{
+          type: "replies",
+          id: "345",
+          attributes: %{body: "body"}
+        })
         |> method(:post)
         |> get_url
 
@@ -190,7 +199,7 @@ defmodule JsonApiClient.RequestTest do
         new("http://api.net")
         |> path(%JsonApiClient.Resource{type: "articles"})
 
-      assert "http://api.net/articles" = req.base_url
+      assert "http://api.net/articles" = get_url(req)
     end
 
     test "when resource has id" do
@@ -198,7 +207,7 @@ defmodule JsonApiClient.RequestTest do
         new("http://api.net")
         |> path(%JsonApiClient.Resource{type: "articles", id: "1"})
 
-      assert "http://api.net/articles/1" = req.base_url
+      assert "http://api.net/articles/1" = get_url(req)
     end
 
     test "when path is a string" do
@@ -206,7 +215,7 @@ defmodule JsonApiClient.RequestTest do
         new("http://api.net")
         |> path("foo/bar")
 
-      assert "http://api.net/foo/bar" = req.base_url
+      assert "http://api.net/foo/bar" = get_url(req)
     end
 
     test "when path has a `/` at the beginning" do
@@ -214,7 +223,7 @@ defmodule JsonApiClient.RequestTest do
         new("http://api.net")
         |> path("/foo/bar")
 
-      assert "http://api.net/foo/bar" = req.base_url
+      assert "http://api.net/foo/bar" = get_url(req)
     end
 
     test "when path has a `/` at the and" do
@@ -222,7 +231,16 @@ defmodule JsonApiClient.RequestTest do
         new("http://api.net")
         |> path("/foo/bar/")
 
-      assert "http://api.net/foo/bar" = req.base_url
+      assert "http://api.net/foo/bar" = get_url(req)
+    end
+
+    test "setting path by string will not infer url from resource" do
+      req =
+        new("http://api.net")
+        |> resource(%Resource{type: "article"})
+        |> path("/articles")
+
+      assert "http://api.net/articles" == get_url(req)
     end
   end
 
