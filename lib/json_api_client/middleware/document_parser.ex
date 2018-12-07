@@ -1,6 +1,6 @@
 defmodule JsonApiClient.Middleware.DocumentParser do
   @moduledoc """
-  HTTP client JSON API doucment parser.
+  HTTP client JSON API document parser.
   """
 
   @behaviour JsonApiClient.Middleware
