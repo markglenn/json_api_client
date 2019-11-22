@@ -83,6 +83,8 @@ defmodule JsonApiClient.ResourceIdentifier do
     meta: map | nil
   }
   defstruct id: nil, type: nil, meta: nil
+
+  @type t_or_list :: t() | [t()]
 end
 
 defmodule JsonApiClient.Relationship do
@@ -119,6 +121,8 @@ defmodule JsonApiClient.Resource do
     relationships: %{},
     meta: nil
   )
+
+  @type t_or_list :: t() | [t()]
 end
 
 defmodule JsonApiClient.JsonApi do
@@ -134,16 +138,19 @@ defmodule JsonApiClient.JsonApi do
 end
 
 defmodule JsonApiClient.Document do
+
+  @type data :: JsonApiClient.Resource.t_or_list() | JsonApiClient.ResourceIdentifier.t_or_list() | nil
+
   @moduledoc """
   JSON API Document Object
   http://jsonapi.org/format/#document-structure
   """
   @type t :: %__MODULE__{
     jsonapi: JsonApiClient.JsonApi.t(),
-    data: [JsonApiClient.ResourceIdentifier.t()] | JsonApiClient.ResourceIdentifier.t() | nil,
+    data: data(),
     links: JsonApiClient.Links.t() | nil,
     meta: map | nil,
-    included: [JsonApiClient.ResourceIdentifier.t()],
+    included: [JsonApiClient.Resource.t()] | [JsonApiClient.ResourceIdentifier.t()] | nil,
     errors: [JsonApiClient.Error.t()]
   }
   defstruct(
