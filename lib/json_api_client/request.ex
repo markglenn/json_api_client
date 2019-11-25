@@ -4,6 +4,7 @@ defmodule JsonApiClient.Request do
   """
   alias __MODULE__
   alias JsonApiClient.Resource
+  alias JsonApiClient.Document
 
   @type http_methods ::
           :get | :post | :update | :delete | :put | :head | :options | :connect | :trace | :patch
@@ -12,7 +13,7 @@ defmodule JsonApiClient.Request do
           path: String.t() | nil,
           params: map | nil,
           id: binary | nil,
-          resource: Resource.t() | nil,
+          resource: Document.data(),
           method: http_methods,
           headers: map,
           options: map,
@@ -51,11 +52,11 @@ defmodule JsonApiClient.Request do
   def id(%Request{} = req, id), do: %Request{req | id: id}
 
   @doc "Specify the HTTP method for the request."
-  @spec method(req :: Request.t(), method :: atom) :: Request.t()
+  @spec method(req :: Request.t(), method :: http_methods) :: Request.t()
   def method(%Request{} = req, method), do: %Request{req | method: method}
 
   @doc "Associate a resource with this request"
-  @spec resource(req :: Request.t(), resource :: Resource.t()) :: Request.t()
+  @spec resource(req :: Request.t(), resource :: Document.data()) :: Request.t()
   def resource(%Request{} = req, resource), do: %Request{req | resource: resource}
 
   @doc "Associate a service_name with this request"
@@ -65,7 +66,7 @@ defmodule JsonApiClient.Request do
   end
 
   @doc "Associate a path with this request"
-  @spec path(req :: Request.t(), Resource.t() | name) :: Request.t()
+  @spec path(req :: Request.t(), Resource.t() | ResourceIdentifier.t() | name) :: Request.t()
   def path(%Request{} = req, %{type: _, id: _} = res) do
     %Request{req | base_url: get_url(resource(req, res))}
   end
