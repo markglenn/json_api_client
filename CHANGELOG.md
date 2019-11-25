@@ -6,8 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Fixed
+
+## [3.1.1] 2019-11-28
 - Fix path inference from resource when setting path explicitly. [Github #9](https://github.com/Decisiv/json_api_client/issues/9)
+- Fix types [Github #13](https://github.com/Decisiv/json_api_client/pull/14)
 
 ## [3.1.0] 2018-9-11
 ### Changed
