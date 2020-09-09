@@ -258,7 +258,7 @@ defmodule JsonApiClient.Request do
   @spec get_body(Request.t()) :: String.t()
   def get_body(%Request{method: method, resource: resource})
       when method in [:post, :patch, :put] and not is_nil(resource) do
-    Poison.encode!(%{data: resource})
+    Jason.encode!(%{data: resource})
   end
 
   def get_body(%Request{} = _req), do: ""

@@ -83,8 +83,7 @@ defmodule JsonApiClient.RequestTest do
   end
 
   def assert_updates_param(field_name) do
-    assert %{params: %{^field_name => "someval"}} =
-             apply(Request, field_name, [%Request{}, "someval"])
+    assert %{params: %{^field_name => "someval"}} = apply(Request, field_name, [%Request{}, "someval"])
   end
 
   test "id", do: assert_updates_field(:id)
@@ -103,7 +102,7 @@ defmodule JsonApiClient.RequestTest do
           |> resource(%JsonApiClient.Resource{type: "users", attributes: %{name: "foo"}})
           |> method(http_method)
           |> get_body
-          |> Poison.decode!()
+          |> Jason.decode!()
 
         assert %{"data" => %{"type" => "users", "attributes" => %{"name" => "foo"}}} = parsed_body
       end

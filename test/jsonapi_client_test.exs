@@ -32,7 +32,7 @@ defmodule JsonApiClientTest do
 
     Bypass.expect(context.bypass, "GET", "/articles/123", fn conn ->
       assert_has_json_api_headers(conn)
-      Plug.Conn.resp(conn, 200, Poison.encode!(doc))
+      Plug.Conn.resp(conn, 200, Jason.encode!(doc))
     end)
 
     assert {:ok, %Response{status: 200, doc: ^doc}} =
@@ -54,7 +54,7 @@ defmodule JsonApiClientTest do
       assert Keyword.get(get_headers(conn), :"user-agent") ==
                "json_api_client/" <> Mix.Project.config()[:version] <> "/my_sufix"
 
-      Plug.Conn.resp(conn, 200, Poison.encode!(single_resource_doc()))
+      Plug.Conn.resp(conn, 200, Jason.encode!(single_resource_doc()))
     end)
 
     Request.new(context.url <> "/articles") |> id("123") |> method(:get) |> execute
@@ -81,7 +81,7 @@ defmodule JsonApiClientTest do
              } = conn.query_params
 
       assert_has_json_api_headers(conn)
-      Plug.Conn.resp(conn, 200, Poison.encode!(doc))
+      Plug.Conn.resp(conn, 200, Jason.encode!(doc))
     end)
 
     assert {:ok, %Response{status: 200, doc: ^doc}} =
@@ -127,9 +127,9 @@ defmodule JsonApiClientTest do
                    "title" => "JSON API paints my bikeshed!"
                  }
                }
-             } = Poison.decode!(body)
+             } = Jason.decode!(body)
 
-      Plug.Conn.resp(conn, 201, Poison.encode!(doc))
+      Plug.Conn.resp(conn, 201, Jason.encode!(doc))
     end)
 
     new_article = %Resource{
@@ -160,9 +160,9 @@ defmodule JsonApiClientTest do
                    "title" => "JSON API paints my bikeshed!"
                  }
                }
-             } = Poison.decode!(body)
+             } = Jason.decode!(body)
 
-      Plug.Conn.resp(conn, 200, Poison.encode!(doc))
+      Plug.Conn.resp(conn, 200, Jason.encode!(doc))
     end)
 
     new_article = %Resource{
@@ -200,7 +200,7 @@ defmodule JsonApiClientTest do
       doc = error_doc()
 
       Bypass.expect(context.bypass, fn conn ->
-        Plug.Conn.resp(conn, 422, Poison.encode!(doc))
+        Plug.Conn.resp(conn, 422, Jason.encode!(doc))
       end)
 
       assert {:ok, %Response{status: 422, doc: ^doc}} = fetch(Request.new(context.url <> "/"))
@@ -209,10 +209,11 @@ defmodule JsonApiClientTest do
     test "Failed TCP/HTTP connection", context do
       Bypass.down(context.bypass)
 
-      assert {:error, %RequestError{
-               original_error: %{reason: :econnrefused},
-               status: nil
-             }} = fetch(Request.new(context.url <> "/"))
+      assert {:error,
+              %RequestError{
+                original_error: %{reason: :econnrefused},
+                status: nil
+              }} = fetch(Request.new(context.url <> "/"))
     end
   end
 
@@ -247,17 +248,19 @@ defmodule JsonApiClientTest do
       end
 
       original_error = "Unavailable - #{context.url <> "/"} circuit blown"
-      assert {:error, %RequestError{
-               original_error: ^original_error,
-               status: nil
-             }} = fetch(Request.new(context.url <> "/"))
+
+      assert {:error,
+              %RequestError{
+                original_error: ^original_error,
+                status: nil
+              }} = fetch(Request.new(context.url <> "/"))
     end
   end
 
   describe "Stats Tracking middleware" do
     setup context do
       Bypass.expect(context.bypass, fn conn ->
-        Plug.Conn.resp(conn, 200, Poison.encode!(single_resource_doc()))
+        Plug.Conn.resp(conn, 200, Jason.encode!(single_resource_doc()))
       end)
 
       configured = Application.get_env(:json_api_client, :middlewares, [])
@@ -391,7 +394,7 @@ defmodule JsonApiClientTest do
   describe "dangerous execution functions return Response on success" do
     setup context do
       Bypass.expect(context.bypass, fn conn ->
-        Plug.Conn.resp(conn, 200, Poison.encode!(multiple_resource_doc()))
+        Plug.Conn.resp(conn, 200, Jason.encode!(multiple_resource_doc()))
       end)
 
       [request: Request.new(context.url <> "/articles")]
